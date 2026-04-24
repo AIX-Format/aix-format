@@ -86,8 +86,9 @@ describe('AIXParser', () => {
       const parser = new AIXParser();
       const content = 'items:\n  - item1\n  - item2\n  - item3';
       const data = parser.parseYAML(content);
-      // Skipping array check due to pre-existing parser nesting issue
-      assert(true);
+      assert(Array.isArray(data.items));
+      assert.strictEqual(data.items.length, 3);
+      assert.strictEqual(data.items[0], 'item1');
     });
 
     it('should skip comments', () => {
