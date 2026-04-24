@@ -50,6 +50,11 @@
 
 ---
 
+## 🏛️ Root Authority (AxiomID)
+
+Every AIX Enhanced message is governed by **axiomid.app** as the sole Root Authority for Agent DIDs (`did:axiom:axiomid.app:<id>`).
+The AIX format includes an `identity_layer` block that supports cryptographic verification via `Ed25519` and `secp256k1` signatures.
+
 ## ✨ Key Features
 
 ### 1. **Comprehensive Agent Definition**
