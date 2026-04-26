@@ -78,6 +78,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 *We are building the trust layer for the Machine Economy.*
 
+ jules-2333444999271751051-9f9ef3e9
 ## 🔒 AIX Agent Runtime Validator (CLI)
 
 The repository includes a strict validation tool designed for CI/CD pipelines and deployment gateways. This ensures no agent enters the network without meeting structural, cryptographic, and security constraints.
@@ -97,3 +98,7 @@ node bin/aix-validate.js path/to/your-agent.aix [options]
 ### GitHub Actions
 
 A GitHub action is included (`.github/workflows/aix-validation.yml`) which automatically validates all modified `.aix` payloads in Pull Requests, running with the `--strict-kyc` and `--security` flags enabled. If an agent fails KYC checks, the PR is blocked.
+=======
+## 📄 Current Status
+✅ **RFC v0.1 published**: [#9](https://github.com/Moeabdelaziz007/aix-format/issues/9)
+ main
