@@ -41,14 +41,15 @@
 graph TD
     User([👤 Pioneer / Developer]) -->|Voice Commands & Clicks| Studio[💻 Sovereign Studio UI<br/>Next.js + Glassmorphism]
 
-    Studio -->|Initialize| PiSDK{🛡️ Pi Network SDK}
+    Studio -->|Step-by-Step Wizard| Wizard[🛠️ Setup Wizard]
+    Wizard -->|Initialize| PiSDK{🛡️ Pi Network SDK}
     PiSDK -->|Request| PiApp[📱 Pi Browser App]
     PiApp -->|Return KYC Status & Payment| PiSDK
 
-    Studio -->|Voice Input| WebSpeech[🎙️ Web Speech API / TTS]
+    Wizard -->|Voice Input| WebSpeech[🎙️ Voice Orb / Web Speech API / TTS]
     WebSpeech -->|Generate Payload| AIXPayload[📄 .aix Payload]
 
-    PiSDK -->|Sign Payload| AxiomID[🔑 AxiomID Cryptographic Signature]
+    PiSDK -->|Sign Payload| AxiomID[🔑 AxiomID Quantum Topology Architecture]
     AxiomID --> AIXPayload
 
     AIXPayload -->|Execute| Core[⚙️ AIX Core Parser]
@@ -57,11 +58,19 @@ graph TD
 
 ### 🌟 Key Features (أبرز الميزات)
 
+ feat/kyc-wizard-tts-12299921071301084280
+1. **Step-by-Step Setup Wizard:** A guided, beginner-friendly process to configure and deploy agents without coding knowledge.
+2. **Interactive Voice Orb with TTS:** Speak to configure agents, and the AIX engine will provide audible feedback confirmation.
+3. **Quantum Topology KYC Security:** High-end visual architecture for Agentic KYC bindings, ensuring a Sovereign Proof of Ownership through Ed25519 signatures and the `@pinetwork-js/sdk`.
+4. **Glassmorphism UI ("Sovereign Aether"):** Ethereal design system relying on deep indigos, charcoals, and translucent layers.
+5. **Polyglot & Model Agnostic:** The Studio acts as the Gateway. The execution layer (AIX core) is designed to run seamlessly on Go/Rust backend execution engines in the future, supporting any LLM.
+
 **[EN]**
 1. **Voice-First Orchestration:** Replaced traditional chatboxes with an interactive Voice Orb. Speak to configure and deploy your agents on the fly.
 2. **KYC-First Deployment:** Every `.aix` payload uploaded to the Studio requires a Cryptographic KYC Signature via Pi Network. This ensures a Sovereign Proof of Ownership.
 3. **Glassmorphism UI ("Sovereign Aether"):** A high-end, ethereal design system relying on deep indigos, charcoals, and translucent layers instead of cyberpunk tropes.
 4. **Polyglot & Model Agnostic:** The Studio acts as the Gateway. The execution layer (AIX core) is designed to run seamlessly on Go/Rust backend execution engines in the future, supporting any LLM (Open Source or Closed).
+ main
 
 **[AR]**
 1. **التوجيه الصوتي أولاً:** تم استبدال صناديق الدردشة التقليدية بكرة صوتية تفاعلية (Voice Orb). تحدث فقط لإعداد ونشر وكلائك فوراً.
@@ -94,10 +103,14 @@ npm run dev --prefix apps/studio
 
 ---
 
+ feat/kyc-wizard-tts-12299921071301084280
+## 🔒 AIX Agent Runtime Validator (CLI)
+=======
 ## 🔒 AIX Agent Runtime Validator (CLI) (مدقق وقت تشغيل وكيل AIX)
 
 **[EN]** The repository includes a strict validation tool designed for CI/CD pipelines and deployment gateways. This ensures no agent enters the network without meeting structural, cryptographic, and security constraints.
 **[AR]** يتضمن المستودع أداة تحقق صارمة مصممة لمسارات CI/CD وبوابات النشر. يضمن هذا عدم دخول أي وكيل إلى الشبكة دون تلبية القيود الهيكلية، التشفيرية، والأمنية.
+ main
 
 ### Usage (طريقة الاستخدام)
 
@@ -122,6 +135,13 @@ node bin/aix-validate.js path/to/your-agent.aix [options]
 **[EN]** A GitHub action is included (`.github/workflows/aix-validation.yml`) which automatically validates all modified `.aix` payloads in Pull Requests, running with the `--strict-kyc` and `--security` flags enabled. If an agent fails KYC checks, the PR is blocked.
 **[AR]** تم إدراج إجراء لـ GitHub Action (`.github/workflows/aix-validation.yml`) يقوم تلقائياً بالتحقق من جميع ملفات الـ `.aix` المعدلة في طلبات السحب (Pull Requests)، ويعمل مع تفعيل خيارات `--strict-kyc` و `--security`. إذا فشل أي وكيل في تجاوز فحص KYC، يتم حظر طلب السحب.
 
+ feat/kyc-wizard-tts-12299921071301084280
+A GitHub action is included (`.github/workflows/aix-validation.yml`) which automatically validates all modified `.aix` payloads in Pull Requests, running with the `--strict-kyc` and `--security` flags enabled. If an agent fails KYC checks, the PR is blocked.
+
+---
+
+## 🤝 Credits & Maintainers
+=======
 ---
 
 ## 📄 Current Status (الحالة الحالية)
@@ -130,8 +150,11 @@ node bin/aix-validate.js path/to/your-agent.aix [options]
 ---
 
 ## 🤝 Credits & Maintainers (الاعتمادات والمساهمون)
+ main
 
 - **Moe Abdelaziz** (@Moeabdelaziz007) - Visionary, Protocol Architect & Pi Integration Lead.
 - **Jules (AI Engineer)** - Engineering Partner & UI/UX Architect.
 
+*We are building the trust layer for the Machine Economy.*
+=======
 *We are building the trust layer for the Machine Economy. (نحن نبني طبقة الثقة لاقتصاد الآلات.)*

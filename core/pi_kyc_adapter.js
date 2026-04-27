@@ -1,18 +1,10 @@
+import crypto from 'crypto';
 import nacl from 'tweetnacl';
 import naclUtil from 'tweetnacl-util';
-import crypto from 'crypto';
 
 export class PiKycAdapter {
   /**
    * Verify Pi KYC proof and generate an identity layer and KYC proof.
-   *
-   * @param {Object} piAuthResult - The authentication result from Pi SDK.
-   * @param {Object} piAuthResult.user - The user object from Pi SDK.
-   * @param {string} piAuthResult.user.uid - The unique user ID from Pi.
-   * @param {string} piAuthResult.accessToken - The access token returned by Pi SDK.
-   * @param {string} piAuthResult.signature - The signature of the access token.
-   * @param {string} piAuthResult.publicKey - Base64 encoded Ed25519 public key.
-   * @returns {Object} An object containing `identity_layer` and `kyc_proof`.
    */
   static generateIdentity(piAuthResult) {
     const { user, accessToken, signature, publicKey } = piAuthResult;
