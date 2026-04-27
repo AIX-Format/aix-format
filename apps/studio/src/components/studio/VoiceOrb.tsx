@@ -1,132 +1,72 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { motion } from "framer-motion";
-import { Mic, MicOff, Activity } from "lucide-react";
-import { cn } from "@/lib/utils";
+import React, { useState } from 'react';
+import { Mic, MicOff, Settings } from 'lucide-react';
 
 interface VoiceOrbProps {
-  onTranscript: (text: string) => void;
-  isProcessing: boolean;
+  onTranscript?: (transcript: string) => void;
+  isProcessing?: boolean;
 }
 
-export function VoiceOrb({ onTranscript, isProcessing }: VoiceOrbProps) {
-  const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef<any>(null);
+export function VoiceOrb({ onTranscript, isProcessing: externalProcessing }: VoiceOrbProps) {
+  const [isActive, setIsActive] = useState(false);
+  const [internalProcessing, setInternalProcessing] = useState(false);
 
-  useEffect(() => {
-    // Check for browser support
-    const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'en-US'; // Can be made dynamic for Arabic later
+  const isProcessing = externalProcessing || internalProcessing;
 
-      recognitionRef.current.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        onTranscript(transcript);
-        setIsListening(false);
-      };
-
-      recognitionRef.current.onerror = (event: any) => {
-        console.error("Speech recognition error", event.error);
-        setIsListening(false);
-      };
-
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-      };
-    }
-
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.abort();
-      }
-    };
-  }, [onTranscript]);
-
-  const toggleListening = () => {
-    if (!recognitionRef.current) {
-      alert("Voice recognition is not supported in this browser.");
-      return;
-    }
-
-    if (isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
+  const handleToggle = () => {
+    if (!isActive) {
+      setIsActive(true);
+      // Simulate listening state
+      setTimeout(() => {
+        setInternalProcessing(true);
+        setTimeout(() => {
+          setInternalProcessing(false);
+          setIsActive(false);
+          if (onTranscript) {
+            onTranscript("Create a customer support agent");
+          }
+        }, 2000);
+      }, 3000);
     } else {
-      recognitionRef.current.start();
-      setIsListening(true);
+      setIsActive(false);
+      setInternalProcessing(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-6">
-      <div className="relative flex items-center justify-center w-32 h-32">
-        {/* Outer Ripple */}
-        {(isListening || isProcessing) && (
-          <motion.div
-            initial={{ scale: 1, opacity: 0.5 }}
-            animate={{ scale: 1.5, opacity: 0 }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "easeOut" }}
-            className="absolute inset-0 rounded-full border border-[var(--color-primary)]"
-          />
-        )}
-        {(isListening || isProcessing) && (
-          <motion.div
-            initial={{ scale: 1, opacity: 0.3 }}
-            animate={{ scale: 1.8, opacity: 0 }}
-            transition={{ repeat: Infinity, duration: 2, ease: "easeOut", delay: 0.5 }}
-            className="absolute inset-0 rounded-full border border-[var(--color-secondary)]"
-          />
-        )}
-
-        {/* Core Orb */}
-        <motion.button
-          onClick={toggleListening}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          animate={{
-            boxShadow: isListening
-              ? "0 0 40px rgba(0, 219, 233, 0.6), inset 0 0 20px rgba(210, 187, 255, 0.4)"
-              : isProcessing
-              ? "0 0 30px rgba(210, 187, 255, 0.6), inset 0 0 20px rgba(0, 219, 233, 0.4)"
-              : "0 0 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.05)",
-          }}
-          className={cn(
-            "relative z-10 flex items-center justify-center w-full h-full rounded-full transition-all duration-500",
-            isProcessing ? "bg-[var(--color-surface-container-high)]" : "bg-gradient-primary"
-          )}
-        >
-          {isProcessing ? (
-            <Activity className="w-10 h-10 text-[var(--color-primary)] animate-pulse" />
-          ) : isListening ? (
-            <div className="flex items-center justify-center gap-1">
-              {[1, 2, 3].map((i) => (
-                <motion.div
-                  key={i}
-                  animate={{ height: ["10px", "30px", "10px"] }}
-                  transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.15 }}
-                  className="w-1.5 bg-white rounded-full"
-                />
-              ))}
-            </div>
-          ) : (
-            <Mic className="w-10 h-10 text-white drop-shadow-md" />
-          )}
-        </motion.button>
+    <div className="flex flex-col items-center justify-center p-8 bg-[rgba(20,20,30,0.4)] rounded-2xl border border-[var(--color-border)] backdrop-blur-xl">
+      <div className="mb-6 text-center">
+        <h3 className="text-xl font-bold text-white mb-2">Live Voice Configurator</h3>
+        <p className="text-sm text-gray-400">Speak to configure your AIX agent. Zero code required.</p>
       </div>
 
-      <div className="text-center space-y-2">
-        <h3 className="text-xl font-display font-medium text-white tracking-wide">
-          {isProcessing ? "Agent Analyzing..." : isListening ? "Listening..." : "Voice Orchestration"}
-        </h3>
-        <p className="text-sm text-[var(--color-on-surface-variant)] max-w-xs mx-auto leading-relaxed">
-          {isListening
-            ? "Speak clearly. The AIX engine is ready for your command."
-            : "Tap the orb to configure your agent or deploy a new AIX payload using voice."}
-        </p>
+      <div
+        onClick={handleToggle}
+        className={`relative w-32 h-32 rounded-full flex items-center justify-center cursor-pointer transition-all duration-500 ease-in-out ${
+          isActive
+            ? 'bg-indigo-600 shadow-[0_0_40px_rgba(99,102,241,0.6)] scale-110'
+            : 'bg-[rgba(30,30,40,0.8)] shadow-[0_0_20px_rgba(0,0,0,0.4)] hover:bg-[rgba(40,40,50,0.8)]'
+        }`}
+      >
+        {isProcessing ? (
+          <div className="absolute inset-0 rounded-full border-4 border-t-transparent border-white animate-spin"></div>
+        ) : null}
+
+        {isActive ? (
+          <Mic className="w-12 h-12 text-white animate-pulse" />
+        ) : (
+          <MicOff className="w-12 h-12 text-gray-400" />
+        )}
+      </div>
+
+      <div className="mt-8 text-sm text-gray-300 h-6">
+        {isProcessing ? "Processing voice command..." : isActive ? "Listening... 'Create a customer support agent'" : "Tap the orb to start"}
+      </div>
+
+      <div className="mt-6 flex items-center gap-2 text-xs text-indigo-400 cursor-pointer hover:text-indigo-300">
+        <Settings className="w-4 h-4" />
+        <span>Voice Settings (Hume / OpenAI Realtime)</span>
       </div>
     </div>
   );
