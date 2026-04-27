@@ -24,14 +24,15 @@ The project is structured as a modern Monorepo, bridging the core AIX parser wit
 graph TD
     User([👤 Pioneer / Developer]) -->|Voice Commands & Clicks| Studio[💻 Sovereign Studio UI<br/>Next.js + Glassmorphism]
 
-    Studio -->|Initialize| PiSDK{🛡️ Pi Network SDK}
+    Studio -->|Step-by-Step Wizard| Wizard[🛠️ Setup Wizard]
+    Wizard -->|Initialize| PiSDK{🛡️ Pi Network SDK}
     PiSDK -->|Request| PiApp[📱 Pi Browser App]
     PiApp -->|Return KYC Status & Payment| PiSDK
 
-    Studio -->|Voice Input| WebSpeech[🎙️ Web Speech API / TTS]
+    Wizard -->|Voice Input| WebSpeech[🎙️ Voice Orb / Web Speech API / TTS]
     WebSpeech -->|Generate Payload| AIXPayload[📄 .aix Payload]
 
-    PiSDK -->|Sign Payload| AxiomID[🔑 AxiomID Cryptographic Signature]
+    PiSDK -->|Sign Payload| AxiomID[🔑 AxiomID Quantum Topology Architecture]
     AxiomID --> AIXPayload
 
     AIXPayload -->|Execute| Core[⚙️ AIX Core Parser]
@@ -40,10 +41,11 @@ graph TD
 
 ### 🌟 Key Features
 
-1. **Voice-First Orchestration:** Replaced traditional chatboxes with an interactive Voice Orb. Speak to configure and deploy your agents on the fly.
-2. **KYC-First Deployment:** Every `.aix` payload uploaded to the Studio requires a Cryptographic KYC Signature via Pi Network. This ensures a Sovereign Proof of Ownership.
-3. **Glassmorphism UI ("Sovereign Aether"):** A high-end, ethereal design system relying on deep indigos, charcoals, and translucent layers instead of cyberpunk tropes.
-4. **Polyglot & Model Agnostic:** The Studio acts as the Gateway. The execution layer (AIX core) is designed to run seamlessly on Go/Rust backend execution engines in the future, supporting any LLM (Open Source or Closed).
+1. **Step-by-Step Setup Wizard:** A guided, beginner-friendly process to configure and deploy agents without coding knowledge.
+2. **Interactive Voice Orb with TTS:** Speak to configure agents, and the AIX engine will provide audible feedback confirmation.
+3. **Quantum Topology KYC Security:** High-end visual architecture for Agentic KYC bindings, ensuring a Sovereign Proof of Ownership through Ed25519 signatures and the `@pinetwork-js/sdk`.
+4. **Glassmorphism UI ("Sovereign Aether"):** Ethereal design system relying on deep indigos, charcoals, and translucent layers.
+5. **Polyglot & Model Agnostic:** The Studio acts as the Gateway. The execution layer (AIX core) is designed to run seamlessly on Go/Rust backend execution engines in the future, supporting any LLM.
 
 ---
 
@@ -68,17 +70,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ---
 
-
----
-
-## 🤝 Credits & Maintainers
-
-- **Moe Abdelaziz** (@Moeabdelaziz007) - Visionary, Protocol Architect & Pi Integration Lead.
-- **Jules (AI Engineer)** - Engineering Partner & UI/UX Architect.
-
-*We are building the trust layer for the Machine Economy.*
-
- jules-2333444999271751051-9f9ef3e9
 ## 🔒 AIX Agent Runtime Validator (CLI)
 
 The repository includes a strict validation tool designed for CI/CD pipelines and deployment gateways. This ensures no agent enters the network without meeting structural, cryptographic, and security constraints.
@@ -98,7 +89,12 @@ node bin/aix-validate.js path/to/your-agent.aix [options]
 ### GitHub Actions
 
 A GitHub action is included (`.github/workflows/aix-validation.yml`) which automatically validates all modified `.aix` payloads in Pull Requests, running with the `--strict-kyc` and `--security` flags enabled. If an agent fails KYC checks, the PR is blocked.
-=======
-## 📄 Current Status
-✅ **RFC v0.1 published**: [#9](https://github.com/Moeabdelaziz007/aix-format/issues/9)
- main
+
+---
+
+## 🤝 Credits & Maintainers
+
+- **Moe Abdelaziz** (@Moeabdelaziz007) - Visionary, Protocol Architect & Pi Integration Lead.
+- **Jules (AI Engineer)** - Engineering Partner & UI/UX Architect.
+
+*We are building the trust layer for the Machine Economy.*

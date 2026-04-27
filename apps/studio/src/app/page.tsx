@@ -1,5 +1,5 @@
 import { Navbar } from "@/components/layout/Navbar";
-import { UploadSidebar } from "@/components/studio/UploadSidebar";
+import { SetupWizard } from "@/components/studio/SetupWizard";
 import { AgentCard } from "@/components/studio/AgentCard";
 
 export default function Home() {
@@ -63,8 +63,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right Sidebar - Agent Deployment */}
-          <UploadSidebar />
+          {/* Right Sidebar - Setup Wizard */}
+          <SetupWizard />
 
         </div>
       </main>
