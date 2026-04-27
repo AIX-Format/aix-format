@@ -11,6 +11,41 @@
     "identity_layer"
   ],
   "properties": {
+    "pi_network": {
+      "type": "object",
+      "description": "Pi Network specific configuration and SDK integration",
+      "required": [
+        "app_id",
+        "environment"
+      ],
+      "properties": {
+        "app_id": {
+          "type": "string",
+          "description": "Pi App identifier from Pi Dev Studio"
+        },
+        "environment": {
+          "type": "string",
+          "enum": [
+            "sandbox",
+            "production"
+          ],
+          "description": "Pi Network execution environment"
+        },
+        "sdk_version": {
+          "type": "string",
+          "description": "Required Pi SDK version"
+        },
+        "payment_provider": {
+          "type": "string",
+          "description": "Pi payment provider identifier"
+        },
+        "kyc_required": {
+          "type": "boolean",
+          "description": "Whether the agent requires KYCed Pi users",
+          "default": true
+        }
+      }
+    },
     "meta": {
       "type": "object",
       "description": "Agent metadata and identification",
@@ -695,6 +730,7 @@
               "description": "Currency code (ISO 4217)",
               "default": "SOL",
               "examples": [
+                "PI",
                 "SOL",
                 "USD",
                 "EUR"

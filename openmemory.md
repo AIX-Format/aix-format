@@ -1,0 +1,60 @@
+# OpenMemory - aix-format Project
+
+## Git Metadata
+- **Repository**: Moeabdelaziz007/aix-format (https://github.com/Moeabdelaziz007/aix-format.git)
+- **Branch**: main
+- **Last Commit Hash**: a19cbd37b4dca31e287df114a7467a99bc6dca14
+
+## Initial Codebase Deep Dive (2026-04-26)
+### Project Overview
+`aix-format` is a standard file format for AI agents (AIX - Artificial Intelligence eXchange). It's a Node.js project focused on standardization, interoperability, and sovereignty of AI agents.
+
+### Jules AI Contributions (Last 2 Days)
+- **AxiomID Integration**: Implemented `did:axiom` validation with `axiomid.app` as the root authority.
+- **VLA (Vision-Language-Action)**: Added support for VLA payloads, integrating with runtimes like `openpi` and `pi0.7`.
+- **Schema Enforcements**: Enhanced memory classification and validation logic in `core/parser.js`.
+- **Integrity Validation**: Added `bin/manifest-validate.js` for checking manifest integrity.
+- **CI/CD**: Updated health-check workflows for schema validation.
+
+### Analysis & Rating
+- **Logic**: The regex for AxiomID is robust. The parser handles authority checks correctly.
+- **Structure**: Modular design with clear separation between core logic, schemas, and CLI tools.
+- **Rating**: 9/10. The work demonstrates high maturity in agent sovereignty and future-proofing for cyber-physical systems.
+
+## Memory Search Logs
+- Search 1: Grep AxiomID -> Found implementation in `core/parser.js` and schemas.
+- Search 2: Grep VLA -> Found support in `ROADMAP.md` and `aix-enhanced.schema.json`.
+
+## Pi Network Integration Research (2026-04-26)
+### Key Findings
+- **SDK Status**: Pi SDK is fully unlocked as of April 2026, allowing direct Pi payments and smart contract tools.
+- **Pi App Studio**: New "Customize App with Pi AI" feature allows streamlined SDK integration.
+- **Protocol 22/23**: Protocol 22 mandatory upgrade (April 27) prepares for Protocol 23 (mid-May), which introduces **PiRC-2** subscription smart contracts.
+- **Identity**: Strong focus on human identity verification (KYC), which aligns with the **AxiomID** sovereign identity goal.
+
+### Phase 2: Schema & Example Implementation (Completed 2026-04-26)
+- **Schema Update**: Added `pi_network` object to `aix-enhanced.schema.json`.
+  - Properties: `app_id`, `environment` (sandbox/production), `sdk_version`, `payment_provider`, `kyc_required`.
+- **Currency Support**: Added `PI` to pricing examples.
+- **Example Created**: `examples/pi-agent.aix` demonstrates a fully compliant Pi-integrated agent.
+
+### Phase 3: Pi Dev Studio App (In Progress)
+- **Concept**: "Pi AIX Studio" - A visual builder for AIX manifests targeting Pi Developers.
+- **Features**:
+  - Live preview of `.aix` manifests.
+  - Pi SDK configuration wizard.
+  - Integration with `axiomid.app` for identity.
+  - One-click export to Pi App Studio format.
+
+## Implementation Progress
+- [x] Analyze Jules AI contributions (Rating: 9/10).
+- [x] Update Parser logic for Pi Network validation.
+- [x] Update JSON Schema with Pi definitions.
+- [x] Create `examples/pi-agent.aix`.
+- [ ] Design and build "Pi AIX Studio" POC.
+
+### Implementation Strategy for AIX-Pi
+1.  **Identity Mapping**: Bridge `axiomid.app` DIDs with Pi Network KYCed accounts.
+2.  **Payment Layer**: Extend `pricing` section to support `currency: PI` and Pi SDK payment flows.
+3.  **Dev Studio Tooling**: Create a generator that converts AIX manifests into Pi App Studio configurations.
+4.  **Smart Contracts**: Use AIX to define PiRC-2 subscription parameters.

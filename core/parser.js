@@ -380,6 +380,7 @@ export class AIXParser {
     if (data.requirements) this.validateRequirements(data.requirements);
     if (data.pricing) this.validatePricing(data.pricing);
     if (data.identity_layer) this.validateIdentityLayer(data.identity_layer);
+    if (data.pi_network) this.validatePiNetwork(data.pi_network);
   }
 
   /**
@@ -766,6 +767,17 @@ export class AIXParser {
    */
   validatePricing(pricing) {
     const validModels = ['pay_per_call', 'subscription', 'freemium', 'tiered'];
+    const validCurrencies = ['USD', 'EUR', 'BTC', 'ETH', 'PI'];
+    
+    if (pricing.currency && !validCurrencies.includes(pricing.currency)) {
+      this.warnings.push({
+        code: 'UNKNOWN_CURRENCY',
+        section: 'pricing',
+        field: 'currency',
+        message: `Currency '${pricing.currency}' is not in the standard list: ${validCurrencies.join(', ')}`
+      });
+    }
+
     if (pricing.model && !validModels.includes(pricing.model)) {
       this.errors.push({
         code: 'INVALID_VALUE',
@@ -841,6 +853,41 @@ export class AIXParser {
         section: 'identity_layer',
         field: 'issuedAt',
         message: 'Invalid ISO 8601 timestamp'
+      });
+    }
+  }
+
+  /**
+   * Validate Pi Network section
+   */
+  validatePiNetwork(pi) {
+    const required = ['app_id', 'environment'];
+    for (const field of required) {
+      if (!pi[field]) {
+        this.errors.push({
+          code: 'MISSING_FIELD',
+          section: 'pi_network',
+          field,
+          message: `Required field 'pi_network.${field}' is missing`
+        });
+      }
+    }
+
+    if (pi.environment && !['sandbox', 'production'].includes(pi.environment)) {
+      this.errors.push({
+        code: 'INVALID_VALUE',
+        section: 'pi_network',
+        field: 'environment',
+        message: 'Pi environment must be sandbox or production'
+      });
+    }
+
+    if (pi.sdk_version && !this.isValidSemver(pi.sdk_version)) {
+      this.errors.push({
+        code: 'INVALID_VERSION',
+        section: 'pi_network',
+        field: 'sdk_version',
+        message: 'Invalid Pi SDK version format'
       });
     }
   }
@@ -965,6 +1012,7 @@ export class AIXAgent {
   get security() { return this.data.security; }
   get identity_layer() { return this.data.identity_layer; }
   get kyc_proof() { return this.data.kyc_proof; }
+  get pi_network() { return this.data.pi_network; }
 
   /**
    * Get agent capabilities
