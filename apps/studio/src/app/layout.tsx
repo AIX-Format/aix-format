@@ -4,7 +4,6 @@ import "./globals.css";
 import Script from "next/script";
 import { AppNav } from "@/components/aix/AppNav";
 import { TopBar } from "@/components/aix/TopBar";
-import { UploadSidebar } from "@/components/aix/UploadSidebar";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -56,7 +55,7 @@ export default function RootLayout({
           <aside className="hidden w-[260px] shrink-0 flex-col gap-4 lg:flex">
             <AppNav />
             <div className="flex-1 overflow-hidden">
-              <UploadSidebar />
+              {/* Sidebar content removed */}
             </div>
           </aside>
 
