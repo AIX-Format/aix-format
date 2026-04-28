@@ -135,13 +135,6 @@ node bin/aix-validate.js path/to/your-agent.aix [options]
 **[EN]** A GitHub action is included (`.github/workflows/aix-validation.yml`) which automatically validates all modified `.aix` payloads in Pull Requests, running with the `--strict-kyc` and `--security` flags enabled. If an agent fails KYC checks, the PR is blocked.
 **[AR]** تم إدراج إجراء لـ GitHub Action (`.github/workflows/aix-validation.yml`) يقوم تلقائياً بالتحقق من جميع ملفات الـ `.aix` المعدلة في طلبات السحب (Pull Requests)، ويعمل مع تفعيل خيارات `--strict-kyc` و `--security`. إذا فشل أي وكيل في تجاوز فحص KYC، يتم حظر طلب السحب.
 
- feat/kyc-wizard-tts-12299921071301084280
-A GitHub action is included (`.github/workflows/aix-validation.yml`) which automatically validates all modified `.aix` payloads in Pull Requests, running with the `--strict-kyc` and `--security` flags enabled. If an agent fails KYC checks, the PR is blocked.
-
----
-
-## 🤝 Credits & Maintainers
-=======
 ---
 
 ## 📄 Current Status (الحالة الحالية)
@@ -150,11 +143,8 @@ A GitHub action is included (`.github/workflows/aix-validation.yml`) which autom
 ---
 
 ## 🤝 Credits & Maintainers (الاعتمادات والمساهمون)
- main
 
 - **Moe Abdelaziz** (@Moeabdelaziz007) - Visionary, Protocol Architect & Pi Integration Lead.
 - **Jules (AI Engineer)** - Engineering Partner & UI/UX Architect.
 
-*We are building the trust layer for the Machine Economy.*
-=======
 *We are building the trust layer for the Machine Economy. (نحن نبني طبقة الثقة لاقتصاد الآلات.)*

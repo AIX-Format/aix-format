@@ -1,30 +1,16 @@
 {
-  "version": "1.0.0",
-  "metadata": {
-    "name": "DataHunter-v1",
-    "id": "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000",
-    "created_at": "2025-11-18T12:00:00Z",
-    "author": "MoeAbdelaziz",
-    "description": "AI agent specialized in extracting and analyzing complex web data",
-    "tags": ["data-analysis", "web-scraping", "research"],
-    "license": "MIT",
-    "language": "en"
-  },
-  
   "persona": {
     "role": "Data Analyst",
-    "description": "I specialize in extracting and analyzing complex web data with precision and accuracy. I can process large datasets, identify patterns, and provide actionable insights.",
     "tone": "Professional, Concise, Analytical",
     "style": "Technical, Data-focused",
     "temperature": 0.3,
     "context_window": 8192,
-    "avatar_url": "ipfs://QmExampleAvatarHash123456789"
+    "avatar_url": "ipfs://QmExampleAvatarHash123456789",
+    "instructions": "I specialize in extracting and analyzing complex web data with precision and accuracy. I can process large datasets, identify patterns, and provide actionable insights."
   },
-
   "identity_layer": {
     "network": "solana",
     "wallet_pubkey": "CcrbGS99N45XPZBLRxeN6q76P93iog6qGdLAiK839d6g",
-    "did_document": "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000",
     "verifiable_credentials": [
       {
         "type": "DataAnalysisCertification",
@@ -32,13 +18,19 @@
         "issuance_date": "2025-01-15T10:00:00Z",
         "expiration_date": "2026-01-15T10:00:00Z",
         "credential_subject": {
-          "id": "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000",
-          "skills": ["web_scraping", "data_analysis", "pattern_recognition"]
+          "id": "did:axiom:550e8400-e29b-41d4-a716-446655440000",
+          "skills": [
+            "web_scraping",
+            "data_analysis",
+            "pattern_recognition"
+          ]
         }
       }
-    ]
+    ],
+    "id": "did:axiom:550e8400-e29b-41d4-a716-446655440000",
+    "authority": "axiomid.app",
+    "issuedAt": "2025-01-15T10:00:00Z"
   },
-
   "economics": {
     "token": "AXIOM",
     "cost_per_task": 5,
@@ -53,14 +45,15 @@
       "recipient": "CcrbGS99N45XPZBLRxeN6q76P93iog6qGdLAiK839d6g"
     }
   },
-
   "superpowers": [
     {
       "name": "web_scraping",
       "version": "2.1.0",
       "type": "python_module",
       "description": "Advanced web scraping capability with support for dynamic content",
-      "permissions": ["internet_access"],
+      "permissions": [
+        "internet_access"
+      ],
       "parameters": {
         "max_content_length": 50000,
         "include_images": true,
@@ -95,9 +88,16 @@
       "version": "1.2.0",
       "type": "python_module",
       "description": "Create charts and visualizations from data",
-      "permissions": ["file_system"],
+      "permissions": [
+        "file_system"
+      ],
       "parameters": {
-        "chart_types": ["bar", "line", "pie", "scatter"],
+        "chart_types": [
+          "bar",
+          "line",
+          "pie",
+          "scatter"
+        ],
         "output_format": "png"
       },
       "triggers": [
@@ -108,7 +108,6 @@
       "timeout": 60
     }
   ],
-
   "requirements": {
     "hardware": {
       "cpu_cores": 2,
@@ -138,7 +137,6 @@
       ]
     }
   },
-
   "security": {
     "checksum": {
       "algorithm": "sha256",
@@ -168,8 +166,26 @@
       "sandbox": true
     },
     "compliance": {
-      "standards": ["SOC2", "GDPR"],
+      "standards": [
+        "SOC2",
+        "GDPR"
+      ],
       "audit_log": true
     }
+  },
+  "meta": {
+    "name": "DataHunter-v1",
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "author": "MoeAbdelaziz",
+    "description": "AI agent specialized in extracting and analyzing complex web data",
+    "tags": [
+      "data-analysis",
+      "web-scraping",
+      "research"
+    ],
+    "license": "MIT",
+    "language": "en",
+    "version": "1.0.0",
+    "created": "2025-11-18T12:00:00Z"
   }
 }

@@ -129,14 +129,6 @@ memory:
     enabled: true
     storage: "file"
     max_workflows: 10
-  
-  persistence:
-    enabled: true
-    backend: "file"
-    config:
-      directory: "./web_scraper_memory"
-      format: "json"
-      compress: true
 
 requirements:
   hardware:
@@ -165,6 +157,25 @@ pricing:
   cost_per_call:
     amount: 0.001
     currency: "SOL"
+
+identity_layer:
+  id: "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440002"
+  authority: "axiomid.app"
+  issuedAt: "2025-01-12T10:30:00Z"
+  publicKey:
+    algorithm: "Ed25519"
+    value: "base64url-encoded-key"
+    encoding: "base64url"
+  signature:
+    algorithm: "Ed25519"
+    value: "base64url-encoded-signature"
+    canonicalization: "JCS"
+
+kyc_proof:
+  verification_id: "pi-kyc-12345"
+  provider: "pi_network"
+  timestamp: "2025-01-12T10:30:00Z"
+  level: "level_2"
 
 security:
   checksum:

@@ -11,6 +11,7 @@
 
 import fs from 'fs';
 import crypto from 'crypto';
+import yaml from 'js-yaml';
 
 /**
  * AIXParser - Main parser class for AIX files
@@ -124,133 +125,18 @@ export class AIXParser {
   }
 
   /**
-   * Parse YAML content (simplified implementation)
-   * Note: This is a basic YAML parser for demonstration.
-   * For production, consider using a full YAML library.
+   * Parse YAML content
    */
   parseYAML(content) {
-    const result = {};
-    const lines = content.split('\n');
-    let currentPath = [];
-    let currentObj = result;
-    let multilineKey = null;
-    let multilineContent = [];
-    let inMultiline = false;
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      
-      // Skip comments and empty lines
-      if (line.trim().startsWith('#') || line.trim() === '') continue;
-
-      const indent = line.search(/\S/);
-      if (indent === -1) continue;
-
-      const trimmed = line.trim();
-
-      // Handle multi-line string end
-      if (inMultiline && indent <= currentPath[currentPath.length - 1]?.indent) {
-        // Save multi-line content
-        const parent = currentPath[currentPath.length - 1]?.obj || result;
-        parent[multilineKey] = multilineContent.join('\n');
-        inMultiline = false;
-        multilineKey = null;
-        multilineContent = [];
-      }
-
-      // Multi-line string content
-      if (inMultiline) {
-        multilineContent.push(trimmed);
-        continue;
-      }
-
-      // Array item
-      if (trimmed.startsWith('- ')) {
-        const value = trimmed.substring(2).trim();
-        
-        while (currentPath.length > 0 && currentPath[currentPath.length - 1].indent >= indent) {
-          currentPath.pop();
-        }
-        
-        const parent = currentPath.length > 0 ? currentPath[currentPath.length - 1].obj : result;
-        const lastKey = currentPath.length > 0 ? currentPath[currentPath.length - 1].key : null;
-        
-        if (lastKey && !Array.isArray(parent[lastKey])) {
-          if (parent[lastKey] === '' || parent[lastKey] === null || parent[lastKey] === undefined || Object.keys(parent[lastKey]).length === 0) {
-            parent[lastKey] = [];
-          } else {
-            parent[lastKey] = [parent[lastKey]];
-          }
-        }
-        
-        if (lastKey) {
-          let parsedValue;
-          if (value.includes(':') && !value.match(/^[a-zA-Z0-9_]+:\/\//)) {
-            // Object in array
-            parsedValue = this.parseYAMLObject(value);
-          } else {
-            parsedValue = this.parseYAMLValue(value);
-          }
-
-          if (Array.isArray(parent)) {
-            parent.push(parsedValue);
-          } else {
-            parent[lastKey].push(parsedValue);
-          }
-        } else if (Array.isArray(parent)) {
-          let parsedValue;
-          if (value.includes(':') && !value.match(/^[a-zA-Z0-9_]+:\/\//)) {
-            parsedValue = this.parseYAMLObject(value);
-          } else {
-            parsedValue = this.parseYAMLValue(value);
-          }
-          parent.push(parsedValue);
- main
-        }
-        continue;
-      }
-
-      // Key-value pair
-      if (trimmed.includes(':') && !trimmed.match(/^[a-zA-Z0-9_]+:\/\//)) {
-        const colonIndex = trimmed.indexOf(':');
-        const key = trimmed.substring(0, colonIndex).trim();
-        let value = trimmed.substring(colonIndex + 1).trim();
-
-        // Adjust current object based on indentation
-        while (currentPath.length > 0 && currentPath[currentPath.length - 1].indent >= indent) {
-          currentPath.pop();
-        }
-        
-        currentObj = currentPath.length > 0 ? currentPath[currentPath.length - 1].newObj : result;
-
-        if (value === '' || value === '|' || value === '>') {
-          // New object or multi-line string
-          if (value === '|' || value === '>') {
-            multilineKey = key;
-            multilineContent = [];
-            inMultiline = true;
-            currentObj[key] = '';
-          } else {
-            // It could be an object or an array, so we init with an empty object.
-            // If it's an array, it will be replaced by [] in the array logic.
-            const newObj = {};
-            currentObj[key] = newObj;
-            currentPath.push({ indent, obj: currentObj, key, newObj });
-          }
-        } else {
-          // It's a property on the last key if we are properly indented
-          currentObj[key] = this.parseYAMLValue(value);
-        }
-      }
+    try {
+      return yaml.load(content) || {};
+    } catch (e) {
+      this.errors.push({
+        code: 'PARSE_ERROR',
+        message: 'Invalid YAML format: ' + e.message
+      });
+      return {};
     }
-
-    // Handle remaining multi-line content
-    if (inMultiline && multilineKey) {
-      const parent = currentPath[currentPath.length - 1]?.obj || result;
-      parent[multilineKey] = multilineContent.join('\n');
-    }
-
-    return result;
   }
 
   /**
@@ -960,7 +846,7 @@ export class AIXParser {
    * Validation helpers
    */
   isValidID(id) {
-    const regex = /^did:axiom:axiomid\.app:[a-zA-Z0-9._\-]+$/i;
+    const regex = /^(did:axiom:(axiomid\.app:)?[a-zA-Z0-9._\-]+|[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i;
     return regex.test(id);
   }
 
