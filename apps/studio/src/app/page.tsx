@@ -2,8 +2,12 @@ import Image from "next/image";
 import { AgentCard } from "@/components/studio/AgentCard";
 import { VoiceOrb } from "@/components/studio/VoiceOrb";
 import { AgenticKycSetup } from "@/components/studio/AgenticKycSetup";
+import { getMockAgents } from "@/lib/aix/mock-data";
 
-export default function Home() {
+export default async function Home() {
+  const agents = await getMockAgents();
+  const defaultAgent = agents[0];
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] bg-[#05050A]">
       <main className="flex flex-col gap-12 row-start-2 items-center sm:items-start w-full max-w-6xl">
@@ -34,7 +38,7 @@ export default function Home() {
           </div>
 
           <div className="w-full md:w-1/3 flex justify-center">
-            <VoiceOrb />
+            <VoiceOrb state="idle" />
           </div>
         </div>
 
@@ -42,20 +46,7 @@ export default function Home() {
           <div className="flex flex-col gap-6">
             <h2 className="text-2xl font-bold text-white mb-2">My Agents</h2>
             <div className="grid grid-cols-1 gap-6 w-full max-w-lg">
-              <AgentCard
-                name="Data Analyzer Pro"
-                role="Data Scientist"
-                price="0.5"
-                status="online"
-                color="#6366f1"
-              />
-              <AgentCard
-                name="Customer Support Bot"
-                role="Support Specialist"
-                price="0.1"
-                status="offline"
-                color="#8b5cf6"
-              />
+              <AgentCard agent={defaultAgent} />
             </div>
           </div>
 

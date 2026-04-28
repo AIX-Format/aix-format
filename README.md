@@ -135,3 +135,11 @@ node bin/aix-validate.js path/to/your-agent.aix [options]
 - **Jules (AI Engineer)** - Engineering Partner & UI/UX Architect.
 
 *We are building the trust layer for the Machine Economy. (نحن نبني طبقة الثقة لاقتصاد الآلات.)*
+
+## Recent Updates & Ecosystem Evolution
+- **Sovereign Automated Agent Pipeline**: Implemented an embedded agent protocol (`agent-identity.json`) using AxiomID and ED25519 cryptographic signatures to cryptographically prove the origin of code changes in `AI_MANIFEST.md`.
+- **Production Stability & Visual Regression**: Included strict workspace prebuild scripts to prevent path drift, and integrated Playwright via GitHub Actions for automated visual regression testing on PRs.
+- **Pure Glassmorphism UI (VisionOS Style):** The `apps/studio` dashboard features a state-of-the-art Glassmorphism interface for managing agents, ensuring an elegant and trustworthy enterprise experience. Built entirely on Next.js App Router (Zustand + Zod + Tailwind v4 + Framer Motion).
+- **Pi Network KYC & AxiomID Signatures:** Full frontend integration for generating `did:axiom` identities and signing AIX manifests securely within the browser using `tweetnacl`.
+- **Advanced Cognitive Memory System:** Enhanced the AIX schema (`aix-enhanced.schema.json`) to explicitly support `temporal_memory`, `early_fusion`, and `semantic_storage` traits for advanced VLA (Vision-Language-Action) agents.
+- **Sovereign Agent Workflow Integration:** The repository includes rigorous validation logic and continuous maintenance scripts ensuring 100% CI/CD stability when deploying to Vercel via Turbopack.

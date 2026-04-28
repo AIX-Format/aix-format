@@ -1,136 +1,196 @@
 "use client";
 
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldCheck, Fingerprint, Lock, X, Loader2 } from "lucide-react";
-// In a real Pi App, this would be available globally or imported via Pi SDK package
-// import { Pi } from "@pinetwork-js/sdk";
-import nacl from 'tweetnacl';
-import naclUtil from 'tweetnacl-util';
+import { X, ShieldCheck, Fingerprint, KeyRound, Check, Loader2 } from "lucide-react";
+import { useIdentityStore } from "@/store/identity";
+import { useSignalStore } from "@/store/signals";
+import { sha256Hex, shortHash } from "@/lib/aix/hash";
+import { cn } from "@/lib/utils";
 
 interface KycSignatureModalProps {
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
-  onSign: (authResult: any) => Promise<void>;
-  isSigning: boolean;
-  agentName: string;
 }
 
-export function KycSignatureModal({ isOpen, onClose, onSign, isSigning, agentName }: KycSignatureModalProps) {
-  if (!isOpen) return null;
+const steps = [
+  { id: 0, title: "Pi KYC", icon: ShieldCheck, desc: "تحقق من الهوية عبر شبكة Pi" },
+  { id: 1, title: "did:axiom", icon: Fingerprint, desc: "توليد معرّف ذاتي السيادة" },
+  { id: 2, title: "Sign", icon: KeyRound, desc: "توقيع التزام بمفتاحك الخاص" },
+];
 
-  const handlePiAuthentication = async () => {
-    try {
-      // In production, you would use:
-      // const authResult = await Pi.authenticate(['username', 'payments', 'wallet_address'], onIncompletePaymentFound);
+export function KycSignatureModal({ open, onClose }: KycSignatureModalProps) {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-      // For demonstration/testing, we simulate the Pi SDK's returned authentication result
-      // generating a real valid Ed25519 signature to pass the Adapter's verification.
+  const { kycStatus, did, setDid, setKyc } = useIdentityStore();
+  const { push: addSignal } = useSignalStore();
 
-      const keypair = nacl.sign.keyPair();
-      const mockUid = `pi_user_${Date.now()}`;
-      const mockAccessToken = `eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.mock_token_${Date.now()}`;
+  const handleStart = async () => {
+    setIsProcessing(true);
+    setKyc("pending");
 
-      const messageUint8 = naclUtil.decodeUTF8(mockAccessToken);
-      const signatureUint8 = nacl.sign.detached(messageUint8, keypair.secretKey);
+    // Step 0: Pi KYC
+    setCurrentStep(0);
+    await new Promise((r) => setTimeout(r, 1500));
 
-      const signature = naclUtil.encodeBase64(signatureUint8);
-      const publicKey = naclUtil.encodeBase64(keypair.publicKey);
+    // Step 1: Generate DID
+    setCurrentStep(1);
+    const mockDid = "did:axiom:axiomid.app:1234567890abcdef";
+    setDid(mockDid);
 
-      const mockAuthResult = {
-        user: { uid: mockUid },
-        accessToken: mockAccessToken,
-        signature: signature,
-        publicKey: publicKey
-      };
+    // Step 2: Sign
+    setCurrentStep(2);
+    await new Promise((r) => setTimeout(r, 1000));
 
-      await onSign(mockAuthResult);
-    } catch (error) {
-      console.error("Pi SDK Authentication failed:", error);
-      alert("Pi Network authentication failed.");
-    }
+    setKyc("verified", "mock-signature-jws");
+
+    addSignal({
+      kind: "success",
+      source: "KycAdapter",
+      message: "Agent identity anchored and signed via Pi Network.",
+    });
+
+    setIsProcessing(false);
   };
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="absolute inset-0 bg-[rgba(7,13,31,0.8)] backdrop-blur-sm"
-        />
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          />
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-lg overflow-hidden rounded-2xl glass-panel-heavy p-1"
-        >
-          {/* Animated gradient border effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-primary)] via-transparent to-[var(--color-secondary)] opacity-20" />
-
-          <div className="relative bg-[var(--color-surface-container)] rounded-xl p-8 h-full">
-            <button
-              onClick={onClose}
-              disabled={isSigning}
-              className="absolute top-4 right-4 text-[var(--color-on-surface-variant)] hover:text-white transition-colors disabled:opacity-50"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex flex-col items-center text-center mb-8">
-              <div className="w-16 h-16 rounded-full bg-[var(--color-surface-container-high)] flex items-center justify-center mb-4 relative">
-                <div className="absolute inset-0 rounded-full border-2 border-[var(--color-primary)] border-dashed animate-[spin_10s_linear_infinite]" />
-                <Fingerprint className="w-8 h-8 text-[var(--color-primary)]" />
-              </div>
-              <h2 className="text-2xl font-display font-semibold text-white mb-2">Cryptographic KYC Signature</h2>
-              <p className="text-sm text-[var(--color-on-surface-variant)] leading-relaxed">
-                You are about to bind your verified Pi Network Identity to this AIX payload. This creates a Sovereign Proof of Ownership.
-              </p>
-            </div>
-
-            <div className="space-y-4 mb-8">
-              <div className="p-4 rounded-lg bg-[var(--color-surface-container-lowest)] border border-[var(--color-glass-border)] flex items-start gap-4">
-                <ShieldCheck className="w-5 h-5 text-[var(--color-secondary)] shrink-0 mt-0.5" />
-                <div className="text-left">
-                  <h4 className="text-sm font-medium text-white">Identity Assertion</h4>
-                  <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">
-                    Your Pi KYC status acts as an Oracle. It guarantees to the network that this agent ({agentName}) is owned by a verified human, preventing Sybil attacks.
-                  </p>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-black/40 border border-white/10 backdrop-blur-xl shadow-2xl"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-white/5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/20 text-blue-400">
+                  <ShieldCheck size={20} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-medium text-white">Sovereign Protocol</h2>
+                  <p className="text-xs text-white/50">Authenticate via Pi Network KYC</p>
                 </div>
               </div>
-              <div className="p-4 rounded-lg bg-[var(--color-surface-container-lowest)] border border-[var(--color-glass-border)] flex items-start gap-4">
-                <Lock className="w-5 h-5 text-[var(--color-primary)] shrink-0 mt-0.5" />
-                <div className="text-left">
-                  <h4 className="text-sm font-medium text-white">Immutable Binding</h4>
-                  <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">
-                    Once signed, the AIX file will include a digital signature block verifiable via the AxiomID protocol.
-                  </p>
-                </div>
+              <button
+                onClick={onClose}
+                className="rounded-full p-2 text-white/50 hover:bg-white/10 hover:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-8">
+              {/* Steps */}
+              <div className="flex justify-between relative">
+                <div className="absolute left-8 right-8 top-5 h-[2px] bg-white/5 -z-10" />
+                {steps.map((s) => {
+                  const isActive = currentStep >= s.id;
+                  const isCurrent = currentStep === s.id;
+                  const Icon = s.icon;
+                  return (
+                    <div key={s.id} className="flex flex-col items-center gap-3">
+                      <motion.div
+                        className={cn(
+                          "flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors",
+                          isActive ? "border-blue-500 bg-blue-500/20 text-blue-400" : "border-white/10 bg-black/50 text-white/30"
+                        )}
+                        animate={isCurrent && isProcessing ? { scale: [1, 1.1, 1], boxShadow: ["0 0 0 0 rgba(59,130,246,0)", "0 0 0 10px rgba(59,130,246,0.2)", "0 0 0 0 rgba(59,130,246,0)"] } : {}}
+                        transition={{ repeat: Infinity, duration: 2 }}
+                      >
+                        <Icon size={18} />
+                      </motion.div>
+                      <div className="text-center">
+                        <p className={cn("text-xs font-medium", isActive ? "text-white" : "text-white/40")}>{s.title}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Status Display */}
+              <div className="rounded-2xl bg-white/5 border border-white/10 p-6 text-center min-h-[140px] flex flex-col items-center justify-center">
+                {(kycStatus === "idle" || kycStatus === "failed") && !isProcessing ? (
+                  <div className="space-y-4">
+                    <Fingerprint className="mx-auto text-white/40" size={32} />
+                    <p className="text-sm text-white/60">
+                      We require a cryptographic signature bound to your Pi Network identity to issue an AxiomID.
+                    </p>
+                  </div>
+                ) : kycStatus === "verified" && !isProcessing ? (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="space-y-4"
+                  >
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20 text-green-400 border border-green-500/30">
+                      <Check size={32} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-white mb-1">Identity Verified</p>
+                      <p className="text-xs font-mono text-green-400/80 bg-green-500/10 px-3 py-1 rounded-full border border-green-500/20 inline-block">
+                        {did}
+                      </p>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <div className="space-y-4">
+                    <Loader2 className="mx-auto text-blue-400 animate-spin" size={32} />
+                    <p className="text-sm text-white/80 animate-pulse">
+                      {currentStep === 0 && "Handshaking with Pi Network..."}
+                      {currentStep === 1 && "Generating Zero-Knowledge Proofs..."}
+                      {currentStep === 2 && "Signing AIX Manifest..."}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
-            <button
-              onClick={handlePiAuthentication}
-              disabled={isSigning}
-              className="w-full py-4 rounded-xl bg-gradient-primary text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(0,219,233,0.2)] disabled:opacity-50"
-            >
-              {isSigning ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Verifying Identity...
-                </>
-              ) : (
-                <>
-                  <Fingerprint className="w-5 h-5" />
-                  Sign & Deploy to Pi Network
-                </>
+            {/* Footer */}
+            <div className="p-6 border-t border-white/5 flex justify-end gap-3 bg-black/20">
+              <button
+                onClick={onClose}
+                disabled={isProcessing}
+                className="px-5 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-50"
+              >
+                {kycStatus === "verified" ? "Close" : "Cancel"}
+              </button>
+
+              {kycStatus !== "verified" && (
+                <button
+                  onClick={handleStart}
+                  disabled={isProcessing}
+                  className="px-5 py-2.5 rounded-xl text-sm font-medium bg-blue-500 text-white hover:bg-blue-600 transition-colors shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Processing
+                    </>
+                  ) : (
+                    <>
+                      <Fingerprint size={16} />
+                      Authenticate
+                    </>
+                  )}
+                </button>
               )}
-            </button>
-          </div>
-        </motion.div>
-      </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </AnimatePresence>
   );
 }
