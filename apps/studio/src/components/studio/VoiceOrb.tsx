@@ -1,33 +1,46 @@
 "use client";
 
- feat/kyc-wizard-tts-12299921071301084280
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Mic, MicOff, Activity, Volume2 } from "lucide-react";
+import { Mic, MicOff, Activity, Volume2, Settings } from "lucide-react";
+import type { VoiceState } from "@/lib/aix/schema";
 import { cn } from "@/lib/utils";
-=======
-import React, { useState } from 'react';
-import { Mic, MicOff, Settings } from 'lucide-react';
- main
 
 interface VoiceOrbProps {
-  onTranscript?: (transcript: string) => void;
+  state?: VoiceState;
+  onTranscript?: (text: string) => void;
   isProcessing?: boolean;
+  size?: number;
+  label?: string;
 }
 
- feat/kyc-wizard-tts-12299921071301084280
-export function VoiceOrb({ onTranscript, isProcessing }: VoiceOrbProps) {
-  const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const recognitionRef = useRef<any>(null);
+const stateLabel: Record<VoiceState, string> = {
+  idle: "في الاستراحة",
+  listening: "ينصت",
+  processing: "يفكّر",
+  speaking: "يتحدّث",
+};
 
-  // Expose a global or prop-based way to trigger speech
-  // For simplicity in this demo, we listen to processing state changes
-  const prevProcessing = useRef(isProcessing);
+export function VoiceOrb({ 
+  state: externalState, 
+  onTranscript, 
+  isProcessing: externalProcessing,
+  size = 220,
+  label 
+}: VoiceOrbProps) {
+  const [internalState, setInternalState] = useState<VoiceState>("idle");
+  const recognitionRef = useRef<any>(null);
+  const prevProcessing = useRef(externalProcessing);
+
+  // Derive active state
+  const state = externalState || internalState;
+  const isProcessing = externalProcessing || state === "processing";
+  const isListening = state === "listening";
+  const isSpeaking = state === "speaking";
 
   useEffect(() => {
     // Check for browser support
-    const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = typeof window !== "undefined" && (window.SpeechRecognition || (window as any).webkitSpeechRecognition);
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
@@ -36,17 +49,17 @@ export function VoiceOrb({ onTranscript, isProcessing }: VoiceOrbProps) {
 
       recognitionRef.current.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
-        onTranscript(transcript);
-        setIsListening(false);
+        if (onTranscript) onTranscript(transcript);
+        setInternalState("idle");
       };
 
       recognitionRef.current.onerror = (event: any) => {
         console.error("Speech recognition error", event.error);
-        setIsListening(false);
+        setInternalState("idle");
       };
 
       recognitionRef.current.onend = () => {
-        setIsListening(false);
+        setInternalState("idle");
       };
     }
 
@@ -54,35 +67,31 @@ export function VoiceOrb({ onTranscript, isProcessing }: VoiceOrbProps) {
       if (recognitionRef.current) {
         recognitionRef.current.abort();
       }
-      if (window.speechSynthesis) {
+      if (typeof window !== "undefined" && window.speechSynthesis) {
         window.speechSynthesis.cancel();
       }
     };
   }, [onTranscript]);
 
   useEffect(() => {
-    // Simple logic: if we just finished processing, maybe speak a confirmation
-    if (prevProcessing.current && !isProcessing && window.speechSynthesis) {
+    if (prevProcessing.current && !externalProcessing && typeof window !== "undefined" && window.speechSynthesis) {
         speakText("Agent DNA generated successfully. Proceed to KYC verification.");
     }
-    prevProcessing.current = isProcessing;
-  }, [isProcessing]);
+    prevProcessing.current = externalProcessing;
+  }, [externalProcessing]);
 
   const speakText = (text: string) => {
-    if (!window.speechSynthesis) return;
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
 
-    // Cancel any ongoing speech
     window.speechSynthesis.cancel();
-
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
-    // Optional: tweak voice parameters for a more "AI" feel
     utterance.pitch = 1.1;
     utterance.rate = 1.05;
 
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
+    utterance.onstart = () => setInternalState("speaking");
+    utterance.onend = () => setInternalState("idle");
+    utterance.onerror = () => setInternalState("idle");
 
     window.speechSynthesis.speak(utterance);
   };
@@ -93,115 +102,94 @@ export function VoiceOrb({ onTranscript, isProcessing }: VoiceOrbProps) {
       return;
     }
 
-    // Stop speaking if listening starts
-    if (window.speechSynthesis) {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
       window.speechSynthesis.cancel();
-      setIsSpeaking(false);
     }
 
     if (isListening) {
       recognitionRef.current.stop();
-      setIsListening(false);
-=======
-export function VoiceOrb({ onTranscript, isProcessing: externalProcessing }: VoiceOrbProps) {
-  const [isActive, setIsActive] = useState(false);
-  const [internalProcessing, setInternalProcessing] = useState(false);
-
-  const isProcessing = externalProcessing || internalProcessing;
-
-  const handleToggle = () => {
-    if (!isActive) {
-      setIsActive(true);
-      // Simulate listening state
-      setTimeout(() => {
-        setInternalProcessing(true);
-        setTimeout(() => {
-          setInternalProcessing(false);
-          setIsActive(false);
-          if (onTranscript) {
-            onTranscript("Create a customer support agent");
-          }
-        }, 2000);
-      }, 3000);
- main
+      setInternalState("idle");
     } else {
-      setIsActive(false);
-      setInternalProcessing(false);
+      recognitionRef.current.start();
+      setInternalState("listening");
     }
   };
 
+  const speed = isProcessing ? 1.2 : isSpeaking ? 1.5 : isListening ? 2.5 : 4;
+  const scale = isSpeaking ? [1, 1.08, 1] : isListening ? [1, 1.03, 1] : [1, 1.02, 1];
+
   return (
- feat/kyc-wizard-tts-12299921071301084280
-    <div className="flex flex-col items-center justify-center gap-6">
-      <div className="relative flex items-center justify-center w-32 h-32">
-        {/* Outer Ripple */}
-        {(isListening || isProcessing || isSpeaking) && (
-          <motion.div
-            initial={{ scale: 1, opacity: 0.5 }}
-            animate={{ scale: 1.5, opacity: 0 }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "easeOut" }}
-            className={cn(
-              "absolute inset-0 rounded-full border",
-              isSpeaking ? "border-[#d2bbff]" : "border-[var(--color-primary)]"
-            )}
-          />
-        )}
-        {(isListening || isProcessing || isSpeaking) && (
-          <motion.div
-            initial={{ scale: 1, opacity: 0.3 }}
-            animate={{ scale: 1.8, opacity: 0 }}
-            transition={{ repeat: Infinity, duration: 2, ease: "easeOut", delay: 0.5 }}
-            className={cn(
-              "absolute inset-0 rounded-full border",
-               isSpeaking ? "border-white" : "border-[var(--color-secondary)]"
-            )}
-          />
-=======
-    <div className="flex flex-col items-center justify-center p-8 bg-[rgba(20,20,30,0.4)] rounded-2xl border border-[var(--color-border)] backdrop-blur-xl">
-      <div className="mb-6 text-center">
-        <h3 className="text-xl font-bold text-white mb-2">Live Voice Configurator</h3>
-        <p className="text-sm text-gray-400">Speak to configure your AIX agent. Zero code required.</p>
+    <div className="flex flex-col items-center justify-center p-8 bg-[rgba(20,20,30,0.4)] rounded-2xl border border-[var(--color-border)] backdrop-blur-xl gap-6">
+      <div className="text-center space-y-1">
+        <h3 className="text-xl font-display font-medium text-white tracking-wide">
+          {isSpeaking ? "Agent Speaking..." : isProcessing ? "Agent Analyzing..." : isListening ? "Listening..." : "Voice Orchestration"}
+        </h3>
+        <p className="text-xs text-gray-400">
+          {isSpeaking ? "The Sovereign Engine is communicating." : "Speak to configure your AIX agent."}
+        </p>
       </div>
 
       <div
-        onClick={handleToggle}
-        className={`relative w-32 h-32 rounded-full flex items-center justify-center cursor-pointer transition-all duration-500 ease-in-out ${
-          isActive
-            ? 'bg-indigo-600 shadow-[0_0_40px_rgba(99,102,241,0.6)] scale-110'
-            : 'bg-[rgba(30,30,40,0.8)] shadow-[0_0_20px_rgba(0,0,0,0.4)] hover:bg-[rgba(40,40,50,0.8)]'
-        }`}
+        className="relative flex items-center justify-center"
+        style={{ width: size, height: size }}
       >
-        {isProcessing ? (
-          <div className="absolute inset-0 rounded-full border-4 border-t-transparent border-white animate-spin"></div>
-        ) : null}
+        {/* Outer halo */}
+        <motion.div
+          className="absolute inset-0 rounded-full"
+          style={{
+            background: "radial-gradient(circle at 50% 50%, oklch(0.85 0.08 240 / 0.18), transparent 70%)",
+          }}
+          animate={{ scale: state === "idle" ? [1, 1.05, 1] : [1, 1.15, 1], opacity: [0.6, 1, 0.6] }}
+          transition={{ duration: speed, repeat: Infinity, ease: "easeInOut" }}
+        />
 
-        {isActive ? (
-          <Mic className="w-12 h-12 text-white animate-pulse" />
-        ) : (
-          <MicOff className="w-12 h-12 text-gray-400" />
- main
-        )}
-      </div>
+        {/* Ring 3 */}
+        <motion.div
+          className="absolute rounded-full border border-white/10"
+          style={{ width: size * 0.95, height: size * 0.95 }}
+          animate={{ rotate: 360 }}
+          transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+        />
 
- feat/kyc-wizard-tts-12299921071301084280
-        {/* Core Orb */}
+        {/* Ring 2 — animated */}
+        <motion.div
+          className="absolute rounded-full border border-white/15"
+          style={{ width: size * 0.78, height: size * 0.78 }}
+          animate={{ scale, rotate: isProcessing ? -360 : 0 }}
+          transition={{
+            scale: { duration: speed * 0.6, repeat: Infinity, ease: "easeInOut" },
+            rotate: { duration: 8, repeat: Infinity, ease: "linear" },
+          }}
+        />
+
+        {/* Ring 1 */}
+        <motion.div
+          className="absolute rounded-full border border-white/20"
+          style={{ width: size * 0.6, height: size * 0.6 }}
+          animate={{ scale }}
+          transition={{ duration: speed * 0.4, repeat: Infinity, ease: "easeInOut" }}
+        />
+
+        {/* Core Orb / Interaction Layer */}
         <motion.button
           onClick={toggleListening}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          animate={{
-            boxShadow: isSpeaking
-              ? "0 0 50px rgba(210, 187, 255, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.6)"
-              : isListening
-              ? "0 0 40px rgba(0, 219, 233, 0.6), inset 0 0 20px rgba(210, 187, 255, 0.4)"
-              : isProcessing
-              ? "0 0 30px rgba(210, 187, 255, 0.6), inset 0 0 20px rgba(0, 219, 233, 0.4)"
-              : "0 0 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.05)",
-          }}
           className={cn(
-            "relative z-10 flex items-center justify-center w-full h-full rounded-full transition-all duration-500",
-            isProcessing || isSpeaking ? "bg-[var(--color-surface-container-high)]" : "bg-gradient-primary"
+            "relative z-10 flex items-center justify-center rounded-full transition-all duration-500",
+            "backdrop-blur-2xl overflow-hidden",
+            isListening ? "bg-gradient-primary shadow-[0_0_40px_rgba(0,219,233,0.6)]" : "bg-white/5"
           )}
+          style={{
+            width: size * 0.42,
+            height: size * 0.42,
+            background: isListening 
+              ? undefined 
+              : "radial-gradient(circle at 30% 30%, oklch(1 0 0 / 0.95), oklch(0.85 0.06 240 / 0.5) 60%, oklch(0.65 0.08 250 / 0.3) 100%)",
+            boxShadow: isListening 
+              ? undefined 
+              : "0 0 40px oklch(0.85 0.08 240 / 0.4), inset 0 -10px 30px oklch(0.5 0.1 260 / 0.4), inset 0 5px 20px oklch(1 0 0 / 0.6)",
+          }}
         >
           {isProcessing ? (
             <Activity className="w-10 h-10 text-[var(--color-primary)] animate-pulse" />
@@ -219,31 +207,31 @@ export function VoiceOrb({ onTranscript, isProcessing: externalProcessing }: Voi
               ))}
             </div>
           ) : (
-            <Mic className="w-10 h-10 text-white drop-shadow-md" />
+            <Mic className="w-10 h-10 text-white/80" />
           )}
+
+          {/* Inner shimmer */}
+          <motion.div
+            className="absolute inset-0 rounded-full pointer-events-none"
+            style={{
+              background: "conic-gradient(from 0deg, transparent, oklch(1 0 0 / 0.15), transparent, oklch(1 0 0 / 0.1), transparent)",
+            }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+          />
         </motion.button>
       </div>
 
-      <div className="text-center space-y-2">
-        <h3 className="text-xl font-display font-medium text-white tracking-wide">
-          {isSpeaking ? "Agent Speaking..." : isProcessing ? "Agent Analyzing..." : isListening ? "Listening..." : "Voice Orchestration"}
-        </h3>
-        <p className="text-sm text-[var(--color-on-surface-variant)] max-w-xs mx-auto leading-relaxed">
-          {isSpeaking
-            ? "The Sovereign Engine is communicating."
-            : isListening
-            ? "Speak clearly. The AIX engine is ready for your command."
-            : "Tap the orb to configure your agent or deploy a new AIX payload using voice."}
-        </p>
-
-      <div className="mt-8 text-sm text-gray-300 h-6">
-        {isProcessing ? "Processing voice command..." : isActive ? "Listening... 'Create a customer support agent'" : "Tap the orb to start"}
+      <div className="text-center">
+        <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+          {label ?? "AIX Status"}
+        </div>
+        <div className="mt-1 text-sm font-medium text-foreground/90">{stateLabel[state]}</div>
       </div>
 
-      <div className="mt-6 flex items-center gap-2 text-xs text-indigo-400 cursor-pointer hover:text-indigo-300">
-        <Settings className="w-4 h-4" />
-        <span>Voice Settings (Hume / OpenAI Realtime)</span>
- main
+      <div className="flex items-center gap-2 text-xs text-indigo-400 cursor-pointer hover:text-indigo-300 transition-colors">
+        <Settings className="w-3 h-3" />
+        <span>Voice Config (Hume / OpenAI)</span>
       </div>
     </div>
   );
