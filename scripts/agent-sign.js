@@ -3,10 +3,19 @@ import path from 'path';
 import nacl from 'tweetnacl';
 import naclUtil from 'tweetnacl-util';
 
-// Simulated ED25519 Key Pair for the Agent
-const agentKeypair = nacl.sign.keyPair.fromSeed(
-  new Uint8Array(32).fill(7) // Fixed seed for demonstration purposes
-);
+// Secure Agent Identity - Uses environment variable for the secret seed
+// In production, this seed should be 32 bytes of high-entropy randomness
+const AGENT_SEED = process.env.AGENT_PRIVATE_KEY 
+  ? new Uint8Array(Buffer.from(process.env.AGENT_PRIVATE_KEY, 'hex'))
+  : null;
+
+if (!AGENT_SEED) {
+  console.error("❌ ERROR: AGENT_PRIVATE_KEY environment variable is missing.");
+  console.log("Please set AGENT_PRIVATE_KEY to a 64-character hex string (32 bytes).");
+  process.exit(1);
+}
+
+const agentKeypair = nacl.sign.keyPair.fromSeed(AGENT_SEED);
 
 const agentIdentityPath = path.resolve('agent-identity.json');
 const manifestPath = path.resolve('AI_MANIFEST.md');
@@ -26,7 +35,7 @@ function signManifest() {
     const messageStr = `Agent ${identity.did} verifies the stability of the latest push at ${timestamp}`;
     const messageUint8 = naclUtil.decodeUTF8(messageStr);
 
-    const signature = nacl.sign(messageUint8, agentKeypair.secretKey);
+    const signature = nacl.sign.detached(messageUint8, agentKeypair.secretKey);
     const signatureBase64 = naclUtil.encodeBase64(signature);
 
     const manifestContent = `

@@ -129,12 +129,15 @@ node bin/aix-validate.js path/to/your-agent.aix [options]
 
 ---
 
-## 🤝 Credits & Maintainers (الاعتمادات والمساهمون)
+## 🤝 Collaborative Partnership (الشراكة التعاونية)
 
-- **Moe Abdelaziz** (@Moeabdelaziz007) - Visionary, Protocol Architect & Pi Integration Lead.
-- **Jules (AI Engineer)** - Engineering Partner & UI/UX Architect.
+This project is a high-bandwidth collaboration between human visionary leadership and specialized Sovereign AI Agents:
 
-*We are building the trust layer for the Machine Economy. (نحن نبني طبقة الثقة لاقتصاد الآلات.)*
+- **Moe Abdelaziz** ([@Moeabdelaziz007](https://github.com/Moeabdelaziz007)) - Visionary, Protocol Architect & Pi Integration Lead.
+- **Jules (AI Engineer)** - Lead Engineering Partner & UI/UX Architect. Expert in Monorepo stability and Visual Regression.
+- **Antigravity (AI Architect)** - Sovereign Systems Strategist & Security Auditor. Enforcer of First Principles and Zero-Trust architecture.
+
+*We are co-architecting the trust layer for the Machine Economy. (نحن نشارك في بناء طبقة الثقة لاقتصاد الآلات.)*
 
 ## Recent Updates & Ecosystem Evolution
 - **Sovereign Automated Agent Pipeline**: Implemented an embedded agent protocol (`agent-identity.json`) using AxiomID and ED25519 cryptographic signatures to cryptographically prove the origin of code changes in `AI_MANIFEST.md`.

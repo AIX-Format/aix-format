@@ -19,8 +19,13 @@ const rootDir = path.resolve(__dirname, '..');
 try {
   // Use ripgrep or grep to find Windows/Mac absolute paths
   // Ignore node_modules, .git, dist, build, .next, and eslint config files where the rule is defined
-  const cmd = `cd ${rootDir} && grep -rE "(C:\\\\|Users\\\\|/home/|/Users/)" apps core schemas bin tests --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.git --exclude="eslint.config.mjs" || true`;
-  const result = execSync(cmd, { encoding: 'utf-8' });
+  const targetDirs = ['apps', 'core', 'schemas', 'bin', 'tests'].join(' ');
+  const excludeDirs = ['node_modules', '.next', '.git'].map(d => `--exclude-dir=${d}`).join(' ');
+  const excludeFiles = ['eslint.config.mjs'].map(f => `--exclude="${f}"`).join(' ');
+  
+  // Safe command construction
+  const cmd = `grep -rE "(C:\\\\|Users\\\\|/home/|/Users/)" ${targetDirs} ${excludeDirs} ${excludeFiles} || true`;
+  const result = execSync(cmd, { cwd: rootDir, encoding: 'utf-8' });
 
   if (result.trim()) {
       console.log(`${RED}Error: Found Hardcoded Absolute Paths!${RESET}`);
