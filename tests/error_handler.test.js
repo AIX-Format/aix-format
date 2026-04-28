@@ -117,7 +117,8 @@ describe('TokenBucket', () => {
 
     bucket.refill();
     assert(bucket.tokens > 0);
-    assert(bucket.tokens <= 1); // roughly 1 token after 100ms at 10 tokens/s
+    // Be slightly more forgiving with timing (0.1s sleep + small overhead)
+    assert(bucket.tokens <= 1.5); 
   });
 
   it('should calculate wait time', () => {

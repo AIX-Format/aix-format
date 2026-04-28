@@ -25,16 +25,16 @@ export class AIXErrorHandler {
     this.rateLimiters = new Map();     // Token bucket rate limiters
     this.config = {
       circuitBreaker: {
-        failureThreshold: config.failureThreshold || 5,
-        successThreshold: config.successThreshold || 2,
-        timeoutSeconds: config.timeoutSeconds || 60,
+        failureThreshold: config.circuitBreaker?.failureThreshold || 5,
+        successThreshold: config.circuitBreaker?.successThreshold || 2,
+        timeoutSeconds: config.circuitBreaker?.timeoutSeconds || 60,
       },
       defaultRetry: {
-        maxAttempts: config.maxAttempts || 3,
-        strategy: config.strategy || 'exponential_backoff',
-        initialDelay: config.initialDelay || 1000,
-        maxDelay: config.maxDelay || 32000,
-        jitter: config.jitter !== false
+        maxAttempts: config.defaultRetry?.maxAttempts || 3,
+        strategy: config.defaultRetry?.strategy || 'exponential_backoff',
+        initialDelay: config.defaultRetry?.initialDelay || 1000,
+        maxDelay: config.defaultRetry?.maxDelay || 32000,
+        jitter: config.defaultRetry?.jitter !== false
       }
     };
   }
