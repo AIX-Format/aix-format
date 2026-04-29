@@ -57,3 +57,7 @@ temp/
 .eslintcache
 .npm/
 
+# Playwright
+playwright-report/
+test-results/
+.playwright/
