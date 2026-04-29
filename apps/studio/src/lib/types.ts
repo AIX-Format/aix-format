@@ -102,3 +102,25 @@ export interface Manifest {
     prompts: any[];
   }
 }
+
+// ─── New Deployment Types ──────────────────────────────────────────────────
+export type DeployTarget = 'vercel' | 'custom';
+
+export interface DeployConfig {
+  token?: string;
+  projectName?: string;
+  endpointUrl?: string;
+}
+
+export interface DeployRequest {
+  agentId: string;
+  target: DeployTarget;
+  config: DeployConfig;
+  yaml: string;
+}
+
+export interface DeployResponse {
+  deployUrl: string;
+  status: 'deployed' | 'failed';
+  error?: string;
+}

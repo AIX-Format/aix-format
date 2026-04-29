@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
-import { ShoppingCart, Star, Shield, Zap, Search, Filter } from "lucide-react";
+import { ShoppingCart, Search, Filter } from "lucide-react";
 import { AgentCard } from "@/components/studio/AgentCard";
 import { useLocalAgents } from "@/hooks/useLocalAgents";
 import { mockAgents } from "@/lib/mock-agents";
@@ -12,26 +12,56 @@ import { AgentRecord } from "@/lib/types";
 
 const tags = ["All", "research", "support", "coding", "robotics", "finance", "content"];
 
+// Discriminated union/extension for marketplace-specific logic
+interface MarketplaceAgent extends AgentRecord {
+  isMock: boolean;
+  tags: string[];
+  description: string;
+  kyc: boolean;
+}
+
 export default function MarketplacePage() {
   const { agents: localAgents } = useLocalAgents();
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState("All");
   const [kycFilter, setKycFilter] = useState("All");
 
-  const allAgents: AgentRecord[] = useMemo(() => [
-    ...mockAgents,
-    ...localAgents
-  ], [localAgents]);
+  const allAgents: MarketplaceAgent[] = useMemo(() => {
+    // 1. Unify mock agents into MarketplaceAgent shape
+    const unifiedMocks: MarketplaceAgent[] = mockAgents.map(a => ({
+      ...a,
+      isMock: true,
+      tags: a.abom?.capabilities.map(c => c.toLowerCase()) ?? [],
+      description: a.yaml?.slice(0, 100) || "Sovereign AI Agent",
+      kyc: a.kyc_tier !== undefined && a.kyc_tier !== 'unverified'
+    }));
+
+    // 2. Map local agents using robust field fallback logic
+    const unifiedLocal: MarketplaceAgent[] = localAgents.map(a => ({
+      ...a,
+      isMock: false,
+      name: a.name,
+      role: a.role,
+      tags: a.abom?.capabilities.map(c => c.toLowerCase()) ?? [],
+      description: a.yaml?.slice(0, 100) || "Sovereign AI Agent",
+      status: a.status ?? 'online',
+      kyc: a.kyc_tier !== undefined && a.kyc_tier !== 'unverified',
+      color: a.color ?? '#6366f1',
+      successRate: a.successRate ?? 98.4,
+      tasksCompleted: a.tasksCompleted ?? 0
+    }));
+
+    return [...unifiedMocks, ...unifiedLocal];
+  }, [localAgents]);
 
   const filtered = allAgents.filter(a => {
     const matchSearch = a.name.toLowerCase().includes(search.toLowerCase()) || 
-                       a.role.toLowerCase().includes(search.toLowerCase());
+                       a.role.toLowerCase().includes(search.toLowerCase()) ||
+                       a.description.toLowerCase().includes(search.toLowerCase());
     
-    const agentTags = a.abom?.capabilities || [];
-    const matchTag = activeTag === "All" || agentTags.some(t => t.toLowerCase() === activeTag.toLowerCase());
+    const matchTag = activeTag === "All" || a.tags.includes(activeTag.toLowerCase());
     
-    const isVerified = a.kyc_tier && a.kyc_tier !== 'unverified';
-    const matchKyc = kycFilter === "All" ? true : kycFilter === "Verified" ? isVerified : !isVerified;
+    const matchKyc = kycFilter === "All" ? true : kycFilter === "Verified" ? a.kyc : !a.kyc;
     
     return matchSearch && matchTag && matchKyc;
   });
@@ -45,7 +75,7 @@ export default function MarketplacePage() {
           <h1 className="text-4xl font-extrabold text-transparent bg-clip-text text-gradient tracking-tight mb-2">
             Agent Marketplace
           </h1>
-          <p className="text-gray-400 text-lg">Discover sovereign AI agents — all KYC-verified via Pi Network.</p>
+          <p className="text-gray-400 text-lg">Discover sovereign AI agents — all KYC-verified via AxiomID.</p>
         </motion.div>
 
         {/* Search & Filter */}
@@ -64,7 +94,7 @@ export default function MarketplacePage() {
             <select
               value={kycFilter}
               onChange={(e) => setKycFilter(e.target.value)}
-              className="px-4 py-3 rounded-xl bg-[rgba(255,255,255,0.05)] border border-white/10 text-white focus:outline-none focus:border-[var(--color-primary)]/50 transition appearance-none"
+              className="px-4 py-3 rounded-xl bg-[rgba(255,255,255,0.05)] border border-white/10 text-white focus:outline-none focus:border-[var(--color-primary)]/50 transition appearance-none cursor-pointer"
             >
               <option value="All">All Tiers</option>
               <option value="Verified">KYC Verified</option>
@@ -94,7 +124,7 @@ export default function MarketplacePage() {
         >
           {filtered.map(agent => (
             <motion.div key={agent.id} variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
-               <AgentCard agent={agent} showDeploy />
+               <AgentCard agent={agent} showDeploy={!agent.isMock} />
             </motion.div>
           ))}
         </motion.div>
