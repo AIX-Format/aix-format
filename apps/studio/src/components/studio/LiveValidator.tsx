@@ -30,16 +30,18 @@ export function LiveValidator() {
       const content = await file.text();
       let parsed: Record<string, unknown> | null = null;
       if (file.name.endsWith(".json") || content.trim().startsWith("{")) {
-        parsed = JSON.parse(content);
+        parsed = JSON.parse(content) as Record<string, unknown>;
       } else {
         const [{ load }] = await Promise.all([import("js-yaml")]);
-        parsed = load(content);
+        parsed = load(content) as Record<string, unknown>;
       }
 
       const computedHash = await sha256Hex(content.replace(/\r\n/g, "\n"));
       setHash(computedHash);
 
-      const hasSig = Boolean(parsed?.security?.signature?.value && parsed?.security?.signature?.algorithm);
+      // We don't have deep type info, so cast to a structure to check fields safely
+      const parsedAny = parsed as any;
+      const hasSig = Boolean(parsedAny?.security?.signature?.value && parsedAny?.security?.signature?.algorithm);
       setSigState(hasSig ? "valid-structure" : "missing");
     } catch (e: unknown) {
       setError(`Invalid AIX payload: ${e instanceof Error ? e.message : String(e)}`);
