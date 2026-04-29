@@ -1,12 +1,13 @@
 const DEFAULT_SCHEMA_VERSION = 'aix/v1';
 
 function generateDID(name, url) {
-  const slug = (name || 'agent').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  const slug = (name || 'agent').toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
   return `did:axiom:axiomid.app:${slug}`;
 }
 
 export function fromA2A(agentCardJson = {}) {
   const capabilities = agentCardJson.capabilities || {};
+  const auth = agentCardJson.authentication || agentCardJson.authenticationSchemes || [];
   
   return {
     schemaVersion: DEFAULT_SCHEMA_VERSION,
@@ -50,7 +51,7 @@ export function fromA2A(agentCardJson = {}) {
       risk_level: 'unknown'
     },
     security: {
-      authentication: agentCardJson.authentication || [],
+      authentication: auth,
       checksum: { algorithm: 'sha256', value: 'pending_signature' },
       signature: { algorithm: 'ed25519', value: 'pending_signature' }
     },
@@ -80,10 +81,12 @@ export function toA2A(aixManifest = {}) {
       stateTransitionHistory: aixManifest.apis?.state_history ?? false,
       ...aixManifest.apis?.raw_capabilities
     },
-    authenticationSchemes: [{
-      scheme: 'bearer',
-      description: 'Ed25519 signed JWT'
-    }],
+    authenticationSchemes: aixManifest.security?.authentication?.length > 0 
+      ? aixManifest.security.authentication 
+      : [{
+          scheme: 'bearer',
+          description: 'Ed25519 signed JWT'
+        }],
     tags: Array.isArray(aixManifest.meta?.tags) ? aixManifest.meta.tags : [],
     'x-aix-metadata': {
       identity_layer: aixManifest.identity_layer || {},

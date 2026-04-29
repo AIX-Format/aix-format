@@ -5,6 +5,11 @@ import { UploadCloud, ShieldCheck, ShieldX, CheckCircle2, AlertTriangle } from "
 import { parseYamlSafe } from "@/lib/utils";
 
 async function sha256Hex(input: string): Promise<string> {
+  const msgUint8 = new TextEncoder().encode(input);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
 
 const REQUIRED_AIX_KEYS = ["meta", "persona", "security", "identity_layer"] as const;
 
