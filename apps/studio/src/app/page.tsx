@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { SetupWizard } from "@/components/studio/SetupWizard";
 import { AgentCard } from "@/components/studio/AgentCard";
@@ -30,12 +31,12 @@ export default function Home() {
                 >
                   Deploy New Agent
                 </a>
-                <a
+                <Link
+                  href="/spec"
                   className="rounded-full border border-solid border-[var(--color-glass-border)] transition-colors flex items-center justify-center bg-[rgba(20,20,20,0.5)] hover:bg-[rgba(35,35,35,0.82)] text-white text-sm sm:text-base h-12 px-8 sm:px-6 backdrop-blur-xl"
-                  href="https://axiomid.app"
                 >
                   Read AIX Spec
-                </a>
+                </Link>
               </div>
             </div>
 
@@ -68,9 +69,9 @@ export default function Home() {
         </main>
 
         <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center text-gray-500 text-sm">
-          <a className="flex items-center gap-2 hover:text-white transition-colors" href="#">
+          <Link href="/spec" className="flex items-center gap-2 hover:text-white transition-colors">
             AIX Format Spec
-          </a>
+          </Link>
           <a className="flex items-center gap-2 hover:text-white transition-colors" href="https://axiomid.app">
             Pi Network Integration
           </a>
