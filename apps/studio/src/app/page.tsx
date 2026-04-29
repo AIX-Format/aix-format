@@ -26,7 +26,7 @@ export default function Home() {
                   Deploy New Agent
                 </a>
                 <a
-                  className="rounded-full border border-solid border-[var(--color-border)] transition-colors flex items-center justify-center bg-[rgba(20,20,30,0.5)] hover:bg-[rgba(30,30,40,0.8)] text-white text-sm sm:text-base h-12 px-8 sm:px-6 backdrop-blur-sm"
+                  className="rounded-full border border-solid border-[var(--color-glass-border)] transition-colors flex items-center justify-center bg-[rgba(20,20,30,0.5)] hover:bg-[rgba(30,30,40,0.8)] text-white text-sm sm:text-base h-12 px-8 sm:px-6 backdrop-blur-sm"
                   href="#"
                 >
                   Read AIX Spec
