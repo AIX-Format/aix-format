@@ -1,6 +1,6 @@
 /**
  * AIX Error Handler - Production-Grade Retry & Circuit Breaker
- * Created by Mohamed H Abdelaziz - AMRIKYY AI Solutions 2025
+ * Created by Mohamed H Abdelaziz - AMRIKYY AI Solutions 2026
  * 
  * Implements production-grade error handling including:
  * - Retry logic with exponential/linear/constant backoff
@@ -12,7 +12,7 @@
  * - AWS Well-Architected Framework: Exponential backoff with jitter
  * - Google SRE Book: Error budgets and graceful degradation
  * 
- * Copyright © 2025 Mohamed H Abdelaziz / AMRIKYY AI Solutions
+ * Copyright © 2026 Mohamed H Abdelaziz / AMRIKYY AI Solutions
  * Licensed under MIT License - See LICENSE.md
  */
 

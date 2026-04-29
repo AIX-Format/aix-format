@@ -1,6 +1,9 @@
-# OpenMemory Integration
+# OpenMemory & Sovereign AI Integration
 
-This document establishes principles for intelligent memory management during development. The memory layer enhances your coding context by retrieving relevant past knowledge and storing significant discoveries.
+**CRITICAL**: All engineering work must align with the [AXIOM_AGENTS.md](file:///Users/cryptojoker710/Desktop/aix-format/AXIOM_AGENTS.md) manifest.
+
+This document establishes principles for intelligent memory management during development.
+ The memory layer enhances your coding context by retrieving relevant past knowledge and storing significant discoveries.
 
 ## User Identification
 

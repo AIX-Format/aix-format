@@ -2,7 +2,7 @@
 
 **Document Version:** 1.0  
 **Created by:** Mohamed H Abdelaziz  
-**Organization:** AMRIKYY AI Solutions - 2025  
+**Organization:** AMRIKYY AI Solutions - 2026  
 **Contact:** amrikyy@gmail.com  
 **Academic Email:** abdela1@students.kennesaw.edu
 

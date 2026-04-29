@@ -66,7 +66,7 @@ test('aix-validate CLI', async (t) => {
       version: '2.0.0',
       id: 'did:axiom:axiomid.app:12345678',
       name: 'Test Agent',
-      created: '2025-01-01T00:00:00Z',
+      created: '2026-01-01T00:00:00Z',
       author: 'Tester'
     },
     persona: {
@@ -76,7 +76,7 @@ test('aix-validate CLI', async (t) => {
     identity_layer: {
       id: 'did:axiom:axiomid.app:12345678',
       authority: 'axiomid.app',
-      issuedAt: '2025-01-01T00:00:00Z'
+      issuedAt: '2026-01-01T00:00:00Z'
     },
     security: {
       checksum: {
@@ -121,7 +121,7 @@ test('aix-validate CLI', async (t) => {
         version: '1.0.0', // Fails strict KYC version check
         id: 'did:axiom:axiomid.app:12345678',
         name: 'Test Agent',
-        created: '2025-01-01T00:00:00Z',
+        created: '2026-01-01T00:00:00Z',
         author: 'Tester'
       },
       persona: {
@@ -131,7 +131,7 @@ test('aix-validate CLI', async (t) => {
       identity_layer: {
         id: 'did:axiom:axiomid.app:12345678',
         authority: 'axiomid.app',
-        issuedAt: '2025-01-01T00:00:00Z'
+        issuedAt: '2026-01-01T00:00:00Z'
       },
       security: {
         checksum: {

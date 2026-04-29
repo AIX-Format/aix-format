@@ -3,7 +3,7 @@
   "metadata": {
     "name": "DataHunter-v1",
     "id": "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000",
-    "created_at": "2025-11-18T12:00:00Z",
+    "created_at": "2026-11-18T12:00:00Z",
     "author": "MoeAbdelaziz",
     "description": "AI agent specialized in extracting and analyzing complex web data",
     "tags": ["data-analysis", "web-scraping", "research"],
@@ -29,7 +29,7 @@
       {
         "type": "DataAnalysisCertification",
         "issuer": "Axiom Academy",
-        "issuance_date": "2025-01-15T10:00:00Z",
+        "issuance_date": "2026-01-15T10:00:00Z",
         "expiration_date": "2026-01-15T10:00:00Z",
         "credential_subject": {
           "id": "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000",
@@ -150,7 +150,7 @@
       "value": "MEUCIQDx...",
       "public_key": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA...\n-----END PUBLIC KEY-----",
       "signer": "MoeAbdelaziz",
-      "timestamp": "2025-11-18T12:00:00Z"
+      "timestamp": "2026-11-18T12:00:00Z"
     },
     "capabilities": {
       "allowed_operations": [

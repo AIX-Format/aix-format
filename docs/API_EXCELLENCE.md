@@ -927,7 +927,7 @@ apis:
 HTTP/1.1 200 OK
 Cache-Control: public, max-age=3600, s-maxage=7200
 ETag: "33a64df551425fcc55e4d42a148795d9f25f89d4"
-Last-Modified: Tue, 15 Jan 2025 10:30:00 GMT
+Last-Modified: Tue, 15 Jan 2026 10:30:00 GMT
 ```
 
 ### 5.2 Client-Side Caching

@@ -3,8 +3,8 @@ meta:
   id: did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440003
   name: Academic Research Assistant
   description: AI agent for academic research, literature review, and citation management
-  created: '2025-01-12T12:00:00Z'
-  updated: '2025-01-12T17:30:00Z'
+  created: '2026-01-12T12:00:00Z'
+  updated: '2026-01-12T17:30:00Z'
   author: Mohamed H Abdelaziz
   tags:
     - research
@@ -352,7 +352,7 @@ security:
       [Public key would be inserted here in production]
       -----END PUBLIC KEY-----
     signer: amrikyy@gmail.com
-    timestamp: '2025-01-12T17:30:00Z'
+    timestamp: '2026-01-12T17:30:00Z'
   encryption:
     encrypted: false
     algorithm: AES-256-GCM

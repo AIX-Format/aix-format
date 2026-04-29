@@ -1,12 +1,12 @@
 /**
  * AIX Error Handler Test Suite
- * Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2025
+ * Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2026
  *
  * Test suite for the AIX Error Handler, Circuit Breaker, and Token Bucket.
  *
  * Usage: node --test tests/error_handler.test.js
  *
- * Copyright © 2025 Mohamed Abdelaziz / AMRIKYY AI Solutions
+ * Copyright © 2026 Mohamed Abdelaziz / AMRIKYY AI Solutions
  * Licensed under MIT License - See LICENSE.md
  */
 

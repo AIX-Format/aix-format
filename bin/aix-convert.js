@@ -2,14 +2,14 @@
 
 /**
  * AIX Format Conversion Tool
- * Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2025
+ * Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2026
  * 
  * Convert AIX files between YAML, JSON, and TOML formats.
  * Automatically recalculates checksums after conversion.
  * 
  * Usage: aix-convert <input> <output> --format <yaml|json|toml>
  * 
- * Copyright © 2025 Mohamed Abdelaziz / AMRIKYY AI Solutions
+ * Copyright © 2026 Mohamed Abdelaziz / AMRIKYY AI Solutions
  * Licensed under MIT License - See LICENSE.md
  */
 

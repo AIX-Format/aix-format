@@ -2,14 +2,14 @@
 
 /**
  * AIX Validation Tool
- * Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2025
+ * Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2026
  * 
  * Command-line tool for validating AIX files.
  * Checks structure, format, and security (checksums and signatures).
  * 
  * Usage: aix-validate <file.aix> [--verbose] [--security] [--strict-kyc]
  * 
- * Copyright © 2025 Mohamed Abdelaziz / AMRIKYY AI Solutions
+ * Copyright © 2026 Mohamed Abdelaziz / AMRIKYY AI Solutions
  * Licensed under MIT License - See LICENSE.md
  */
 

@@ -1,13 +1,13 @@
 /**
  * AIX Parser Test Suite
- * Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2025
+ * Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2026
  * 
  * Test suite for the AIX parser implementation.
  * Tests format detection, validation, and security features.
  * 
  * Usage: node --test tests/parser.test.js
  * 
- * Copyright © 2025 Mohamed Abdelaziz / AMRIKYY AI Solutions
+ * Copyright © 2026 Mohamed Abdelaziz / AMRIKYY AI Solutions
  * Licensed under MIT License - See LICENSE.md
  */
 
@@ -134,7 +134,7 @@ describe('AIXParser', () => {
           version: '1.0',
           id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
           name: 'Test',
-          created: '2025-01-12T10:30:00Z',
+          created: '2026-01-12T10:30:00Z',
           author: 'Test Author'
         },
         persona: {
@@ -150,7 +150,7 @@ describe('AIXParser', () => {
         identity_layer: {
           id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
           authority: 'axiomid.app',
-          issuedAt: '2025-01-12T10:30:00Z'
+          issuedAt: '2026-01-12T10:30:00Z'
         }
       };
       parser.validateStructure(data);
@@ -165,7 +165,7 @@ describe('AIXParser', () => {
         version: '1.0',
         id: 'invalid-uuid',
         name: 'Test',
-        created: '2025-01-12T10:30:00Z',
+        created: '2026-01-12T10:30:00Z',
         author: 'Test'
       };
       parser.validateMeta(meta);
@@ -178,7 +178,7 @@ describe('AIXParser', () => {
         version: '1.0',
         id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
         name: 'Test',
-        created: '2025-01-12T10:30:00Z',
+        created: '2026-01-12T10:30:00Z',
         author: 'Test'
       };
       parser.validateMeta(meta);
@@ -204,7 +204,7 @@ describe('AIXParser', () => {
         version: '1.0',
         id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
         name: 'Test',
-        created: '2025-01-12T10:30:00Z',
+        created: '2026-01-12T10:30:00Z',
         author: 'Test'
       };
       parser.validateMeta(meta);
@@ -217,7 +217,7 @@ describe('AIXParser', () => {
         version: 'invalid',
         id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
         name: 'Test',
-        created: '2025-01-12T10:30:00Z',
+        created: '2026-01-12T10:30:00Z',
         author: 'Test'
       };
       parser.validateMeta(meta);
@@ -233,7 +233,7 @@ describe('AIXParser', () => {
           version,
           id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
           name: 'Test',
-          created: '2025-01-12T10:30:00Z',
+          created: '2026-01-12T10:30:00Z',
           author: 'Test'
         };
         parser.errors = [];
@@ -422,7 +422,7 @@ describe('AIXParser', () => {
           version: '1.0',
           id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
           name: 'Test Agent',
-          created: '2025-01-12T10:30:00Z',
+          created: '2026-01-12T10:30:00Z',
           author: 'Test'
         },
         persona: {
@@ -449,7 +449,7 @@ describe('AIXParser', () => {
     it('should get agent capabilities', () => {
       const data = {
         meta: { version: '1.0', id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
-                name: 'Test', created: '2025-01-12T10:30:00Z', author: 'Test' },
+                name: 'Test', created: '2026-01-12T10:30:00Z', author: 'Test' },
         persona: { role: 'test', instructions: 'test' },
         skills: [
           { name: 'skill1', description: 'Skill 1', enabled: true },
@@ -472,7 +472,7 @@ describe('AIXParser', () => {
     it('should check authorization', () => {
       const data = {
         meta: { version: '1.0', id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
-                name: 'Test', created: '2025-01-12T10:30:00Z', author: 'Test' },
+                name: 'Test', created: '2026-01-12T10:30:00Z', author: 'Test' },
         persona: { role: 'test', instructions: 'test' },
         security: {
           checksum: { algorithm: 'sha256', value: 'abc123' },
@@ -490,7 +490,7 @@ describe('AIXParser', () => {
     it('should return formatted string', () => {
       const data = {
         meta: { version: '1.0', id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
-                name: 'Test Agent', created: '2025-01-12T10:30:00Z', author: 'Test' },
+                name: 'Test Agent', created: '2026-01-12T10:30:00Z', author: 'Test' },
         persona: { role: 'test', instructions: 'test' },
         security: { checksum: { algorithm: 'sha256', value: 'abc123' } }
       };
