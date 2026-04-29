@@ -16,7 +16,7 @@ export function MetaForm() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <label htmlFor="agent-name">Agent Name</label>
-          <input
+          <input 
             id="agent-name"
             placeholder="e.g. Nexus Prime"
             className="input"
@@ -26,7 +26,7 @@ export function MetaForm() {
         </div>
         <div className="space-y-2">
           <label htmlFor="agent-version">Version</label>
-          <input
+          <input 
             id="agent-version"
             placeholder="1.0.0"
             className="input"
@@ -38,7 +38,7 @@ export function MetaForm() {
 
       <div className="space-y-2">
         <label htmlFor="agent-author">Author (DID or Username)</label>
-        <input
+        <input 
           id="agent-author"
           placeholder="did:web:axiom.studio"
           className="input"
@@ -49,7 +49,7 @@ export function MetaForm() {
 
       <div className="space-y-2">
         <label htmlFor="agent-desc">Description</label>
-        <textarea
+        <textarea 
           id="agent-desc"
           placeholder="What does this agent do?"
           className="input min-h-[100px] resize-none py-3"
@@ -60,7 +60,7 @@ export function MetaForm() {
 
       <div className="space-y-2">
         <label htmlFor="agent-license">License</label>
-        <select
+        <select 
           id="agent-license"
           className="input bg-[var(--color-surface)]"
           value={formData.license}

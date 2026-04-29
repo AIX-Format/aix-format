@@ -234,7 +234,7 @@ test('numeric spec_version produces INVALID_TYPE error', () => {
   assert(hasError(errors, 'INVALID_TYPE'), 'Expected INVALID_TYPE for numeric spec_version');
 });
 
-test('abomSummary returns correct counts', async () => {
+test("abomSummary returns correct counts", async () => {
   const parser = makeParser();
   const agent = {
     data: {
