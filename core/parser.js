@@ -137,21 +137,52 @@ export class AIXParser {
    * Parse TOML content (simplified implementation)
    */
   parseTOML(content) {
-    const yamlCompatible = content
-      .split('\n')
-      .map((line) => {
-        const trimmed = line.trim();
-        if (trimmed === '' || trimmed.startsWith('#')) return line;
-        if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
-          return `${trimmed.slice(1, -1)}:`;
-        }
-        const eq = line.indexOf('=');
-        if (eq === -1) return line;
-        return `${line.slice(0, eq)}:${line.slice(eq + 1)}`;
-      })
-      .join('\n');
+    const out = {};
+    let current = out;
 
-    return yaml.load(yamlCompatible, { schema: yaml.JSON_SCHEMA });
+    for (const rawLine of content.split('\n')) {
+      const line = rawLine.trim();
+      if (!line || line.startsWith('#')) continue;
+
+      if (line.startsWith('[') && line.endsWith(']')) {
+        const sectionPath = line.slice(1, -1).split('.').map((s) => s.trim()).filter(Boolean);
+        current = out;
+        for (const section of sectionPath) {
+          if (!current[section] || typeof current[section] !== 'object' || Array.isArray(current[section])) {
+            current[section] = {};
+          }
+          current = current[section];
+        }
+        continue;
+      }
+
+      const eq = line.indexOf('=');
+      if (eq === -1) continue;
+      const key = line.slice(0, eq).trim();
+      const rawValue = line.slice(eq + 1).trim();
+
+      let parsedValue;
+      if ((rawValue.startsWith('"') && rawValue.endsWith('"')) || (rawValue.startsWith("'") && rawValue.endsWith("'"))) {
+        parsedValue = rawValue.slice(1, -1);
+      } else if (rawValue === 'true' || rawValue === 'false') {
+        parsedValue = rawValue === 'true';
+      } else if (rawValue.startsWith('[') && rawValue.endsWith(']')) {
+        parsedValue = rawValue.slice(1, -1).split(',').map((item) => item.trim()).filter((v) => v.length > 0).map((item) => {
+          if ((item.startsWith('"') && item.endsWith('"')) || (item.startsWith("'") && item.endsWith("'"))) return item.slice(1, -1);
+          if (item === 'true' || item === 'false') return item === 'true';
+          if (!Number.isNaN(Number(item))) return Number(item);
+          return item;
+        });
+      } else if (!Number.isNaN(Number(rawValue))) {
+        parsedValue = Number(rawValue);
+      } else {
+        parsedValue = rawValue;
+      }
+
+      current[key] = parsedValue;
+    }
+
+    return out;
   }
 
 

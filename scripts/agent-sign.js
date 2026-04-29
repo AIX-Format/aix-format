@@ -1,55 +1,54 @@
 #!/usr/bin/env node
 import fs from 'fs';
 import path from 'path';
-import crypto from 'crypto';
 import yaml from 'js-yaml';
-import { canonicalizeForSigning } from '../core/canonicalize.js';
+import { signManifest } from '../core/src/security/signature.js';
 
 function detectFormat(content, filePath) {
   const ext = path.extname(filePath).toLowerCase();
   if (ext === '.json') return 'json';
   if (ext === '.yaml' || ext === '.yml') return 'yaml';
-  const trimmed = content.trim();
-  return trimmed.startsWith('{') ? 'json' : 'yaml';
+  return content.trim().startsWith('{') ? 'json' : 'yaml';
 }
 
 function parseAix(content, format) {
   return format === 'json' ? JSON.parse(content) : yaml.load(content, { schema: yaml.JSON_SCHEMA });
 }
 
-function signAgent(filePath) {
-  const raw = fs.readFileSync(filePath, 'utf8');
-  const format = detectFormat(raw, filePath);
-  const parsed = parseAix(raw, format);
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new Error('Invalid AIX payload: expected object root');
-  }
+const args = process.argv.slice(2);
+const inputPath = args[0];
+const keyArgIndex = args.findIndex((a) => a === '--private-key');
+const kidArgIndex = args.findIndex((a) => a === '--kid');
+const privateKeyPath = keyArgIndex !== -1 ? args[keyArgIndex + 1] : null;
+const kid = kidArgIndex !== -1 ? args[kidArgIndex + 1] : 'local-ed25519';
 
-  const next = structuredClone(parsed);
-  next.security = (next.security && typeof next.security === 'object' && !Array.isArray(next.security)) ? next.security : {};
-
-  const { bytes } = canonicalizeForSigning(next);
-  const digest = crypto.createHash('sha256').update(bytes).digest('hex');
-
-  delete next.security.signature;
-  next.security.checksum = { algorithm: 'sha256', value: digest };
-
-  const output = format === 'json'
-    ? `${JSON.stringify(next, null, 2)}\n`
-    : yaml.dump(next, { sortKeys: true, lineWidth: 120, noRefs: true });
-
-  fs.writeFileSync(filePath, output, 'utf8');
-  return digest;
-}
-
-const [, , inputPath] = process.argv;
-if (!inputPath) {
-  console.error('Usage: node scripts/agent-sign.js <file.aix|file.json|file.yaml|file.yml>');
+if (!inputPath || !privateKeyPath) {
+  console.error('Usage: node scripts/agent-sign.js <manifest.aix> --private-key <ed25519-private.pem> [--kid <key-id>]');
   process.exit(1);
 }
 
 try {
-  console.log(`✅ checksum updated: ${signAgent(path.resolve(inputPath))}`);
+  const resolvedInput = path.resolve(inputPath);
+  const raw = fs.readFileSync(resolvedInput, 'utf8');
+  const format = detectFormat(raw, resolvedInput);
+  const manifest = parseAix(raw, format);
+  manifest.security = manifest.security && typeof manifest.security === 'object' ? manifest.security : {};
+
+  const privateKeyPem = fs.readFileSync(path.resolve(privateKeyPath), 'utf8');
+  const result = signManifest(manifest, privateKeyPem, kid);
+
+  manifest.security.checksum = { algorithm: 'sha256', value: result.checksum };
+  manifest.security.signature = result.signature;
+
+  const output = format === 'json'
+    ? `${JSON.stringify(manifest, null, 2)}\n`
+    : yaml.dump(manifest, { sortKeys: true, noRefs: true, lineWidth: 120 });
+
+  fs.writeFileSync(resolvedInput, output, 'utf8');
+  console.log(`✅ signed: ${resolvedInput}`);
+  console.log(`checksum=${result.checksum}`);
+  console.log(`signature_b64=${result.signature.value}`);
+  console.log(`canonical_bytes=${Buffer.byteLength(result.canonicalString, 'utf8')}`);
 } catch (error) {
   console.error(`❌ signing failed: ${error.message}`);
   process.exit(1);
