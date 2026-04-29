@@ -1,3 +1,4 @@
+"use client";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useRef, type MouseEvent } from "react";
 import { Shield, Languages, Cpu, Hash, BadgeCheck, Clock, AlertTriangle } from "lucide-react";

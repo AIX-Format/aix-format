@@ -1,3 +1,4 @@
+"use client";
 import { motion } from "framer-motion";
 import type { VoiceState } from "@/lib/aix/schema";
 import { cn } from "@/lib/utils";

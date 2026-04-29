@@ -1,7 +1,7 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { SetupWizard } from "@/components/studio/SetupWizard";
 import { AgentCard } from "@/components/studio/AgentCard";
-import { VoiceOrb } from "@/components/studio/VoiceOrb";
+import { VoiceOrb } from "@/components/aix/VoiceOrb";
 import { AgenticKycSetup } from "@/components/studio/AgenticKycSetup";
 import { getMockAgents } from "@/lib/aix/mock-data";
 

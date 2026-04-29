@@ -17,7 +17,7 @@ import {
   CircuitBreaker,
   CircuitBreakerError,
   MaxRetriesExceededError,
-  TimeoutError
+  TimeoutError, TokenBucket
 } from '../core/error_handler.js';
 
 describe('CircuitBreaker', () => {
@@ -89,7 +89,6 @@ describe('CircuitBreaker', () => {
   });
 });
 
- jules-8053208464884975193-dbc860dd
 
 describe('TokenBucket', () => {
   it('should initialize with full capacity', () => {
@@ -131,7 +130,6 @@ describe('TokenBucket', () => {
   });
 });
 
- main
 describe('AIXErrorHandler Integration', () => {
   it('should execute operation successfully', async () => {
     const handler = new AIXErrorHandler();

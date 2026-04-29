@@ -152,7 +152,7 @@ export function SetupWizard() {
       </div>
 
       <KycSignatureModal
-        isOpen={isModalOpen}
+        open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSign={handleSign}
         isSigning={isSigning}

@@ -100,6 +100,9 @@ This project is a high-bandwidth synthesis of human vision and autonomous AI eng
 
 ## 📈 Recent Evolution (v0.3.0 Stable)
 
+- **YAML Parser Engine Migration**: Fully migrated away from custom parsers to robust, zero-dependency verified integrations for absolute structural compliance.
+- **Cyber-Physical Memory Alignment**: Strictly enforced agent schema classifications (Episodic, Semantic, Procedural) mapping towards future VLA (Vision-Language-Action) open-robotics workloads (e.g. `π0.7`).
+
 - **TokenBucket Rate Limiting**: Integrated production-grade backpressure handling into `AIXErrorHandler`.
 - **AxiomID Cryptography**: Finalized Ed25519 signature validation for all incoming agent manifests.
 - **Next.js App Router Migration**: Achieved 100% migration to App Router for optimized server-side rendering.

@@ -11,6 +11,7 @@
  * Licensed under MIT License - See LICENSE.md
  */
 
+import yaml from "yaml";
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import { AIXParser, AIXAgent } from '../core/parser.js';

@@ -500,11 +500,6 @@ memory:
     enabled: boolean
     storage: string
     max_workflows: integer
-    
-  persistence:
-    enabled: boolean
-    backend: string      # "file", "database", "redis"
-    config: object       # Backend-specific configuration
 ```
 
 **Validation Rules:**
@@ -534,14 +529,6 @@ memory:
     enabled: true
     storage: "file"
     max_workflows: 50
-    
-  persistence:
-    enabled: true
-    backend: "file"
-    config:
-      directory: "./agent_memory"
-      format: "json"
-      compress: true
 ```
 
 ---

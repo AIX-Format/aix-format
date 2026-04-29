@@ -1,3 +1,4 @@
+"use client";
 import { motion } from "framer-motion";
 import { useMemo } from "react";
 import type { LoadedAgent } from "@/lib/aix/schema";

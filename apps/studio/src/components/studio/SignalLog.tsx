@@ -1,3 +1,4 @@
+"use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Info, CheckCircle2, AlertTriangle, XCircle, FileSignature, ChevronRight, Trash2 } from "lucide-react";

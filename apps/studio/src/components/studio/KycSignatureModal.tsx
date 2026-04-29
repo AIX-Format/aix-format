@@ -10,6 +10,9 @@ import nacl from "tweetnacl";
 import naclUtil from "tweetnacl-util";
 
 interface KycSignatureModalProps {
+  onSign?: (result: any) => Promise<void>;
+  isSigning?: boolean;
+  agentName?: string;
   open: boolean;
   onClose: () => void;
 }
@@ -208,7 +211,7 @@ export function KycSignatureModal({ open, onClose }: KycSignatureModalProps) {
                    </h2>
                    <p className="text-sm text-[#94a3b8] leading-relaxed max-w-xs">
                      {kycStatus === "verified" 
-                       ? `Authenticated with DID: ${did.substring(0, 20)}...`
+                       ? `Authenticated with DID: ${did?.substring(0, 20)}...`
                        : "Quantum Topology Architecture for immutable identity binding."}
                    </p>
                 </div>

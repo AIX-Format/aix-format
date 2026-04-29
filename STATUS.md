@@ -22,12 +22,12 @@
 ## ✅ What's Been Built (37 Hours)
 
 ### Latest Weekly Audit
+- ✅ **YAML Parser Enhancements**: Migrated core parsing engine to use `yaml` directly for full compliance with complex structures (multiline strings, array of objects), fixing validation issues in examples.
 - ✅ **Agentic KYC & Live Voice Focus**: Added roadmap strategies for zero-code KYC setup and Live Voice capabilities for conversational AI agents, prioritizing beginner-friendly UX.
 - ✅ **Deep Architecture Audit**: Implemented memory classification check, VLA integration tests, and architecture updates targeting recent breakthroughs in Agentic Vision and Steerability.
 - ✅ **Codebase Execution**: Core parser and schemas are fully indexed and compliant with VLA and AxiomID requirements.
 - ✅ **AxiomID Integration**: Enforced `axiomid.app` as the root authority for Agent DIDs (`did:axiom:axiomid.app:<id>`) with cryptographic verification via Ed25519 and secp256k1 signatures.
 - ✅ **Cyber-Physical Alignment**: Integrated VLA payload requirements supporting `openpi`, `π0.7`, and generic models.
-
 ### Day 1 (October 13, 2025)
 
 **Hours 1-12: Core Foundation**

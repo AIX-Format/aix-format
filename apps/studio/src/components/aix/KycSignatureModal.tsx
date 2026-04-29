@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ShieldCheck, Fingerprint, KeyRound, Check, Loader2 } from "lucide-react";
@@ -7,6 +8,9 @@ import { sha256Hex, shortHash } from "@/lib/aix/hash";
 import { cn } from "@/lib/utils";
 
 interface KycSignatureModalProps {
+  onSign?: (result: any) => void;
+  isSigning?: boolean;
+  agentName?: string;
   open: boolean;
   onClose: () => void;
 }
@@ -74,7 +78,7 @@ export function KycSignatureModal({ open, onClose }: KycSignatureModalProps) {
             exit={{ scale: 0.95, y: 12, opacity: 0 }}
             transition={{ type: "spring", stiffness: 240, damping: 24 }}
             className="glass-strong relative w-full max-w-lg overflow-hidden rounded-3xl"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
           >
             {/* progress bar */}
             <div className="h-0.5 bg-white/5">

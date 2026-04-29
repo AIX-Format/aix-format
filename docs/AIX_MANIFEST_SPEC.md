@@ -47,7 +47,7 @@ The `.aix` file contains **only agent content**, with **NO security metadata**:
 aix_version: "1.1"
 
 meta:
-  id: "550e8400-e29b-41d4-a716-446655440001"
+  id: "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440001"
   name: "ResearchBot"
   version: "1.0.0"
   created: "2026-04-24T10:30:00Z"
