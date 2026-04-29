@@ -4,6 +4,8 @@ import Image from "next/image";
 import { AgentCard } from "@/components/studio/AgentCard";
 import { VoiceOrb } from "@/components/studio/VoiceOrb";
 import { AgenticKycSetup } from "@/components/studio/AgenticKycSetup";
+import { LiveValidator } from "@/components/studio/LiveValidator";
+import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 
 export default function Home() {
   return (
@@ -70,10 +72,13 @@ export default function Home() {
                 <h2 className="text-2xl font-bold text-white mb-2">Quick Setup</h2>
                 <SetupWizard />
               </div>
+              <LiveValidator />
             </div>
           </div>
         </main>
 
+
+      </div>
 
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center text-gray-500 text-sm">
         <a className="flex items-center gap-2 hover:text-white transition-colors" href="#">
@@ -86,6 +91,7 @@ export default function Home() {
           AMRIKYY AI Solutions
         </a>
       </footer>
+      <SovereignStatusBar />
     </div>
   );
 }
