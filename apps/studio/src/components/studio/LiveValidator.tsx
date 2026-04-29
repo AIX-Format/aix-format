@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { UploadCloud, ShieldCheck, ShieldX } from "lucide-react";
+import { UploadCloud, ShieldCheck, ShieldX, CheckCircle2, AlertTriangle } from "lucide-react";
 
 async function sha256Hex(input: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -13,75 +13,122 @@ async function sha256Hex(input: string): Promise<string> {
 }
 
 /**
- * Lightweight YAML parser sufficient for .aix manifests.
- * Handles nested keys (dot-notation depth-2), lists, and scalars.
- * Replaces dynamic `import('js-yaml')` to avoid missing @types/js-yaml
- * TypeScript error on Vercel builds.
+ * Lightweight YAML parser for .aix manifests.
+ * FIX: properly handles arrays (sequences) so `skills`, `permissions`, and
+ * `tools` fields are parsed as real arrays instead of being dropped or stored
+ * under a synthetic `_items` key.
+ *
+ * Supports:
+ *   - Nested mappings (unlimited depth via indentation stack)
+ *   - Block sequences (- item syntax) stored as string[]
+ *   - Scalar values with single/double quote stripping
+ *   - Inline comments (#)
  */
 function parseYamlLight(yaml: string): Record<string, unknown> {
-  const result: Record<string, unknown> = {};
-  const lines = yaml.split("\n");
-  const stack: Array<{ indent: number; obj: Record<string, unknown> }> = [
-    { indent: -1, obj: result },
+  const root: Record<string, unknown> = {};
+  const lines = yaml.split(/\r?\n/);
+
+  // Stack entries: { indent, obj } where obj is the current mapping context.
+  // We also track the last key written so we can attach array items to it.
+  const stack: Array<{ indent: number; obj: Record<string, unknown>; lastKey: string | null }> = [
+    { indent: -1, obj: root, lastKey: null },
   ];
 
   for (const raw of lines) {
-    const line = raw.replace(/\r$/, "");
-    if (!line.trim() || line.trim().startsWith("#")) continue;
+    // Strip inline comments & trailing whitespace
+    const line = raw.replace(/#.*$/, "").trimEnd();
+    if (!line.trim()) continue;
 
     const indent = line.search(/\S/);
     const content = line.trim();
 
-    // Pop stack to current indent level
+    // Pop stack down to the correct parent indent level
     while (stack.length > 1 && stack[stack.length - 1].indent >= indent) {
       stack.pop();
     }
 
-    const parent = stack[stack.length - 1].obj;
+    const frame = stack[stack.length - 1];
+    const parent = frame.obj;
 
-    if (content.includes(":")) {
+    if (content.startsWith("- ")) {
+      // ── Sequence item ────────────────────────────────────────────────────
+      // Attach to the last key defined at the parent level
+      const itemValue = content.slice(2).trim().replace(/^['"]|['"]$/g, "");
+      if (frame.lastKey) {
+        const existing = parent[frame.lastKey];
+        if (Array.isArray(existing)) {
+          (existing as string[]).push(itemValue);
+        } else {
+          // First item — convert to array
+          parent[frame.lastKey] = [itemValue];
+        }
+      }
+    } else if (content.includes(":")) {
+      // ── Mapping key ──────────────────────────────────────────────────────
       const colonIdx = content.indexOf(":");
-      const key = content.slice(0, colonIdx).trim().replace(/^- /, "");
+      const key = content.slice(0, colonIdx).trim();
       const val = content.slice(colonIdx + 1).trim();
 
       if (val === "" || val === "|") {
-        // Nested object
+        // Nested mapping — push new context
         const child: Record<string, unknown> = {};
         parent[key] = child;
-        stack.push({ indent, obj: child });
+        frame.lastKey = key;
+        stack.push({ indent, obj: child, lastKey: null });
+      } else if (val === "[]") {
+        // Explicit empty array
+        parent[key] = [];
+        frame.lastKey = key;
       } else {
-        // Scalar value — strip YAML quotes
+        // Scalar value
         parent[key] = val.replace(/^['"]|['"]$/g, "");
+        frame.lastKey = key;
       }
-    } else if (content.startsWith("- ")) {
-      // List item (store as string for now)
-      const listKey = "_items";
-      if (!Array.isArray(parent[listKey])) parent[listKey] = [];
-      (parent[listKey] as string[]).push(content.slice(2).trim());
     }
   }
 
-  return result;
+  return root;
+}
+
+// Required top-level AIX fields for structural validation
+const REQUIRED_FIELDS = ["meta", "persona", "security"] as const;
+
+type ValidationResult = {
+  valid: boolean;
+  missing: string[];
+  hasSignature: boolean;
+  fieldCount: number;
+};
+
+function validateAix(parsed: Record<string, unknown>): ValidationResult {
+  const missing = REQUIRED_FIELDS.filter((f) => !parsed[f]);
+  const security = parsed.security as Record<string, unknown> | undefined;
+  const sig = security?.signature as Record<string, unknown> | undefined;
+  const hasSignature = Boolean(sig?.value);
+  const fieldCount = Object.keys(parsed).length;
+  return { valid: missing.length === 0, missing, hasSignature, fieldCount };
 }
 
 export function LiveValidator() {
   const [dragging, setDragging] = useState(false);
   const [hash, setHash] = useState<string>("");
-  const [sigState, setSigState] = useState<
-    "unknown" | "valid-structure" | "missing"
-  >("unknown");
+  const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [fileName, setFileName] = useState<string>("");
   const [error, setError] = useState<string>("");
 
   const statusLabel = useMemo(() => {
-    if (sigState === "valid-structure") return "Trust Chain: Signature Present";
-    if (sigState === "missing") return "Trust Chain: Signature Missing";
-    return "Awaiting AIX DNA";
-  }, [sigState]);
+    if (!validation) return "Awaiting AIX DNA";
+    if (!validation.valid) return `Missing fields: ${validation.missing.join(", ")}`;
+    return validation.hasSignature
+      ? "Trust Chain: Signature Present"
+      : "Trust Chain: Signature Missing";
+  }, [validation]);
 
   const handleFile = async (file: File) => {
     setError("");
     setFileName(file.name);
+    setValidation(null);
+    setHash("");
     try {
       const content = await file.text();
       let parsed: Record<string, unknown> | null = null;
@@ -89,53 +136,38 @@ export function LiveValidator() {
       if (file.name.endsWith(".json") || content.trim().startsWith("{")) {
         parsed = JSON.parse(content) as Record<string, unknown>;
       } else {
-        // Use inline YAML parser — no external dependency needed
         parsed = parseYamlLight(content);
       }
 
       const computedHash = await sha256Hex(content.replace(/\r\n/g, "\n"));
       setHash(computedHash);
-
-      const hasSig = Boolean(
-        (parsed?.security as Record<string, unknown> | undefined)
-          ?.signature &&
-          (
-            (parsed?.security as Record<string, unknown>)
-              ?.signature as Record<string, unknown>
-          )?.value
-      );
-      setSigState(hasSig ? "valid-structure" : "missing");
+      setValidation(validateAix(parsed));
     } catch (e: unknown) {
       setError(
         `Invalid AIX payload: ${
           e instanceof Error ? e.message : String(e)
         }`
       );
-      setHash("");
-      setSigState("unknown");
     }
   };
+
+  const sigState = validation?.hasSignature
+    ? "valid-structure"
+    : validation
+    ? "missing"
+    : "unknown";
 
   return (
     <div className="rounded-2xl border border-[var(--color-glass-border)] bg-[rgba(12,16,28,0.5)] p-5 backdrop-blur-xl">
       <h3 className="text-white font-semibold text-lg mb-2">Live Validator</h3>
       <p className="text-xs text-[var(--color-on-surface-variant)] mb-4">
-        Drop a .aix file to inspect SHA-256 DNA and signature status instantly.
+        Drop a .aix file to inspect SHA-256 DNA, required fields, and signature status.
       </p>
 
       <div
-        onDragEnter={(e) => {
-          e.preventDefault();
-          setDragging(true);
-        }}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={(e) => {
-          e.preventDefault();
-          setDragging(false);
-        }}
+        onDragEnter={(e) => { e.preventDefault(); setDragging(true); }}
+        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={(e) => { e.preventDefault(); setDragging(false); }}
         onDrop={(e) => {
           e.preventDefault();
           setDragging(false);
@@ -144,38 +176,74 @@ export function LiveValidator() {
         className={`rounded-xl border-2 border-dashed p-6 text-center transition ${
           dragging
             ? "border-cyan-400 bg-cyan-500/10"
-            : "border-[var(--color-glass-border)]"
+            : "border-[var(--color-glass-border)] hover:border-white/20"
         }`}
       >
         <UploadCloud className="w-7 h-7 mx-auto text-cyan-300 mb-2" />
         <p className="text-sm text-white">
           Drag &amp; Drop <span className="font-semibold">.aix</span> here
         </p>
-        <input
-          className="mt-3 text-xs text-gray-300"
-          type="file"
-          accept=".aix,.json,.yaml,.yml"
-          onChange={(e) =>
-            e.target.files?.[0] && handleFile(e.target.files[0])
-          }
-        />
+        <label className="mt-3 block cursor-pointer">
+          <span className="text-xs text-gray-400 underline underline-offset-2">or browse</span>
+          <input
+            className="sr-only"
+            type="file"
+            accept=".aix,.json,.yaml,.yml"
+            onChange={(e) =>
+              e.target.files?.[0] && handleFile(e.target.files[0])
+            }
+          />
+        </label>
       </div>
 
       {fileName && (
-        <p className="mt-4 text-xs text-gray-400">File: {fileName}</p>
+        <p className="mt-4 text-xs text-gray-400 truncate" title={fileName}>File: {fileName}</p>
       )}
+
       {hash && (
-        <p className="mt-2 text-xs break-all text-cyan-200">SHA-256: {hash}</p>
+        <p className="mt-2 text-[10px] font-mono break-all text-cyan-200/80">
+          SHA-256: {hash}
+        </p>
       )}
-      <div className="mt-3 flex items-center gap-2 text-sm text-white">
-        {sigState === "valid-structure" ? (
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-        ) : (
-          <ShieldX className="w-4 h-4 text-amber-400" />
-        )}
-        <span>{statusLabel}</span>
-      </div>
-      {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
+
+      {validation && (
+        <div className="mt-3 space-y-2">
+          {/* Structural validity */}
+          <div className="flex items-center gap-2 text-sm">
+            {validation.valid ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+            ) : (
+              <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+            )}
+            <span className={validation.valid ? "text-emerald-300" : "text-amber-300"}>
+              {validation.valid ? `Valid AIX — ${validation.fieldCount} top-level fields` : `Invalid: missing ${validation.missing.join(", ")}`}
+            </span>
+          </div>
+
+          {/* Signature status */}
+          <div className="flex items-center gap-2 text-sm">
+            {sigState === "valid-structure" ? (
+              <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+            ) : (
+              <ShieldX className="w-4 h-4 text-amber-400 flex-shrink-0" />
+            )}
+            <span className={sigState === "valid-structure" ? "text-emerald-300" : "text-amber-300/80"}>
+              {statusLabel}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {!validation && !error && hash === "" && (
+        <div className="mt-3 flex items-center gap-2 text-sm text-[var(--color-on-surface-faint)]">
+          <ShieldX className="w-4 h-4" />
+          <span>{statusLabel}</span>
+        </div>
+      )}
+
+      {error && (
+        <p className="mt-3 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{error}</p>
+      )}
     </div>
   );
 }
