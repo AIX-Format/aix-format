@@ -10,7 +10,7 @@
 
 <a href="https://github.com/Moeabdelaziz007/aix-format/actions"><img src="https://img.shields.io/github/actions/workflow/status/Moeabdelaziz007/aix-format/aix-validation.yml?style=for-the-badge&logo=github&color=6366f1&label=Validation+CI" alt="CI"/></a>
 <a href="https://github.com/Moeabdelaziz007/aix-format/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-0ea5e9?style=for-the-badge" alt="License"/></a>
-<img src="https://img.shields.io/badge/Standard-AIX_v0.3-7c3aed?style=for-the-badge" alt="Standard"/>
+<img src="https://img.shields.io/badge/Standard-AIX_v0.4.0-7c3aed?style=for-the-badge" alt="Standard"/>
 <img src="https://img.shields.io/badge/Security-Ed25519-8b5cf6?style=for-the-badge" alt="Ed25519"/>
 <img src="https://img.shields.io/badge/Identity-Pi_Network_KYC-ec4899?style=for-the-badge" alt="Pi KYC"/>
 <img src="https://img.shields.io/badge/Agents-17M%2B_Verified-14b8a6?style=for-the-badge" alt="Verified Users"/>
@@ -186,12 +186,10 @@ aix-format/
 │   └── aix-validate.js      # CLI Validator | مدقق سطر الأوامر
 └── .github/workflows/
     └── aix-validation.yml   # Automated security CI | الأمن الآلي
- main
 ```
 
 ### 🌟 Key Features (أبرز الميزات)
 
- feat/kyc-wizard-tts-12299921071301084280
 1. **Step-by-Step Setup Wizard:** A guided, beginner-friendly process to configure and deploy agents without coding knowledge.
 2. **Interactive Voice Orb with TTS:** Speak to configure agents, and the AIX engine will provide audible feedback confirmation.
 3. **Quantum Topology KYC Security:** High-end visual architecture for Agentic KYC bindings, ensuring a Sovereign Proof of Ownership through Ed25519 signatures and the `@pinetwork-js/sdk`.
@@ -203,7 +201,6 @@ aix-format/
 2. **KYC-First Deployment:** Every `.aix` payload uploaded to the Studio requires a Cryptographic KYC Signature via Pi Network. This ensures a Sovereign Proof of Ownership.
 3. **Glassmorphism UI ("Sovereign Aether"):** A high-end, ethereal design system relying on deep indigos, charcoals, and translucent layers instead of cyberpunk tropes.
 4. **Polyglot & Model Agnostic:** The Studio acts as the Gateway. The execution layer (AIX core) is designed to run seamlessly on Go/Rust backend execution engines in the future, supporting any LLM (Open Source or Closed).
- main
 
 **[AR]**
 1. **التوجيه الصوتي أولاً:** تم استبدال صناديق الدردشة التقليدية بكرة صوتية تفاعلية (Voice Orb). تحدث فقط لإعداد ونشر وكلائك فوراً.
@@ -212,23 +209,6 @@ aix-format/
 4. **متعدد اللغات ومستقل عن النماذج:** يعمل الاستوديو كبوابة، بينما تم تصميم طبقة التنفيذ الأساسية (AIX core) لتعمل مستقبلاً على محركات تنفيذ مبنية بـ Go/Rust تدعم أي نموذج ذكاء اصطناعي (مفتوح أو مغلق المصدر).
 
 ---
-
- jules-add-aix-validate-tests-11474985681302733165
-## 🛠️ Quick Start (البدء السريع)
-
-**[EN]** This repository uses npm workspaces (`apps/studio` and `core/`).
-**[AR]** تستخدم هذه المستودعات ميزة npm workspaces لمجلدات (`apps/studio` و `core/`).
-
-### Prerequisites (المتطلبات الأساسية)
-- Node.js >= 18.0.0
-- Pi Browser (for full authentication testing / لاختبار المصادقة الكاملة)
-
-### Installation (التثبيت)
-```bash
-# Install dependencies for both core and studio (تثبيت الاعتمادات للواجهة والمحرك الأساسي)
-npm install
-
-# Run the Studio development server (تشغيل خادم التطوير للاستوديو)
 
 ## ✨ Sovereign Features | المميزات السيادية
 
@@ -365,7 +345,6 @@ git clone https://github.com/Moeabdelaziz007/aix-format.git
 cd aix-format && npm install
 
 # Launch Sovereign Studio | تشغيل الاستوديو
- main
 npm run dev --prefix apps/studio
 
 # Validate an agent file | التحقق من ملف وكيل
@@ -385,7 +364,7 @@ npm test
 meta:
   name: "research-assistant"
   version: "1.0.0"
-  aix_version: "0.3"
+  aix_version: "0.4.0"
 
 identity_layer:
   id: "did:axiom:axiomid.app:agent_uuid"
@@ -421,14 +400,11 @@ mcp:
 
 ---
 
- feat/kyc-wizard-tts-12299921071301084280
-## 🔒 AIX Agent Runtime Validator (CLI)
-
 ## 🔒 AIX Agent Runtime Validator (CLI) (مدقق وقت تشغيل وكيل AIX)
 
-**[EN]** The repository includes a strict validation tool designed for CI/CD pipelines and deployment gateways. This ensures no agent enters the network without meeting structural, cryptographic, and security constraints.
-**[AR]** يتضمن المستودع أداة تحقق صارمة مصممة لمسارات CI/CD وبوابات النشر. يضمن هذا عدم دخول أي وكيل إلى الشبكة دون تلبية القيود الهيكلية، التشفيرية، والأمنية.
- main
+**[EN]** The repository includes a strict validation tool designed for CI/CD pipelines and deployment gateways. This ensures no agent enters the network without meeting structural, cryptographic, and security constraints. See [AXIOM_AGENTS.md](./AXIOM_AGENTS.md) for full technical specifications.
+
+**[AR]** يتضمن المستودع أداة تحقق صارمة مصممة لمسارات CI/CD وبوابات النشر. يضمن هذا عدم دخول أي وكيل إلى الشبكة دون تلبية القيود الهيكلية، التشفيرية، والأمنية. راجع [AXIOM_AGENTS.md](./AXIOM_AGENTS.md) للمواصفات التقنية الكاملة.
 
 ### Usage (طريقة الاستخدام)
 
@@ -453,13 +429,6 @@ node bin/aix-validate.js path/to/your-agent.aix [options]
 **[EN]** A GitHub action is included (`.github/workflows/aix-validation.yml`) which automatically validates all modified `.aix` payloads in Pull Requests, running with the `--strict-kyc` and `--security` flags enabled. If an agent fails KYC checks, the PR is blocked.
 **[AR]** تم إدراج إجراء لـ GitHub Action (`.github/workflows/aix-validation.yml`) يقوم تلقائياً بالتحقق من جميع ملفات الـ `.aix` المعدلة في طلبات السحب (Pull Requests)، ويعمل مع تفعيل خيارات `--strict-kyc` و `--security`. إذا فشل أي وكيل في تجاوز فحص KYC، يتم حظر طلب السحب.
 
- feat/kyc-wizard-tts-12299921071301084280
-A GitHub action is included (`.github/workflows/aix-validation.yml`) which automatically validates all modified `.aix` payloads in Pull Requests, running with the `--strict-kyc` and `--security` flags enabled. If an agent fails KYC checks, the PR is blocked.
-
----
-
-## 🤝 Credits & Maintainers
-=======
 ---
 
 ## 📄 Current Status (الحالة الحالية)
@@ -467,16 +436,6 @@ A GitHub action is included (`.github/workflows/aix-validation.yml`) which autom
 
 ---
 
-## 🤝 Credits & Maintainers (الاعتمادات والمساهمون)
- main
-
-- **Moe Abdelaziz** (@Moeabdelaziz007) - Visionary, Protocol Architect & Pi Integration Lead.
-- **Jules (AI Engineer)** - Engineering Partner & UI/UX Architect.
-
-*We are building the trust layer for the Machine Economy.*
-=======
-*We are building the trust layer for the Machine Economy. (نحن نبني طبقة الثقة لاقتصاد الآلات.)*
-=======
 ## 🗺️ Roadmap | خارطة الطريق
 
 <table width="100%">

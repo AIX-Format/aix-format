@@ -1,7 +1,7 @@
-# AIX File Format Specification v1.0
+# AIX File Format Specification v1.1
 
 **Title:** AIX (Artificial Intelligence e**X**change) File Format Specification  
-**Version:** 1.0  
+**Version:** 1.1  
 **Status:** Stable  
 **Date:** April 2026
 **Author:** Mohamed H Abdelaziz  
@@ -87,7 +87,7 @@ An AIX file consists of eleven top-level sections:
 
 ```
 ┌─────────────────────────────────┐
-│ meta        (Required)          │  Agent metadata and identification
+│ meta        (Required)          │  Agent metadata, identification, and ABOM
 ├─────────────────────────────────┤
 │ persona     (Required)          │  Personality and behavior definition
 ├─────────────────────────────────┤
@@ -188,7 +188,8 @@ name = "Example Agent"
 ```yaml
 meta:
   version: string          # AIX format version (semver), REQUIRED
-  id: string              # did:web:axiomid.app:<id> format, REQUIRED
+  id: string              # did:axiom or did:web format, REQUIRED
+  abom: object            # Agent Bill of Materials, REQUIRED
   name: string            # Agent name, REQUIRED
   created: string         # ISO 8601 timestamp, REQUIRED
   author: string          # Author name or identifier, REQUIRED
@@ -213,7 +214,7 @@ meta:
 **Validation Rules:**
 
 - `version` **MUST** follow Semantic Versioning (semver) format
-- `id` **MUST** be a valid `did:web` identifier (`did:web:axiomid.app:<id>`)
+- `id` **MUST** be a valid `did:axiom` or `did:web` identifier
 - `created` and `updated` **MUST** be valid ISO 8601 timestamps
 - `name` **MUST** be 1-100 characters
 - `tags` **SHOULD** contain 1-10 tags, each 1-50 characters
@@ -222,8 +223,11 @@ meta:
 
 ```yaml
 meta:
-  version: "1.0"
-  id: "did:web:axiomid.app:550e8400-e29b-41d4-a716-446655440000"
+  version: "1.1"
+  id: "did:axiom:550e8400-e29b-41d4-a716-446655440000"
+  abom:
+    framework: "langchain"
+    dependencies: ["torch", "transformers"]
   name: "Customer Service Bot"
   description: "AI agent for handling customer inquiries"
   created: "2026-04-24T10:30:00Z"
@@ -688,7 +692,7 @@ pricing:
 
 ```json
 "identity_layer": {
-  "id": string,               // Unique Axiom identifier (did:web:axiomid.app:<id> format), REQUIRED
+  "id": string,               // Unique identifier (did:axiom or did:web format), REQUIRED
   "authority": string,        // Root authority domain, must be "axiomid.app", REQUIRED
   "issuedAt": string,         // ISO 8601 timestamp of issuance, REQUIRED
   "expiresAt": string,        // ISO 8601 timestamp of expiration, OPTIONAL
@@ -699,7 +703,7 @@ pricing:
 
 **Validation Rules:**
 
-- `id` **MUST** be a valid `did:web` identifier (`did:web:axiomid.app:<id>`).
+- `id` **MUST** be a valid `did:axiom` or `did:web` identifier.
 - `authority` **MUST** resolve to `axiomid.app`.
 - `issuedAt` **MUST** be a valid ISO 8601 date-time string.
 - `publicKey.algorithm` **MUST** be one of: `Ed25519`, `secp256k1`.
@@ -710,7 +714,7 @@ pricing:
 
 ```json
 "identity_layer": {
-  "id": "did:web:axiomid.app:550e8400-e29b-41d4-a716-446655440000",
+  "id": "did:axiom:550e8400-e29b-41d4-a716-446655440000",
   "authority": "axiomid.app",
   "issuedAt": "2026-04-24T10:30:00Z",
   "publicKey": {
@@ -747,7 +751,7 @@ pricing:
 
 **Validation Rules:**
 
-- `token` **MUST** be one of: AXIOM, SOL, ETH, USDC, USDT
+- `token` **MUST** be one of: PI, AXIOM, SOL, ETH, USDC, USDT
 - `cost_per_task` **MUST** be a non-negative number
 - `min_reputation_required` **MUST** be a non-negative integer if specified
 
