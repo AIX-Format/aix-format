@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import yaml from 'js-yaml';
+import { canonicalizeForSigning } from '../core/canonicalize.js';
 
 function detectFormat(content, filePath) {
   const ext = path.extname(filePath).toLowerCase();
@@ -16,25 +17,21 @@ function parseAix(content, format) {
   return format === 'json' ? JSON.parse(content) : yaml.load(content, { schema: yaml.JSON_SCHEMA });
 }
 
-function stableStringify(value) {
-  if (value === null || typeof value !== 'object') return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
-  const keys = Object.keys(value).sort();
-  return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(value[k])}`).join(',')}}`;
-}
-
 function signAgent(filePath) {
   const raw = fs.readFileSync(filePath, 'utf8');
   const format = detectFormat(raw, filePath);
   const parsed = parseAix(raw, format);
-  if (!parsed || typeof parsed !== 'object') throw new Error('Invalid AIX payload: expected object root');
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Invalid AIX payload: expected object root');
+  }
 
   const next = structuredClone(parsed);
-  next.security = (next.security && typeof next.security === 'object') ? next.security : {};
-  delete next.security.checksum;
-  delete next.security.signature;
+  next.security = (next.security && typeof next.security === 'object' && !Array.isArray(next.security)) ? next.security : {};
 
-  const digest = crypto.createHash('sha256').update(stableStringify(next), 'utf8').digest('hex');
+  const { bytes } = canonicalizeForSigning(next);
+  const digest = crypto.createHash('sha256').update(bytes).digest('hex');
+
+  delete next.security.signature;
   next.security.checksum = { algorithm: 'sha256', value: digest };
 
   const output = format === 'json'
