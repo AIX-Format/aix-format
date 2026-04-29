@@ -127,7 +127,7 @@ export function VoiceOrb({ onTranscript, isProcessing = false }: VoiceOrbProps) 
             transition={{ repeat: Infinity, duration: 1.5, ease: "easeOut" }}
             className={cn(
               "absolute inset-0 rounded-full border",
-              isSpeaking ? "border-[#d2bbff]" : "border-[var(--color-primary)]",
+              isSpeaking ? "border-[var(--color-secondary)]" : "border-[var(--color-primary)]",
             )}
           />
         )}
@@ -139,7 +139,7 @@ export function VoiceOrb({ onTranscript, isProcessing = false }: VoiceOrbProps) 
             transition={{ repeat: Infinity, duration: 2, ease: "easeOut", delay: 0.5 }}
             className={cn(
               "absolute inset-0 rounded-full border",
-              isSpeaking ? "border-white" : "border-[var(--color-secondary)]",
+              isSpeaking ? "border-white/80" : "border-[var(--color-secondary)]",
             )}
           />
         )}
@@ -153,11 +153,11 @@ export function VoiceOrb({ onTranscript, isProcessing = false }: VoiceOrbProps) 
             y: pointerOffset.y,
             scale: 1 + micLevel * 0.05,
             boxShadow: isSpeaking
-              ? "0 0 50px rgba(210, 187, 255, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.6)"
+              ? "0 0 50px rgba(149, 165, 166, 0.65), inset 0 0 20px rgba(255, 255, 255, 0.4)"
               : isListening
-                ? "0 0 40px rgba(0, 219, 233, 0.6), inset 0 0 20px rgba(210, 187, 255, 0.4)"
+                ? "0 0 44px rgba(57, 255, 20, 0.7), inset 0 0 20px rgba(149, 165, 166, 0.35)"
                 : isProcessing
-                  ? "0 0 30px rgba(210, 187, 255, 0.6), inset 0 0 20px rgba(0, 219, 233, 0.4)"
+                  ? "0 0 34px rgba(57, 255, 20, 0.45), inset 0 0 20px rgba(149, 165, 166, 0.3)"
                   : "0 0 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.05)",
           }}
           transition={{ duration: 0.18, ease: "easeOut" }}
@@ -169,7 +169,7 @@ export function VoiceOrb({ onTranscript, isProcessing = false }: VoiceOrbProps) 
           {isProcessing ? (
             <Activity className="w-10 h-10 text-[var(--color-primary)] animate-pulse" />
           ) : isSpeaking ? (
-            <Volume2 className="w-10 h-10 text-[#d2bbff] animate-pulse" />
+            <Volume2 className="w-10 h-10 text-[var(--color-secondary)] animate-pulse" />
           ) : isListening ? (
             <div className="flex items-center justify-center gap-1">
               {[1, 2, 3].map((i) => (

@@ -9,13 +9,13 @@ import { AgenticKycSetup } from "@/components/studio/AgenticKycSetup";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#05050A] font-[family-name:var(--font-geist-sans)]">
+    <div className="min-h-screen bg-[var(--color-background)] font-[family-name:var(--font-geist-sans)]">
       <Navbar />
       <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center p-8 pb-20 gap-16 sm:p-20">
         <main className="flex flex-col gap-12 row-start-2 items-center sm:items-start w-full max-w-6xl">
           <div className="flex flex-col md:flex-row items-center justify-between w-full gap-8">
             <div className="flex flex-col gap-4 text-center md:text-left glass-panel-heavy rounded-3xl p-6 md:p-8 border border-white/5">
-              <h1 className="text-4xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 tracking-tight">
+              <h1 className="text-4xl sm:text-6xl font-extrabold text-transparent bg-clip-text text-gradient tracking-tight">
                 Sovereign Pi Agents
               </h1>
               <p className="text-lg sm:text-xl text-gray-400 max-w-2xl font-light">
@@ -23,13 +23,13 @@ export default function Home() {
               </p>
               <div className="flex gap-4 items-center flex-col sm:flex-row mt-4">
                 <a
-                  className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-indigo-600 text-white gap-2 hover:bg-indigo-700 text-sm sm:text-base h-12 px-8 shadow-[0_0_20px_rgba(79,70,229,0.4)]"
+                  className="rounded-full border border-solid border-[var(--color-primary-dim)]/70 transition-colors flex items-center justify-center bg-[var(--color-primary)] text-black gap-2 hover:brightness-110 text-sm sm:text-base h-12 px-8 shadow-[0_0_22px_rgba(57,255,20,0.45)]"
                   href="https://axiomid.app"
                 >
                   Deploy New Agent
                 </a>
                 <a
-                  className="rounded-full border border-solid border-[var(--color-glass-border)] transition-colors flex items-center justify-center bg-[rgba(20,20,30,0.5)] hover:bg-[rgba(30,30,40,0.8)] text-white text-sm sm:text-base h-12 px-8 sm:px-6 backdrop-blur-xl"
+                  className="rounded-full border border-solid border-[var(--color-glass-border)] transition-colors flex items-center justify-center bg-[rgba(20,20,20,0.5)] hover:bg-[rgba(35,35,35,0.82)] text-white text-sm sm:text-base h-12 px-8 sm:px-6 backdrop-blur-xl"
                   href="https://axiomid.app"
                 >
                   Read AIX Spec
