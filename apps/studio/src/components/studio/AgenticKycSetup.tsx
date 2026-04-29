@@ -7,8 +7,14 @@ import { cn } from "@/lib/utils";
 const stepActive   = "border-[var(--color-primary)]/40 bg-[var(--color-primary)]/10";
 const stepInactive = "border-[var(--color-glass-border)] bg-[var(--color-surface)]";
 
-export const AgenticKycSetup = memo(function AgenticKycSetup() {
+export const AgenticKycSetup = memo(function AgenticKycSetup({ user }: { user?: any }) {
   const [step, setStep] = useState(1);
+  
+  useEffect(() => {
+    if (user && step === 1) {
+      startKyc();
+    }
+  }, [user]);
   // ─── Refs to hold timer IDs so we can clear them on unmount ─────────────
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 

@@ -10,10 +10,10 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Build Status](https://github.com/Moeabdelaziz007/aix-format/actions/workflows/aix-validation.yml/badge.svg)](https://github.com/Moeabdelaziz007/aix-format/actions)
-[![Version](https://img.shields.io/badge/version-1.2.0--sovereign-orange.svg)]()
+[![Version](https://img.shields.io/badge/version-1.3.0--sovereign-orange.svg)]()
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)]()
 <br/>
-<img src="https://img.shields.io/badge/Standard-AIX_v1.2.0-7c3aed?style=for-the-badge" alt="Standard"/>
+<img src="https://img.shields.io/badge/Standard-AIX_v1.3.0-7c3aed?style=for-the-badge" alt="Standard"/>
 <img src="https://img.shields.io/badge/Security-Ed25519-8b5cf6?style=for-the-badge" alt="Ed25519"/>
 <img src="https://img.shields.io/badge/Identity-Pi_Network_KYC-ec4899?style=for-the-badge" alt="Pi KYC"/>
 
@@ -129,9 +129,9 @@ The root cause: there is no open standard requiring human-verified identity for 
 | **Agent Identity (DID)** | ✅ `did:web` | ❌ | ❌ | ⚠️ partial |
 | **KYC / Proof of Personhood** | ✅ Pi Network (17M+) | ❌ | ❌ | ⚠️ concept only |
 | **Economics / Pricing Layer** | ✅ built-in | ❌ | ❌ | ❌ |
-| **Checksum / Supply Chain** | ✅ SHA-256 + Ed25519 | ❌ | ❌ | ⚠️ planned |
+| **Checksum / Supply Chain** | ✅ SHA-256 (ABOM) + Ed25519 | ❌ | ❌ | ⚠️ planned |
 | **VLA / Robotics Support** | ✅ openpi, π0.7 | ❌ | ❌ | ❌ |
-| **MCP Server Embedding** | ✅ | ❌ | ✅ | ❌ |
+| **MCP Server Card / Discovery** | ✅ .well-known / W3C Draft | ❌ | ✅ | ❌ |
 | **Multi-Format** | ✅ YAML/JSON/TOML | ❌ JSON only | ✅ | ❌ |
 | **A2A Compatible** | ⚠️ converter exists | ✅ native | ⚠️ | ❌ |
 | **Focus Layer** | Identity + Distribution | Runtime Comm. | Contract | Enterprise Meta |

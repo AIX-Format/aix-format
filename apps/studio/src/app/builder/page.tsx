@@ -21,7 +21,7 @@ import {
   FileCode,
   Database
 } from "lucide-react";
-import { stringifyYamlSafe } from "@/lib/utils";
+import { stringifyYamlSafe, sha256Hex } from "@/lib/utils";
 import { Navbar } from "@/components/layout/Navbar";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import LiveValidator from "@/components/studio/LiveValidator";
@@ -51,6 +51,7 @@ export default function AgentBuilderPage() {
     meta: {
       name: "",
       version: "1.0.0",
+      format_version: "1.3",
       author: "",
       description: "",
     },
@@ -79,6 +80,7 @@ export default function AgentBuilderPage() {
       bom_format: "CycloneDX",
       spec_version: "1.6",
       risk_level: "low",
+      integrity_hash: "pending",
       dependencies: [] as string[]
     }
   });
@@ -93,6 +95,14 @@ export default function AgentBuilderPage() {
       if (formData.meta.name) {
         const slug = formData.meta.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
         manifest.identity_layer.id = `did:axiom:axiomid.app:agent-${slug}`;
+      }
+
+      // Update integrity hash based on dependencies
+      if (formData.abom.dependencies.length > 0) {
+        const depString = formData.abom.dependencies.join(",");
+        manifest.abom.integrity_hash = await sha256Hex(depString);
+      } else {
+        manifest.abom.integrity_hash = "sha256-empty-deps";
       }
 
       if (previewFormat === "json") {
@@ -171,7 +181,7 @@ export default function AgentBuilderPage() {
   };
 
   const handleDownload = () => {
-    const blob = new Blob([manifestContent], { type: 'text/plain' });
+    const blob = new Blob([manifestContent], { type: 'application/x-aix' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

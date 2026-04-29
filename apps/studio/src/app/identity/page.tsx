@@ -188,7 +188,7 @@ export default function IdentityPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="max-w-xl"
               >
-                <AgenticKycSetup />
+                <AgenticKycSetup user={piUser} />
               </motion.div>
             )}
 

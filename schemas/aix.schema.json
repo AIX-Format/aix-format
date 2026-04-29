@@ -311,6 +311,18 @@
       "required": ["id", "authority", "issuedAt"],
       "properties": {
         "id": { "$ref": "#/$defs/AxiomDID" },
+        "kyc_tier": {
+          "type": "integer",
+          "description": "Pi Network KYC tier (0: None, 1: Basic, 2: Full, 3: Sovereign)",
+          "minimum": 0,
+          "maximum": 3,
+          "default": 0
+        },
+        "verified": {
+          "type": "boolean",
+          "description": "Whether the identity has been verified by the authority",
+          "default": false
+        },
         "authority": {
           "type": "string",
           "const": "axiomid.app",
@@ -544,6 +556,11 @@
       "type": "object",
       "description": "Agent Bill of Materials (ABOM) — AI-SBOM compatible supply chain transparency",
       "properties": {
+        "integrity_hash": {
+          "type": "string",
+          "description": "SHA-256 hash of the full ABOM for supply chain verification",
+          "pattern": "^[0-9a-f]{64}$"
+        },
         "spec_version": { "type": "string" },
         "generated": { "$ref": "#/$defs/ISODateTime" },
         "tools": {

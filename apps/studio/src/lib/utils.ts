@@ -31,3 +31,14 @@ export async function stringifyYamlSafe(data: any): Promise<string> {
     return "# Error generating YAML\n" + (error as Error).message;
   }
 }
+
+/**
+ * Generates a SHA-256 hex hash of the given string.
+ * Used for ABOM integrity verification.
+ */
+export async function sha256Hex(content: string): Promise<string> {
+  const msgUint8 = new TextEncoder().encode(content);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+}
