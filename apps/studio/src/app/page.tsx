@@ -1,6 +1,5 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { SetupWizard } from "@/components/studio/SetupWizard";
-import Image from "next/image";
 import { AgentCard } from "@/components/studio/AgentCard";
 import { VoiceOrb } from "@/components/studio/VoiceOrb";
 import { AgenticKycSetup } from "@/components/studio/AgenticKycSetup";
@@ -74,6 +73,7 @@ export default function Home() {
           </div>
         </main>
 
+      </div>
 
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center text-gray-500 text-sm">
         <a className="flex items-center gap-2 hover:text-white transition-colors" href="#">
