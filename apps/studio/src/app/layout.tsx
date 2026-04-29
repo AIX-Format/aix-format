@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Manrope, Inter } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -23,6 +24,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const hasClerk = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+
   return (
     <html lang="en" className="dark">
       <body
@@ -35,7 +38,7 @@ export default function RootLayout({
         </div>
 
         <div className="relative z-10 flex flex-col min-h-screen">
-          {children}
+          {hasClerk ? <ClerkProvider>{children}</ClerkProvider> : children}
         </div>
 
         {/* Pi Network SDK */}

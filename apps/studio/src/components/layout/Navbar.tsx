@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Shield, Cpu, Activity } from "lucide-react";
 import { motion } from "framer-motion";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 
 export function Navbar() {
+  const hasClerk = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
   const [isScrolled, setIsScrolled] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -75,7 +77,27 @@ export function Navbar() {
         </nav>
 
         <div>
-          {user ? (
+          {hasClerk ? (
+            <>
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="relative overflow-hidden group px-6 py-2.5 rounded-full bg-[var(--color-surface-container-highest)] border border-[var(--color-glass-border)] hover:border-[var(--color-primary)]/50 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.2)] text-sm font-semibold text-white"
+                  >
+                    Sign in
+                  </motion.button>
+                </SignInButton>
+              </SignedOut>
+              <SignedIn>
+                <div className="flex items-center gap-3 glass-panel px-4 py-2 rounded-full border border-[var(--color-primary-dim)]/30">
+                  <span className="text-xs text-[var(--color-secondary)]">Clerk Auth</span>
+                  <UserButton afterSignOutUrl="/" />
+                </div>
+              </SignedIn>
+            </>
+          ) : user ? (
             <div className="flex items-center gap-3 glass-panel px-4 py-2 rounded-full border border-[var(--color-primary-dim)]/30">
               <div className="w-2 h-2 rounded-full bg-[var(--color-primary)] animate-pulse" />
               <span className="text-sm font-medium text-white">{user.username}</span>
