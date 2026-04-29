@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Label } from "@/components/ui/label";
 import { Plus, X, BrainCircuit, Sparkles } from "lucide-react";
 
 export function PersonaEditor() {
@@ -23,10 +22,10 @@ export function PersonaEditor() {
     <div className="space-y-8">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <Label className="text-white flex items-center gap-2">
+          <label className="text-white flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-[var(--color-primary)]" />
             Personality Traits
-          </Label>
+          </label>
           <span className="text-[10px] text-[var(--color-on-surface-variant)] uppercase font-bold tracking-widest">
             Enter to Add
           </span>
@@ -52,10 +51,10 @@ export function PersonaEditor() {
       </div>
 
       <div className="space-y-4">
-        <Label className="text-white flex items-center gap-2">
+        <label className="text-white flex items-center gap-2">
           <BrainCircuit className="w-4 h-4 text-[var(--color-secondary)]" />
           System Instructions
-        </Label>
+        </label>
         <div className="relative">
           <textarea 
             placeholder="Define the core behavioral logic and constraints for the agent..."
