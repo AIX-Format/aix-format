@@ -17,6 +17,18 @@ export class PiKycAdapter {
       throw new Error('Invalid Pi Auth Result: Missing token, signature, or public key');
     }
 
+    if (typeof user.uid !== 'string' || user.uid.length < 3 || user.uid.length > 256) {
+      throw new Error('Invalid Pi Auth Result: user.uid must be a non-empty string');
+    }
+
+    if (typeof accessToken !== 'string' || accessToken.length < 10 || accessToken.length > 8192) {
+      throw new Error('Invalid Pi Auth Result: accessToken length is out of allowed bounds');
+    }
+
+    if (!PiKycAdapter.isValidBase64(signature) || !PiKycAdapter.isValidBase64(publicKey)) {
+      throw new Error('Invalid Pi Auth Result: signature/publicKey must be valid base64');
+    }
+
     // Verify the signature
     let isValid = false;
     try {
@@ -24,9 +36,16 @@ export class PiKycAdapter {
       const signatureUint8 = naclUtil.decodeBase64(signature);
       const publicKeyUint8 = naclUtil.decodeBase64(publicKey);
 
+      if (publicKeyUint8.length !== nacl.sign.publicKeyLength) {
+        throw new Error('Invalid public key size');
+      }
+      if (signatureUint8.length !== nacl.sign.signatureLength) {
+        throw new Error('Invalid signature size');
+      }
+
       isValid = nacl.sign.detached.verify(messageUint8, signatureUint8, publicKeyUint8);
     } catch (error) {
-      throw new Error(`Signature verification failed: ${error.message}`);
+      throw new Error('Signature verification failed: malformed signature payload');
     }
 
     if (!isValid) {
@@ -68,5 +87,10 @@ export class PiKycAdapter {
     }
 
 return { identity_layer, kyc_proof };
+  }
+
+  static isValidBase64(value) {
+    if (typeof value !== 'string' || value.length === 0 || value.length > 4096) return false;
+    return /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value);
   }
 }

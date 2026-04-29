@@ -64,6 +64,21 @@ describe('PiKycAdapter Unit Tests', () => {
     assert.ok(result.kyc_proof.access_token_hash);
   });
 
+
+
+  it('rejects malformed base64 signature/public key payloads', () => {
+    const authResult = {
+      user: { uid: 'user_12345' },
+      accessToken: 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.token',
+      signature: '@@not_base64@@',
+      publicKey: '@@not_base64@@'
+    };
+
+    assert.throws(
+      () => PiKycAdapter.generateIdentity(authResult),
+      /valid base64/
+    );
+  });
   it('rejects invalid signature', () => {
     const keypair = nacl.sign.keyPair();
     const wrongKeypair = nacl.sign.keyPair(); // Different keypair
