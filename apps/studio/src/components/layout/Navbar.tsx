@@ -32,7 +32,8 @@ declare global {
 const navLinks = [
   { href: "/",               label: "Studio"          },
   { href: "/marketplace",    label: "Marketplace"     },
-  { href: "/my-agents",      label: "My Agents"       },
+  { href: "/builder",        label: "Builder"         },
+  { href: "/identity",       label: "Identity"        },
   { href: "/spec",           label: "AIX Spec"         },
   { href: "/network-status", label: "Network"         },
 ];

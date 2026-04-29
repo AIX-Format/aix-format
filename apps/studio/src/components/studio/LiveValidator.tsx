@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { UploadCloud, ShieldCheck, ShieldX, CheckCircle2, AlertTriangle } from "lucide-react";
 
 async function sha256Hex(input: string): Promise<string> {
@@ -91,11 +91,17 @@ function validateAix(parsed: Record<string, unknown>): ValidationResult {
   return { valid: missing.length === 0, missing, hasSignature, fieldCount };
 }
 
-export function LiveValidator() {
+export default function LiveValidator({ 
+  content: propContent, 
+  fileName: propFileName 
+}: { 
+  content?: string; 
+  fileName?: string;
+}) {
   const [dragging, setDragging] = useState(false);
   const [hash, setHash] = useState<string>("");
   const [validation, setValidation] = useState<ValidationResult | null>(null);
-  const [fileName, setFileName] = useState<string>("");
+  const [fileName, setFileName] = useState<string>(propFileName || "");
   const [error, setError] = useState<string>("");
 
   const statusLabel = useMemo(() => {
@@ -106,16 +112,13 @@ export function LiveValidator() {
       : "Trust Chain: Signature Missing";
   }, [validation]);
 
-  const handleFile = async (file: File) => {
+  const processContent = async (content: string, name: string) => {
     setError("");
-    setFileName(file.name);
-    setValidation(null);
-    setHash("");
+    setFileName(name);
     try {
-      const content = await file.text();
       let parsed: Record<string, unknown>;
 
-      if (file.name.endsWith(".json") || content.trim().startsWith("{")) {
+      if (name.endsWith(".json") || content.trim().startsWith("{")) {
         parsed = JSON.parse(content) as Record<string, unknown>;
       } else {
         parsed = parseYamlLight(content);
@@ -130,7 +133,19 @@ export function LiveValidator() {
           e instanceof Error ? e.message : String(e)
         }`
       );
+      setValidation(null);
     }
+  };
+
+  useEffect(() => {
+    if (propContent) {
+      processContent(propContent, propFileName || "live-builder.aix");
+    }
+  }, [propContent, propFileName]);
+
+  const handleFile = async (file: File) => {
+    const content = await file.text();
+    await processContent(content, file.name);
   };
 
   const sigState = validation?.hasSignature
