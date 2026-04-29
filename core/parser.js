@@ -12,7 +12,6 @@
 import fs from 'fs';
 import crypto from 'crypto';
 import yaml from 'js-yaml';
-import { AIXErrorHandler } from './error_handler.js';
 
 // ─── AI-SBOM constituent field enumerations ───────────────────────────────────
 const ABOM_VALID_TYPES        = ['model', 'dataset', 'library', 'tool', 'plugin', 'agent', 'runtime'];
@@ -28,7 +27,6 @@ export class AIXParser {
   constructor() {
     this.errors = [];
     this.warnings = [];
-    this.errorHandler = new AIXErrorHandler();
   }
 
   /**
@@ -194,11 +192,7 @@ export class AIXParser {
 
 
   createParseError(code, message, filePath, originalError) {
-    const formatted = this.errorHandler.formatError(
-      { status: 400, message, details: { filePath } },
-      'aix_parser'
-    );
-    const error = new Error(formatted.error.detail || message);
+    const error = new Error(message);
     error.code = code;
     error.file = filePath;
     error.cause = originalError;
