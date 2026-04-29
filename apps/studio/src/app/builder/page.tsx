@@ -45,7 +45,7 @@ const STEPS = [
 
 export default function AgentBuilderPage() {
   const router = useRouter();
-  const { addAgent } = useLocalAgents();
+  const { saveAgent } = useLocalAgents();
   const [currentStep, setCurrentStep] = useState(1);
   const [previewFormat, setPreviewFormat] = useState<"yaml" | "json" | "discovery">("yaml");
   const [copied, setCopied] = useState(false);
@@ -175,8 +175,27 @@ export default function AgentBuilderPage() {
     await new Promise(r => setTimeout(r, 1500));
     
     try {
-      const agent = addAgent(formData as unknown as Manifest, "#00dbe9");
-      router.push(`/agents/${agent.id}`);
+      const slug = formData.meta.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const agentId = `agent-${slug}-${Date.now().toString().slice(-4)}`;
+      
+      const agentRecord = {
+        id: agentId,
+        name: formData.meta.name,
+        role: formData.persona.role,
+        createdAt: new Date().toISOString(),
+        yaml: manifestContent,
+        did: formData.identity_layer.id,
+        kyc_tier: 'unverified' as const,
+        abom: formData.abom,
+        manifest: JSON.parse(JSON.stringify(formData)),
+        color: "#00dbe9",
+        status: 'online' as const,
+        successRate: 100,
+        tasksCompleted: 0
+      };
+
+      saveAgent(agentRecord);
+      router.push(`/agents/${agentRecord.id}`);
     } catch (e) {
       console.error("Deployment failed", e);
       alert("Failed to deploy agent locally.");

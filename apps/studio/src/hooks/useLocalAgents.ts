@@ -1,70 +1,60 @@
-import { useState, useEffect } from 'react';
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
 import { AgentRecord } from '@/lib/types';
 
-const STORAGE_KEY = 'aix_local_agents';
+const STORAGE_KEY = 'aix_agents';
+
+function readStorage(): AgentRecord[] {
+  try {
+    if (typeof window === 'undefined') return [];
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as AgentRecord[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeStorage(agents: AgentRecord[]): void {
+  try {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(agents));
+  } catch {
+    console.error('localStorage write failed');
+  }
+}
 
 export function useLocalAgents() {
   const [agents, setAgents] = useState<AgentRecord[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        setAgents(JSON.parse(saved));
-      }
-    } catch (e) {
-      console.error('Failed to parse local agents:', e);
-      // Graceful fallback to empty array
-      setAgents([]);
-    } finally {
-      setLoading(false);
-    }
+    setAgents(readStorage());
+    setLoaded(true);
   }, []);
 
-  const saveAgents = (newAgents: AgentRecord[]) => {
-    try {
-      setAgents(newAgents);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newAgents));
-    } catch (e) {
-      console.error('Failed to save agents to localStorage:', e);
-    }
-  };
+  const saveAgent = useCallback((agent: AgentRecord) => {
+    setAgents(prev => {
+      const idx = prev.findIndex(a => a.id === agent.id);
+      const updated = idx >= 0
+        ? prev.map(a => a.id === agent.id ? agent : a)
+        : [...prev, agent];
+      writeStorage(updated);
+      return updated;
+    });
+  }, []);
 
-  const addAgent = (manifest: any, color: string = '#00d4ff') => {
-    const id = manifest.identity_layer?.id?.split(':').pop() || Math.random().toString(36).substring(7);
-    const newAgent: AgentRecord = {
-      id,
-      name: manifest.meta.name,
-      role: manifest.meta.role || manifest.persona?.role || 'Agent',
-      createdAt: new Date().toISOString(),
-      yaml: '', // This will be set by the caller if needed
-      manifest,
-      color,
-      status: 'online',
-      successRate: 100,
-      tasksCompleted: 0
-    };
+  const deleteAgent = useCallback((id: string) => {
+    setAgents(prev => {
+      const updated = prev.filter(a => a.id !== id);
+      writeStorage(updated);
+      return updated;
+    });
+  }, []);
 
-    const exists = agents.find(a => a.id === id);
-    let updatedAgents;
-    if (exists) {
-      updatedAgents = agents.map(a => a.id === id ? newAgent : a);
-    } else {
-      updatedAgents = [...agents, newAgent];
-    }
-    
-    saveAgents(updatedAgents);
-    return newAgent;
-  };
-
-  const getAgent = (id: string) => {
+  const getAgent = useCallback((id: string) => {
     return agents.find(a => a.id === id);
-  };
+  }, [agents]);
 
-  const deleteAgent = (id: string) => {
-    saveAgents(agents.filter(a => a.id !== id));
-  };
-
-  return { agents, addAgent, getAgent, deleteAgent, loading };
+  return { agents, saveAgent, deleteAgent, getAgent, loaded };
 }

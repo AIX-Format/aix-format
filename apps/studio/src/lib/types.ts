@@ -2,67 +2,14 @@ export interface AgentRecord {
   id: string;
   name: string;
   role: string;
-  createdAt: string;   // ISO 8601
-  yaml: string;        // raw .aix file content
-  did?: string;        // did:aix:<hash>
+  createdAt: string;
+  yaml: string;
+  did?: string;
   kyc_tier?: 'unverified' | 'basic' | 'verified' | 'institutional';
   abom?: AbomRecord;
-  manifest: Manifest;  // Parsed manifest
+  manifest: any; // The full parsed manifest object
   color?: string;
-  successRate?: number;
-  tasksCompleted?: number;
-}
-
-export interface Manifest {
-  meta: {
-    name: string;
-    description: string;
-    version: string;
-    role: string;
-    format_version?: string;
-    author?: string;
-  };
-  persona: {
-    role: string;
-    instructions: string;
-    tone?: string;
-  };
-  identity_layer: {
-    id: string;
-    kyc_tier?: number;
-    verified?: boolean;
-    authority?: string;
-    issuedAt?: string;
-  };
-  skills: Array<{
-    name: string;
-    description: string;
-    parameters?: object;
-  }>;
-  economics: {
-    pricing_model: string;
-    currency: string;
-  };
-  security?: {
-    checksum?: {
-      algorithm: string;
-      value: string;
-    };
-    signature?: {
-      algorithm: string;
-      value: string;
-      public_key: string;
-    };
-  };
-  abom?: {
-    bom_format: string;
-    spec_version: string;
-    risk_level: string;
-    integrity_hash: string;
-    dependencies: string[];
-  };
-  status?: string;
-  color?: string;
+  status?: 'online' | 'offline' | 'busy';
   successRate?: number;
   tasksCompleted?: number;
 }
@@ -101,4 +48,40 @@ export interface McpDiscoveryResponse {
   generated: string;
   totalAgents: number;
   agents: McpAgent[];
+}
+
+export interface Manifest {
+  meta: {
+    name: string;
+    version: string;
+    format_version: string;
+    author: string;
+    description: string;
+  };
+  persona: {
+    role: string;
+    instructions: string;
+    tone: string;
+  };
+  skills: any[];
+  security: {
+    checksum: {
+      algorithm: string;
+      value: string;
+    }
+  };
+  identity_layer: {
+    id: string;
+    authority: string;
+    issuedAt: string;
+    kyc_tier?: number;
+  };
+  economics: {
+    pricing_model: string;
+    currency: string;
+  };
+  abom: any;
+  mcp: {
+    prompts: any[];
+  }
 }
