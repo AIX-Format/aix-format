@@ -12,7 +12,7 @@ import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[var(--color-background)] font-[family-name:var(--font-geist-sans)]">
+    <div className="min-h-screen bg-[var(--color-background)] font-[family-name:var(--font-manrope)]">
       <Navbar />
       <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center p-8 pb-20 gap-16 sm:p-20">
         <main className="flex flex-col gap-12 row-start-2 items-center sm:items-start w-full max-w-6xl">
@@ -28,6 +28,8 @@ export default function Home() {
                 <a
                   className="rounded-full border border-solid border-[var(--color-primary-dim)]/70 transition-colors flex items-center justify-center bg-[var(--color-primary)] text-black gap-2 hover:brightness-110 text-sm sm:text-base h-12 px-8 shadow-[0_0_22px_rgba(57,255,20,0.45)]"
                   href="https://axiomid.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   Deploy New Agent
                 </a>
@@ -56,7 +58,7 @@ export default function Home() {
 
             <div className="flex flex-col gap-8">
               <div className="flex flex-col gap-6">
-                <h2 className="text-2xl font-bold text-white mb-2">Security & Identity</h2>
+                <h2 className="text-2xl font-bold text-white mb-2">Security &amp; Identity</h2>
                 <AgenticKycSetup />
               </div>
               <div className="flex flex-col gap-6">

@@ -6,9 +6,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   outputFileTracingRoot: path.join(__dirname, "../../"),
   transpilePackages: ["aix-format"],
-  experimental: {
-    externalDir: true,
-  },
+
 };
 
 export default nextConfig;

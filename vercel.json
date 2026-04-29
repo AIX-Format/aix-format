@@ -1,20 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "nextjs",
+  "buildCommand": "cd apps/studio && npm run build",
+  "outputDirectory": "apps/studio/.next",
   "installCommand": "npm install",
-  "buildCommand": "npm run build --workspace=studio",
-  "devCommand": "npm run dev --workspace=studio",
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.axiomid.app"
-        }
-      ],
-      "destination": "https://axiomid.app/$1",
-      "permanent": true
-    }
+  "framework": "nextjs",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/$1" }
   ]
 }

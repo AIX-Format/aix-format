@@ -28,7 +28,7 @@ export default function MyAgentsPage() {
   const onlineCount = agents.filter(a => a.status === 'online').length;
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] font-[family-name:var(--font-geist-sans)]">
+    <div className="min-h-screen bg-[var(--color-background)] font-[family-name:var(--font-manrope)]">
       <Navbar />
       <div className="pt-28 pb-20 px-6 md:px-12 max-w-5xl mx-auto">
         {/* Header */}

@@ -39,8 +39,8 @@ export default function RootLayout({
           {children}
         </div>
 
-        {/* Pi Network SDK */}
-        <Script src="https://sdk.minepi.com/pi-sdk.js" strategy="beforeInteractive" />
+        {/* Pi Network SDK — afterInteractive is correct for external CDN scripts */}
+        <Script src="https://sdk.minepi.com/pi-sdk.js" strategy="afterInteractive" />
         <Analytics />
       </body>
     </html>
