@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AgentRecord } from '../lib/types';
+import { AgentRecord } from '@/lib/types';
 
 const STORAGE_KEY = 'aix_local_agents';
 

@@ -5,20 +5,18 @@ import { motion } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import { useLocalAgents } from "@/hooks/useLocalAgents";
+import { DiscoveryPreview } from "@/components/studio/DiscoveryPreview";
 import { 
   Shield, 
   Zap, 
   BrainCircuit, 
   ArrowLeft, 
-  ExternalLink, 
-  FileCode, 
-  Lock, 
   Globe,
   Trash2,
-  CheckCircle2
+  FileCode
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function AgentDetailsPage() {
   const params = useParams();
@@ -146,7 +144,7 @@ export default function AgentDetailsPage() {
                     </div>
                     <div className="flex justify-between items-center p-3 rounded-xl bg-black/20">
                       <span className="text-gray-400 text-sm">KYC Trust Tier</span>
-                      <span className="text-amber-400 font-bold">Tier {agent.manifest.identity_layer.kyc_tier}</span>
+                      <span className="text-amber-400 font-bold">Tier {agent.manifest.identity_layer.kyc_tier || 0}</span>
                     </div>
                   </div>
                 </section>
@@ -163,7 +161,7 @@ export default function AgentDetailsPage() {
                     </div>
                     <div className="p-4 rounded-xl bg-black/20">
                       <p className="text-gray-500 text-[10px] uppercase font-bold mb-1">Currency</p>
-                      <p className="text-white font-bold">{agent.manifest.economics.currency}</p>
+                      <p className="text-white font-bold">{agent.manifest.economics.currency || 'PI'}</p>
                     </div>
                   </div>
                 </section>
@@ -176,15 +174,15 @@ export default function AgentDetailsPage() {
                     <div>
                       <div className="flex justify-between text-xs mb-1">
                         <span className="text-gray-400">Success Rate</span>
-                        <span className="text-white font-bold">{agent.successRate}%</span>
+                        <span className="text-white font-bold">{agent.successRate || 100}%</span>
                       </div>
                       <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full bg-emerald-500" style={{ width: `${agent.successRate}%` }} />
+                        <div className="h-full bg-emerald-500" style={{ width: `${agent.successRate || 100}%` }} />
                       </div>
                     </div>
                     <div>
                       <p className="text-gray-400 text-xs mb-1">Tasks Completed</p>
-                      <p className="text-2xl font-black text-white">{agent.tasksCompleted.toLocaleString()}</p>
+                      <p className="text-2xl font-black text-white">{(agent.tasksCompleted || 0).toLocaleString()}</p>
                     </div>
                   </div>
                 </div>
@@ -218,33 +216,8 @@ export default function AgentDetailsPage() {
             <motion.div 
               initial={{ opacity: 0, y: 10 }} 
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl bg-black/40 border border-white/10 overflow-hidden"
             >
-              <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-white/[0.02]">
-                <div className="flex items-center gap-2">
-                  <FileCode className="w-4 h-4 text-amber-400" />
-                  <span className="text-xs font-mono text-gray-300">agent.aix.json</span>
-                </div>
-                <button className="text-[10px] font-bold uppercase tracking-widest text-blue-400 hover:text-blue-300 transition">
-                  Copy Manifest
-                </button>
-              </div>
-              <pre className="p-6 text-xs font-mono text-blue-300 overflow-x-auto leading-relaxed">
-                {JSON.stringify({
-                  "@context": "https://www.w3.org/ns/ai-agent",
-                  "spec_version": "1.3.0",
-                  "name": agent.manifest.meta.name,
-                  "identity": {
-                    "did": agent.manifest.identity_layer.id,
-                    "kyc_tier": agent.manifest.identity_layer.kyc_tier
-                  },
-                  "capabilities": {
-                    "mcp": {
-                      "tools": agent.manifest.skills.map(s => s.name)
-                    }
-                  }
-                }, null, 2)}
-              </pre>
+              <DiscoveryPreview manifest={agent.manifest} />
             </motion.div>
           )}
         </div>

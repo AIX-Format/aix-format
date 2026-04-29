@@ -11,12 +11,12 @@ import Link from "next/link";
 import { useLocalAgents } from "@/hooks/useLocalAgents";
 
 export default function MyAgentsPage() {
-  const { agents, isLoading } = useLocalAgents();
+  const { agents, loading } = useLocalAgents();
 
   const totalEarnings = agents.reduce((sum, a) => sum + (parseFloat(a.manifest.economics.token === 'PI' ? '0.5' : '0')), 0).toFixed(1);
   const onlineCount = agents.filter(a => a.status === 'online').length;
 
-  if (isLoading) return <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center"><Activity className="animate-spin text-[var(--color-primary)]" /></div>;
+  if (loading) return <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center"><Activity className="animate-spin text-[var(--color-primary)]" /></div>;
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] font-[family-name:var(--font-geist-sans)]">

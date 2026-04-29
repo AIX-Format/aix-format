@@ -1,56 +1,46 @@
-export interface AgentManifest {
-  meta: {
+export interface AgentRecord {
+  id: string;
+  name: string;
+  role: string;
+  createdAt: string;   // ISO 8601
+  yaml: string;        // raw .aix file content
+  did?: string;        // did:aix:<hash>
+  kyc_tier?: 'unverified' | 'basic' | 'verified' | 'institutional';
+  abom?: AbomRecord;
+}
+
+export interface AbomRecord {
+  capabilities: string[];
+  integrity_hash: string;
+  generated_by: string;
+  timestamp: string;
+  model?: {
+    provider: string;
     name: string;
-    version: string;
-    format_version: string;
-    author: string;
-    description: string;
+    version?: string;
   };
-  persona: {
-    role: string;
-    instructions: string;
-    tone: string;
+  dataset?: {
+    sources: string[];
+    cutoff_date?: string;
   };
-  skills: Array<{
-    name: string;
-    description: string;
-  }>;
-  security: {
-    checksum: {
-      algorithm: string;
-      value: string;
-    };
-  };
-  identity_layer: {
-    id: string;
-    authority: string;
-    issuedAt: string;
-  };
-  economics: {
-    pricing_model: string;
-    token: string;
-  };
-  abom: {
-    bom_format: string;
-    spec_version: string;
-    risk_level: string;
-    integrity_hash: string;
-    dependencies: string[];
-  };
-  mcp?: {
-    prompts: any[];
-    resources?: any[];
-    tools?: any[];
+  governance?: {
+    license: string;
+    contact?: string;
   };
 }
 
-export interface AgentRecord {
-  id: string;
-  manifest: AgentManifest;
-  createdAt: string;
-  updatedAt: string;
-  status: "online" | "offline" | "busy";
-  color?: string;
-  successRate?: number;
-  tasksCompleted?: number;
+export interface McpAgent {
+  did: string;
+  name: string;
+  role: string;
+  capabilities: string[];
+  kyc_tier: string;
+  specVersion: string;
+}
+
+export interface McpDiscoveryResponse {
+  mcpVersion: string;
+  generated: string;
+  totalAgents: number;
+  agents: McpAgent[];
 }
