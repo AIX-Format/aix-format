@@ -27,7 +27,7 @@ import { useRouter } from "next/navigation";
 import { stringifyYamlSafe, sha256Hex } from "@/lib/utils";
 import { Navbar } from "@/components/layout/Navbar";
 import { useLocalAgents } from "@/hooks/useLocalAgents";
-import { Manifest, AgentSkill, McpPrompt } from "@/lib/types";
+import { Manifest, AgentSkill, McpPrompt, AgentRecord } from "@/lib/types";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import LiveValidator from "@/components/studio/LiveValidator";
 import { clsx, type ClassValue } from "clsx";
@@ -121,7 +121,6 @@ export default function AgentBuilderPage() {
       if (previewFormat === "json") {
         setManifestContent(JSON.stringify(manifest, null, 2));
       } else if (previewFormat === "discovery") {
-        // Dynamic import to avoid SSR issues if any, or just use the local generator
         const { generateAIXDiscovery } = await import("@/lib/mcp-generator");
         const disc = generateAIXDiscovery(manifest, "https://agent.example.com");
         setManifestContent(JSON.stringify(disc, null, 2));
@@ -175,7 +174,6 @@ export default function AgentBuilderPage() {
   const handleExportAndSave = async () => {
     setIsDeploying(true);
     
-    // Simulate some processing lag for effect
     await new Promise(r => setTimeout(r, 1000));
     
     try {
@@ -183,17 +181,15 @@ export default function AgentBuilderPage() {
       const slug = formData.meta.name.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'unnamed-agent';
       const agentId = `${slug}-${id.slice(0, 4)}`;
       
-      // Calculate integrity hash of the final manifest
       const integrityHash = await sha256Hex(manifestContent);
       
-      // Build agent record
       const record: AgentRecord = {
         id: agentId,
         name: formData.meta.name || "Unnamed Agent",
         role: formData.persona.role || "AI Assistant",
         createdAt: new Date().toISOString(),
         yaml: manifestContent,
-        manifest: JSON.parse(JSON.stringify(formData)), // Save structured manifest
+        manifest: JSON.parse(JSON.stringify(formData)),
         did: `did:aix:${id.replace(/-/g, '').slice(0, 32)}`,
         kyc_tier: formData.identity_layer.kyc_tier as any,
         abom: {
@@ -212,9 +208,8 @@ export default function AgentBuilderPage() {
       };
 
       saveAgent(record);
-      handleDownload(); // Trigger file download
+      handleDownload();
       
-      // Short delay to ensure download starts before navigation
       setTimeout(() => {
         router.push(`/agents/${record.id}`);
       }, 500);
@@ -519,16 +514,16 @@ export default function AgentBuilderPage() {
                         </select>
                       </div>
 
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Currency (Optional)</label>
-                          <input
-                            type="text"
-                            value={formData.economics.currency || ""}
-                            onChange={(e) => updateEconomics("currency", e.target.value)}
-                            placeholder="e.g. PI"
-                            className="input"
-                          />
-                        </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Currency (Optional)</label>
+                        <input
+                          type="text"
+                          value={formData.economics.currency || ""}
+                          onChange={(e) => updateEconomics("currency", e.target.value)}
+                          placeholder="e.g. PI"
+                          className="input"
+                        />
+                      </div>
 
                       <div className="pt-6 border-t border-white/[0.05] mt-6">
                         <div className="flex items-center gap-3 text-xs text-[#8888a0]">
@@ -539,6 +534,7 @@ export default function AgentBuilderPage() {
                     </div>
                   )}
 
+                  {/* Step 5: SBOM */}
                   {currentStep === 5 && (
                     <div className="space-y-4">
                       <div className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/10 mb-6">
@@ -584,6 +580,11 @@ export default function AgentBuilderPage() {
                           onChange={(e) => updateAbom("dependencies", e.target.value.split(",").map(s => s.trim()))}
                         />
                       </div>
+                    </div>
+                  )}
+
+                  {/* Step 6: Identity */}
+                  {currentStep === 6 && (
                     <div className="space-y-4">
                       <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 mb-6">
                         <div className="flex gap-3">
