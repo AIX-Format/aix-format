@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { kv, NS, TTL } from "../../../../core/storage/redis.ts";
+import { kv, NS, TTL } from "@/lib/storage/redis";
 import { AuthResult, PiUser } from "@/lib/types";
 
 const SESSION_TTL = TTL.SESSION;
-
 
 /**
  * POST /api/auth
@@ -14,34 +13,38 @@ export async function POST(req: NextRequest) {
     const { accessToken } = await req.json();
 
     if (!accessToken) {
-      return NextResponse.json({ error: "Missing accessToken" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing accessToken" },
+        { status: 400 }
+      );
     }
 
     // 1. Verify with Pi Platform
-    const piRes = await fetch('https://api.minepi.com/v2/me', {
-      headers: { Authorization: `Bearer ${accessToken}` }
+    const piRes = await fetch("https://api.minepi.com/v2/me", {
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
 
     if (!piRes.ok) {
-      return NextResponse.json({ error: "Invalid Pi accessToken" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Invalid Pi accessToken" },
+        { status: 401 }
+      );
     }
 
-    const userData = await piRes.json() as PiUser;
-    
-    // 2. Store session in KV
-    // Pattern: aix:session:{uid}
+    const userData = (await piRes.json()) as PiUser;
+
+    // 2. Store session in KV — Pattern: aix:session:{uid}
     const sessionKey = `${NS.SESSION}:${userData.uid}`;
     await kv.set(sessionKey, { user: userData, accessToken }, { ex: SESSION_TTL });
 
-    const result: AuthResult = {
-      user: userData,
-      accessToken
-    };
-
+    const result: AuthResult = { user: userData, accessToken };
     return NextResponse.json(result);
   } catch (error) {
     console.error("Auth Error:", error);
-    return NextResponse.json({ error: "Authentication failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Authentication failed" },
+      { status: 500 }
+    );
   }
 }
 
