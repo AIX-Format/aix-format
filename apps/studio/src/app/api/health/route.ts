@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { kv } from "@/lib/storage/redis";
-
+import { NextResponse } from 'next/server';
+import { kv } from "@/lib/redis";
+import { getRegistry } from '@/lib/registry';
 
 /**
  * GET /api/health
