@@ -113,6 +113,28 @@ export function scanAgent(agent: any): ScanReport {
     score += 5; // Neutral if no endpoints
   }
 
+  // 11. Rule 11: build_provenance existence for high-risk agents → +10
+  const isHighRisk = agent.abom?.risk_level === 'high' || hasUncheckedDangerous;
+  if (isHighRisk) {
+    if (agent.abom?.build_provenance) {
+      score += 10;
+    } else {
+      risks.push({ category: 'Security', severity: 'critical', message: 'High-risk agent missing build provenance' });
+      recommendations.push('Add build_provenance metadata to verify the agent construction process');
+    }
+  }
+
+  // 12. Rule 12: saas_services not empty for SaaS-heavy agents → +10
+  const isSaasHeavy = agent.meta?.type === 'saas' || (agent.abom?.saas_services?.length || 0) > 3;
+  if (isSaasHeavy) {
+    if (agent.abom?.saas_services && agent.abom.saas_services.length > 0) {
+      score += 10;
+    } else {
+      risks.push({ category: 'Supply Chain', severity: 'high', message: 'SaaS-heavy agent missing service declarations' });
+      recommendations.push('Declare all upstream SaaS services used by this agent in the ABOM');
+    }
+  }
+
   // Cap score at 100
   score = Math.min(100, score);
 

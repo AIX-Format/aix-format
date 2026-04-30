@@ -80,6 +80,12 @@ export interface AbomData {
     aboms?: any[];
     infrastructure?: any[];
   };
+  build_provenance?: {
+    builder_id: string;
+    build_type: string;
+    metadata?: Record<string, any>;
+    verified: boolean;
+  };
 }
 
 export interface McpAgent {
@@ -116,6 +122,7 @@ export interface Manifest {
     format_version: string;
     author: string;
     description: string;
+    type?: 'persona' | 'utility' | 'saas' | 'hybrid';
   };
   persona: {
     role: string;
