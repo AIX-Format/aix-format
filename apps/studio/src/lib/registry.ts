@@ -34,14 +34,14 @@ export async function saveRegistry(entries: RegistryEntry[]): Promise<void> {
  */
 export async function updateRegistryEntry(entry: RegistryEntry): Promise<void> {
   const entries = await getRegistry();
-  const index = entries.findIndex(e => e.did === entry.did);
-  
+  const index = entries.findIndex((e) => e.did === entry.did);
+
   if (index !== -1) {
     entries[index] = entry;
   } else {
     entries.push(entry);
   }
-  
+
   await saveRegistry(entries);
 }
 
@@ -50,6 +50,6 @@ export async function updateRegistryEntry(entry: RegistryEntry): Promise<void> {
  */
 export async function deleteRegistryEntry(did: string): Promise<void> {
   const entries = await getRegistry();
-  const filtered = entries.filter(e => e.did !== did);
+  const filtered = entries.filter((e) => e.did !== did);
   await saveRegistry(filtered);
 }

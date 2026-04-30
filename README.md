@@ -40,7 +40,8 @@
 * [6 🛠️ Quick Start | البدء السريع](#-quick-start--البدء-السريع)
 * [7 🗺️ Roadmap | خارطة الطريق](#-roadmap--خارطة-الطريق)
 * [8 🤝 How to Contribute | كيف تساهم](#-how-to-contribute--كيف-تساهم)
-* [9 🏛️ The Sovereign Hive | الخلية السيادية](#-the-sovereign-hive--الخلية-السيادية)
+* [9 📚 Documentation Suite | حقيبة التوثيق](#-documentation-suite--حقيبة-التوثيق)
+* [10 🏛️ The Sovereign Hive | الخلية السيادية](#-the-sovereign-hive--الخلية-السيادية)
 
 </details>
 
@@ -377,6 +378,18 @@ npm test
 
 ---
 
+## 📚 Documentation Suite | حقيبة التوثيق
+
+**[EN]** Deep dives into building, regulating, and integrating with the AIX ecosystem.
+**[AR]** تعمق في بناء وتوثيق ودمج نظام AIX.
+
+- **[Builders Guide (دليل المطورين)](./docs/BUILDERS_GUIDE.md)**: From idea to monetization.
+- **[Regulators Note (مذكرة المنظمين)](./docs/REGULATORS_NOTE.md)**: Compliance, ABOM, and accountability.
+- **[Full Manifest Example (مثال كامل)](./docs/examples/full-agent.aix.json)**: v1.3.0 enhanced schema implementation.
+- **[Technical Specification (المواصفات الفنية)](./docs/AIX_SPEC.md)**: The core protocol details.
+
+---
+
 ## 🤝 How to Contribute | كيف تساهم
 
 🇬🇧 **[EN]** We welcome contributions! Please read our [CONTRIBUTING.md] and check the open issues.
@@ -450,3 +463,13 @@ npm test
 <img src="https://img.shields.io/badge/Research-Claude_4.6_x_Antigravity-8b5cf6?style=for-the-badge" alt="Research"/>
 
 </div>
+
+## 🚀 Micro SaaS Features (April 2026 Update)
+
+We've introduced three core components to transform AIX Format into a full Micro SaaS ecosystem:
+
+1.  **ABOM Risk Scanner**: A high-fidelity security analysis engine for AI Agent manifests.
+2.  **AIX MCP Server**: A standards-compliant Model Context Protocol server for agent discovery and validation.
+3.  **Sovereign Monetization**: A multi-tier subscription system integrated into AIX Studio.
+
+Visit `/scan` to analyze your agents or `/pricing` to explore our protocol tiers.

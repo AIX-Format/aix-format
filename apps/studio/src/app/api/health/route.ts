@@ -2,76 +2,74 @@ import { NextResponse } from 'next/server';
 import { kv } from "@/lib/redis";
 import { getRegistry } from '@/lib/registry';
 
+/**
+ * GET /api/health
+ * Returns system health including Redis connectivity and Pi Network status.
+ * Used as Vercel pre-deployment smoke test and monitor.
+ */
 export async function GET() {
+  const checks: Record<string, { status: "ok" | "error" | "degraded"; latencyMs?: number; message?: string }> = {};
   const startTime = Date.now();
-  
-  // 1. Check KV Status
-  let kvStatus: 'connected' | 'unavailable' = 'unavailable';
-  let kvLatency = 0;
+
+  // 1. Redis check
+  const redisStart = Date.now();
   try {
-    const pingStart = Date.now();
-    await kv.set('aix_health_heartbeat', Date.now());
-    kvStatus = 'connected';
-    kvLatency = Date.now() - pingStart;
-  } catch (error) {
-    console.error('Health Check: KV Ping failed', error);
+    const heartbeatKey = "aix:health:heartbeat";
+    await kv.set(heartbeatKey, Date.now(), { ex: 30 });
+    const pong = await kv.get<number>(heartbeatKey);
+    checks.redis = {
+      status: pong !== null ? "ok" : "error",
+      latencyMs: Date.now() - redisStart,
+      message: pong !== null ? "Connected" : "Ping returned null",
+    };
+  } catch (err) {
+    checks.redis = {
+      status: "error",
+      latencyMs: Date.now() - redisStart,
+      message: err instanceof Error ? err.message : String(err),
+    };
   }
 
-  // 2. Get Agent Count
-  let agentCount = 0;
+  // 2. Pi Network Availability (3s timeout)
+  const piStart = Date.now();
   try {
-    const registry = await getRegistry();
-    agentCount = registry.length;
-  } catch (error) {
-    console.error('Health Check: Registry count failed', error);
-  }
-
-  // 3. Check Pi Network Availability (3s timeout)
-  let piStatus: 'operational' | 'degraded' | 'unavailable' = 'unavailable';
-  let piLatency = 0;
-  try {
-    const piStart = Date.now();
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
     
-    const response = await fetch('https://api.minepi.com/v2/health', {
+    const response = await fetch("https://api.minepi.com/v2/health", {
       signal: controller.signal,
-      cache: 'no-store'
+      cache: "no-store"
     });
     
     clearTimeout(timeoutId);
-    if (response.ok) {
-      piStatus = 'operational';
-      piLatency = Date.now() - piStart;
-    } else {
-      piStatus = 'degraded';
-    }
-  } catch (error) {
-    console.error('Health Check: Pi Network check failed', error);
+    checks.piNetwork = {
+      status: response.ok ? "ok" : "degraded",
+      latencyMs: Date.now() - piStart,
+      message: response.ok ? "Operational" : `HTTP ${response.status}`,
+    };
+  } catch (err) {
+    checks.piNetwork = {
+      status: "error",
+      latencyMs: Date.now() - piStart,
+      message: err instanceof Error ? err.message : String(err),
+    };
   }
 
-  // 4. Overall Status
-  const isHealthy = kvStatus === 'connected' && piStatus !== 'unavailable';
+  const allOk = Object.values(checks).every((c) => c.status === "ok");
 
-  return NextResponse.json({
-    status: isHealthy ? 'healthy' : 'degraded',
-    kv: {
-      status: kvStatus,
-      latency: kvLatency
-    },
-    piNetwork: {
-      status: piStatus,
-      latency: piLatency
-    },
-    registry: {
-      agents: agentCount
-    },
-    system: {
-      uptime: process.uptime(),
-      version: '1.0.0',
-      nodeEnv: process.env.NODE_ENV,
+  return NextResponse.json(
+    {
+      status: allOk ? "healthy" : "degraded",
+      version: process.env.NEXT_PUBLIC_STUDIO_VERSION ?? "1.3.0",
       timestamp: new Date().toISOString(),
-      totalLatency: Date.now() - startTime
-    }
-  });
+      totalLatencyMs: Date.now() - startTime,
+      checks,
+      system: {
+        uptime: process.uptime(),
+        nodeEnv: process.env.NODE_ENV,
+      }
+    },
+    { status: allOk ? 200 : 503 }
+  );
 }
+

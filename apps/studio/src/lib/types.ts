@@ -38,6 +38,7 @@ export interface AgentRecord {
   status?: 'online' | 'offline' | 'busy';
   successRate?: number;
   tasksCompleted?: number;
+  manifest?: Manifest;
   published?: boolean;
 }
 
@@ -51,6 +52,12 @@ export interface AbomData {
   integrity_hash: string;
   capabilities: string[];
   dependencies: string[]; // constituents
+  saas_services?: Array<{
+    name: string;
+    endpoint?: string;
+    usage_policy?: string;
+    tier?: string;
+  }>;
   generated_by: string;
   timestamp: string;
   model?: {
@@ -66,6 +73,12 @@ export interface AbomData {
     license: string;
     contact?: string;
     txHash?: string; // Anchored on-chain (Sprint 4)
+  };
+  unified_bom?: {
+    saas?: any[];
+    ai_models?: any[];
+    aboms?: any[];
+    infrastructure?: any[];
   };
 }
 
@@ -120,7 +133,7 @@ export interface Manifest {
     id: string;
     authority: string;
     issuedAt: string;
-    kyc_tier?: number;
+    kyc_tier?: string;
   };
   economics: {
     pricing_model: string;
@@ -135,6 +148,13 @@ export interface Manifest {
 export interface PiUser {
   uid: string;
   username?: string;
+  credentials?: {
+    scopes: string[];
+    valid_until: {
+      timestamp: number;
+      iso8601: string;
+    };
+  };
 }
 
 export interface AuthResult {
@@ -252,3 +272,5 @@ export interface ScanResult {
   timestamp: string;
 }
 
+// Add missing types that might be referenced
+export type AbomRecord = ScanResult;
