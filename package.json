@@ -18,7 +18,6 @@
     "generate:types:unified": "json2ts -i schemas/aix.schema.json -o types/aix.d.ts --strictIndexSignatures --unreachableDefinitions",
     "generate:types": "json2ts -i \"schemas/**/*.json\" -o types/",
     "build": "tsc -p tsconfig.json",
-    "prepare": "npm run build",
     "studio:dev": "npm run dev --workspace=studio",
     "detective": "node apps/aix-detective/index.js",
     "lint": "echo 'Linting not configured yet'",
