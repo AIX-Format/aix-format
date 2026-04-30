@@ -40,8 +40,35 @@ export interface KycProof {
   verified_at: string;
   access_token_hash: string;
   challenge_binding_hash?: string;
-  blockchain_anchor?: any;
-  vla_device_registry?: any;
+  blockchain_anchor?: {
+    chain: string;
+    txid: string;
+    block_height?: number;
+    anchored_at: string;
+    anchor_hash: string;
+  };
+  vla_device_registry?: {
+    adapter: string;
+    hardware_id: string;
+  };
+}
+
+export interface PiKycOptions {
+  uidSalt?: string;
+  didMethod?: 'did:axiom' | 'did:web';
+  didAuthority?: string;
+  assuranceLevel?: 'low' | 'substantial' | 'high';
+  minAssuranceLevel?: 'low' | 'substantial' | 'high';
+  enforceJwtExpiry?: boolean;
+  enforceJwtAlg?: boolean;
+  allowedJwtAlgs?: string[];
+  challengeNonce?: string;
+  blockchainAnchor?: {
+    chain: string;
+    txid: string;
+    blockHeight?: number;
+    anchoredAt?: string;
+  };
 }
 
 export interface KycResponse {
@@ -53,7 +80,7 @@ export class PiKycAdapter {
   /**
    * Verify Pi KYC proof and generate an identity layer and KYC proof.
    */
-  static generateIdentity(piAuthResult: PiAuthResult, options: any = {}): KycResponse {
+  static generateIdentity(piAuthResult: PiAuthResult, options: PiKycOptions = {}): KycResponse {
     const { user, accessToken, signature, publicKey } = piAuthResult;
 
     if (!user || !user.uid) {
@@ -165,7 +192,7 @@ export class PiKycAdapter {
     return `${method}:${authority}:${subject}`;
   }
 
-  static validateJwtTimestamps(token: string, options: any = {}): void {
+  static validateJwtTimestamps(token: string, options: PiKycOptions = {}): void {
     if (!options.enforceJwtExpiry) return;
     const parts = token.split('.');
     if (parts.length < 2) throw new Error('Invalid Pi Auth Result: JWT format required when enforceJwtExpiry is enabled');
@@ -185,7 +212,7 @@ export class PiKycAdapter {
     }
   }
 
-  static validateJwtHeader(token: string, options: any = {}): void {
+  static validateJwtHeader(token: string, options: PiKycOptions = {}): void {
     if (!options.enforceJwtAlg) return;
     const parts = token.split('.');
     if (parts.length < 2) throw new Error('Invalid JWT format for header validation');
@@ -201,7 +228,7 @@ export class PiKycAdapter {
     }
   }
 
-  static enforceAssurancePolicy(level: string, options: any = {}): void {
+  static enforceAssurancePolicy(level: string, options: PiKycOptions = {}): void {
     if (!options.minAssuranceLevel) return;
     const order = ['low', 'substantial', 'high'];
     if (order.indexOf(level) < order.indexOf(options.minAssuranceLevel)) {
@@ -209,8 +236,8 @@ export class PiKycAdapter {
     }
   }
 
-  static buildBlockchainAnchor(anchor: any, accessTokenHash: string, timestamp: string): any {
-    if (!anchor.chain || !anchor.txid) {
+  static buildBlockchainAnchor(anchor: PiKycOptions['blockchainAnchor'], accessTokenHash: string, timestamp: string): any {
+    if (!anchor || !anchor.chain || !anchor.txid) {
       throw new Error('Invalid blockchainAnchor: chain and txid are required');
     }
     return {

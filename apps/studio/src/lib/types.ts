@@ -134,12 +134,72 @@ export interface Manifest {
 
 export interface PiUser {
   uid: string;
-  username: string;
+  username?: string;
 }
 
 export interface AuthResult {
   user: PiUser;
   accessToken: string;
+  signature?: string;
+  publicKey?: string;
+}
+
+export interface PiKycOptions {
+  uidSalt?: string;
+  didMethod?: 'did:axiom' | 'did:web';
+  didAuthority?: string;
+  assuranceLevel?: 'low' | 'substantial' | 'high';
+  minAssuranceLevel?: 'low' | 'substantial' | 'high';
+  enforceJwtExpiry?: boolean;
+  enforceJwtAlg?: boolean;
+  allowedJwtAlgs?: string[];
+  challengeNonce?: string;
+  blockchainAnchor?: {
+    chain: string;
+    txid: string;
+    blockHeight?: number;
+    anchoredAt?: string;
+  };
+}
+
+export interface IdentityLayer {
+  id: string;
+  authority: string;
+  issuedAt: string;
+  publicKey: {
+    algorithm: string;
+    value: string;
+    encoding: string;
+    fingerprint: string;
+  };
+}
+
+export interface KycProof {
+  version: string;
+  provider: string;
+  assurance_level: string;
+  uid_hash: string;
+  uid_hash_algorithm: string;
+  uid_hash_salted: boolean;
+  verified_at: string;
+  access_token_hash: string;
+  challenge_binding_hash?: string;
+  blockchain_anchor?: {
+    chain: string;
+    txid: string;
+    block_height?: number;
+    anchored_at: string;
+    anchor_hash: string;
+  };
+  vla_device_registry?: {
+    adapter: string;
+    hardware_id: string;
+  };
+}
+
+export interface KycResponse {
+  identity_layer: IdentityLayer;
+  kyc_proof: KycProof;
 }
 
 // ─── New Deployment Types ──────────────────────────────────────────────────
