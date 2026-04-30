@@ -719,7 +719,6 @@ export default function AgentBuilderPage() {
                 
                 <div className="flex-1 overflow-hidden relative">
                   {previewFormat === "visualizer" ? (
-<<<<<<< HEAD
                     <div className="flex-1 p-0">
                       <BOMVisualizer formData={formData} />
                     </div>
@@ -789,9 +788,6 @@ export default function AgentBuilderPage() {
                           </div>
                         </div>
                       </div>
-=======
-                    <BOMVisualizer formData={formData} />
->>>>>>> 84be82e (feat(builder): implement live SHA-256, smart validation, and deploy pipeline)
                   ) : (
                     <motion.div
                       key={manifestContent}
