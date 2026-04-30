@@ -104,12 +104,20 @@ export default function AgentBuilderPage() {
       capabilities: [] as string[],
       generated_by: "AIX-Studio",
       timestamp: new Date().toISOString(),
-      dependencies: [] as string[]
+      dependencies: [] as string[],
+      saas_services: [] as Array<{
+        name: string;
+        endpoint?: string;
+        usage_policy?: string;
+        tier?: string;
+      }>
     },
     mcp: {
       prompts: [] as McpPrompt[]
     }
   });
+
+  const [saasBomEnabled, setSaasBomEnabled] = useState(false);
 
   // Generate Manifest Content (Async)
   useEffect(() => {
@@ -121,6 +129,11 @@ export default function AgentBuilderPage() {
       if (formData.meta.name) {
         const slug = formData.meta.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
         manifest.identity_layer.id = `did:axiom:axiomid.app:agent-${slug}`;
+      }
+
+      // Handle SaaS-BOM toggle
+      if (!saasBomEnabled && manifest.abom) {
+        delete manifest.abom.saas_services;
       }
 
       // Update integrity hash based on dependencies
@@ -188,6 +201,8 @@ export default function AgentBuilderPage() {
     try {
       const yamlString = await stringifyYamlSafe(formData);
       
+      const integrityHash = await sha256Hex(manifestContent);
+      
       const entry: RegistryEntry = {
         did: formData.identity_layer.id,
         name: formData.meta.name,
@@ -196,7 +211,12 @@ export default function AgentBuilderPage() {
         kyc_tier: String(formData.identity_layer.kyc_tier || 0),
         specVersion: formData.meta.version,
         publishedAt: new Date().toISOString(),
-        yaml: yamlString
+        yaml: yamlString,
+        abom: {
+          ...formData.abom,
+          integrity_hash: integrityHash,
+          timestamp: new Date().toISOString()
+        }
       };
 
       await publishAgent(entry);
@@ -267,7 +287,7 @@ export default function AgentBuilderPage() {
     }));
   };
 
-  const updateAbom = (field: string, value: string | string[]) => {
+  const updateAbom = (field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
       abom: {
@@ -275,6 +295,40 @@ export default function AgentBuilderPage() {
         [field]: value
       }
     }));
+  };
+
+  const addSaasService = () => {
+    setFormData(prev => ({
+      ...prev,
+      abom: {
+        ...prev.abom,
+        saas_services: [
+          ...(prev.abom.saas_services || []),
+          { name: "", endpoint: "", usage_policy: "Standard", tier: "free" }
+        ]
+      }
+    }));
+  };
+
+  const removeSaasService = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      abom: {
+        ...prev.abom,
+        saas_services: (prev.abom.saas_services || []).filter((_, i) => i !== index)
+      }
+    }));
+  };
+
+  const updateSaasService = (index: number, field: string, value: string) => {
+    setFormData(prev => {
+      const services = [...(prev.abom.saas_services || [])];
+      services[index] = { ...services[index], [field]: value };
+      return {
+        ...prev,
+        abom: { ...prev.abom, saas_services: services }
+      };
+    });
   };
 
   const updateIdentity = (field: string, value: string | number) => {
@@ -584,6 +638,90 @@ export default function AgentBuilderPage() {
                           onChange={(e) => updateAbom("dependencies", e.target.value.split(",").map(s => s.trim()))}
                         />
                       </div>
+
+                      <div className="pt-6 border-t border-white/[0.05] mt-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <Cloud className="w-4 h-4 text-[#00dbe9]" />
+                            <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">SaaS-BOM (v1.3)</label>
+                          </div>
+                          <button
+                            onClick={() => setSaasBomEnabled(!saasBomEnabled)}
+                            className={cn(
+                              "relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                              saasBomEnabled ? "bg-[#00dbe9]" : "bg-white/10"
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                                saasBomEnabled ? "translate-x-5" : "translate-x-0"
+                              )}
+                            />
+                          </button>
+                        </div>
+
+                        {saasBomEnabled && (
+                          <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                              <p className="text-[10px] text-[#404050]">Track 3rd-party SaaS dependencies.</p>
+                              <button
+                                onClick={addSaasService}
+                                className="btn btn-sm btn-ghost hover:border-[#00dbe9]/50 text-[#00dbe9] py-1 h-auto"
+                              >
+                                <Plus className="w-3 h-3 mr-1" /> Add Service
+                              </button>
+                            </div>
+
+                            <div className="space-y-3">
+                              {(formData.abom.saas_services || []).map((service, idx) => (
+                                <div key={idx} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] space-y-3 relative group">
+                                  <button
+                                    onClick={() => removeSaasService(idx)}
+                                    className="absolute top-2 right-2 p-1.5 text-[#404050] hover:text-[#ef4444] transition-colors"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                  
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-bold text-white/40 uppercase">Service Name</label>
+                                      <input
+                                        placeholder="e.g. OpenAI API"
+                                        value={service.name}
+                                        onChange={(e) => updateSaasService(idx, "name", e.target.value)}
+                                        className="input py-2 text-xs"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-bold text-white/40 uppercase">Tier</label>
+                                      <select
+                                        value={service.tier}
+                                        onChange={(e) => updateSaasService(idx, "tier", e.target.value)}
+                                        className="input py-2 text-xs appearance-none bg-[#0e0e12]"
+                                      >
+                                        <option value="free">Free</option>
+                                        <option value="pro">Pro</option>
+                                        <option value="enterprise">Enterprise</option>
+                                      </select>
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-white/40 uppercase">Endpoint</label>
+                                    <input
+                                      placeholder="https://api.openai.com/v1"
+                                      value={service.endpoint}
+                                      onChange={(e) => updateSaasService(idx, "endpoint", e.target.value)}
+                                      className="input py-2 text-xs"
+                                    />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
 
@@ -608,7 +746,7 @@ export default function AgentBuilderPage() {
                               onClick={() => updateIdentity('kyc_tier', tier)}
                               className={cn(
                                 "p-3 rounded-xl border text-left transition-all",
-                                formData.identity_layer?.kyc_tier?.toString() === tier
+                                String(formData.identity_layer.kyc_tier) === tier
                                   ? "bg-emerald-500/10 border-emerald-500/50 text-white"
                                   : "bg-white/5 border-white/5 text-[#8888a0] hover:border-white/20"
                               )}
