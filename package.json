@@ -83,13 +83,18 @@
     "example": "examples"
   },
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ],
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "framer-motion": "^12.38.0",
     "js-yaml": "^4.1.1",
+    "lucide-react": "^1.14.0",
     "smol-toml": "^1.3.1",
     "tweetnacl": "^1.0.3",
-    "tweetnacl-util": "^0.15.1"
+    "tweetnacl-util": "^0.15.1",
+    "zod": "^4.4.1"
   },
   "devDependencies": {
     "json-schema-to-typescript": "^15.0.4",

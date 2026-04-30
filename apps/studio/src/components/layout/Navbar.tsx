@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { WalletButton } from "@/components/studio/WalletButton";
 interface PiUser {
   username: string;
   uid: string;
@@ -31,6 +32,8 @@ declare global {
 
 const navLinks = [
   { href: "/",               label: "Studio"          },
+  { href: "/pricing",        label: "Pricing"         },
+  { href: "/scan",           label: "Risk Scanner"    },
   { href: "/marketplace",    label: "Marketplace"     },
   { href: "/builder",        label: "Builder"         },
   { href: "/identity",       label: "Identity"        },
