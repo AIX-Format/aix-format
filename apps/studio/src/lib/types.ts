@@ -67,6 +67,12 @@ export interface AbomData {
     contact?: string;
     txHash?: string; // Anchored on-chain (Sprint 4)
   };
+  unified_bom?: {
+    saas?: any[];
+    ai_models?: any[];
+    aboms?: any[];
+    infrastructure?: any[];
+  };
 }
 
 export interface McpAgent {
@@ -252,3 +258,5 @@ export interface ScanResult {
   timestamp: string;
 }
 
+// Add missing types that might be referenced
+export type AbomRecord = ScanResult;

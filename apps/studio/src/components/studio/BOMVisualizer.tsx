@@ -129,7 +129,7 @@ export default function BOMVisualizer({ formData }: BOMVisualizerProps) {
       id: rootId,
       type: 'agent',
       position: { x: 400, y: 0 },
-      data: { label: formData.metadata?.name || 'Sovereign Agent' },
+      data: { label: formData.meta?.name || 'Sovereign Agent' },
     });
 
     const categories = [

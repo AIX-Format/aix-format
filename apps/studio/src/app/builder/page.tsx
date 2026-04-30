@@ -97,7 +97,10 @@ export default function AgentBuilderPage() {
       spec_version: "1.6",
       risk_level: "low",
       integrity_hash: "pending",
-      dependencies: [] as string[]
+      dependencies: [] as string[],
+      capabilities: [] as string[],
+      generated_by: "Agent-Builder",
+      timestamp: new Date().toISOString()
     },
     mcp: {
       prompts: [] as McpPrompt[]

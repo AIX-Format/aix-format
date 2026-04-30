@@ -30,6 +30,8 @@
     "sonner": "^1.7.4",
     "tailwind-merge": "^3.0.2",
     "tailwindcss": "^4.0.0",
+    "tweetnacl": "^1.0.3",
+    "tweetnacl-util": "^0.15.1",
     "viem": "^2.23.10",
     "wagmi": "^2.14.11"
   },
