@@ -135,6 +135,13 @@ export interface Manifest {
 export interface PiUser {
   uid: string;
   username?: string;
+  credentials?: {
+    scopes: string[];
+    valid_until: {
+      timestamp: number;
+      iso8601: string;
+    };
+  };
 }
 
 export interface AuthResult {

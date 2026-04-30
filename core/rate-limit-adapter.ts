@@ -1,4 +1,4 @@
-import { kv as upstashKv, NS } from './storage/redis.ts';
+import { kv as upstashKv, NS } from './storage/redis';
 
 /**
  * AIXTokenBucket
