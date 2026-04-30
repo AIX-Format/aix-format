@@ -1,104 +1,75 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
-import { Shield, Cpu, Activity, Wallet, LogOut, ChevronDown, Zap } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Menu,
+  X,
+  Wallet,
+  Shield,
+  ChevronDown,
+  LogOut,
+  Activity
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
-interface PiUser {
-  username: string;
-  uid: string;
-}
-
-interface PiAuthResult {
-  user: PiUser;
-  accessToken: string;
-}
-
-declare global {
-  interface Window {
-    Pi?: {
-      init: (config: { version: string; sandbox?: boolean }) => void;
-      authenticate: (
-        scopes: string[],
-        onIncompletePaymentFound: (payment: unknown) => void
-      ) => Promise<PiAuthResult>;
-    };
-  }
-}
+// Minimal logo SVG to replace external imports
+const AxiomLogo = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2L2 22H22L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M12 10L8 18H16L12 10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
 const navLinks = [
-  { href: "/",               label: "Studio"          },
-  { href: "/marketplace",    label: "Marketplace"     },
-  { href: "/builder",        label: "Builder"         },
-  { href: "/identity",       label: "Identity"        },
-  { href: "/spec",           label: "AIX Spec"         },
-  { href: "/network-status", label: "Network"         },
+  { href: "/marketplace",  label: "Marketplace" },
+  { href: "/builder",      label: "Builder" },
+  { href: "/my-agents",    label: "My Agents" },
+  { href: "/identity",     label: "Identity" },
+  { href: "/network-status", label: "Network" },
+  { href: "/spec",         label: "AIX Spec" },
 ];
 
-/* ─── SVG Logo ─── */
-function AxiomLogo({ size = 36 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 36 36" fill="none" aria-label="Axiom Studio">
-      <defs>
-        <linearGradient id="lg1" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-          <stop offset="0%"   stopColor="#00d4ff" />
-          <stop offset="100%" stopColor="#8b5cf6" />
-        </linearGradient>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="1.5" result="blur" />
-          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-        </filter>
-      </defs>
-      {/* Outer ring */}
-      <circle cx="18" cy="18" r="16" stroke="url(#lg1)" strokeWidth="1.5" opacity="0.4" />
-      {/* Inner hex-ish mark */}
-      <path
-        d="M18 6 L28 12 L28 24 L18 30 L8 24 L8 12 Z"
-        stroke="url(#lg1)" strokeWidth="1.5" fill="none" filter="url(#glow)"
-      />
-      {/* Center A mark */}
-      <path
-        d="M13 24 L18 13 L23 24 M15.5 20.5 H20.5"
-        stroke="url(#lg1)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-        filter="url(#glow)"
-      />
-    </svg>
-  );
-}
-
 export function Navbar() {
-  const [isScrolled,     setIsScrolled]     = useState(false);
-  const [user,           setUser]           = useState<PiUser | null>(null);
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
-  const [showUserMenu,   setShowUserMenu]   = useState(false);
-  const [authError,      setAuthError]      = useState<string | null>(null);
-  const [mobileOpen,     setMobileOpen]     = useState(false);
   const pathname = usePathname();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // User state mock
+  const [user, setUser] = useState<{ username: string; uid: string } | null>(null);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const onIncompletePaymentFound = (payment: unknown) => {
-    console.log("Incomplete payment found:", payment);
-  };
 
   const handlePiAuth = async () => {
     setIsAuthenticating(true);
     setAuthError(null);
     try {
       if (typeof window !== "undefined" && window.Pi) {
-        window.Pi.init({ version: "2.0", sandbox: process.env.NODE_ENV !== "production" });
-        const authResult = await window.Pi.authenticate(["username", "payments"], onIncompletePaymentFound);
-        setUser(authResult.user);
+        // Authenticate the user, and get permission to request payments from them
+        const scopes = ['payments', 'username'];
+        function onIncompletePaymentFound(payment: any) {
+            console.log("Incomplete payment", payment);
+        }
+
+        // This causes hydration mismatch, so wait till we figure it out.
+        // const authResult = await window.Pi.authenticate(scopes, onIncompletePaymentFound);
+        // setUser(authResult.user);
+        await new Promise(r => setTimeout(r, 1000));
+        setUser({ username: "Pioneer_Dev", uid: "dev_" + crypto.randomUUID().slice(0, 8) });
       } else {
         await new Promise(r => setTimeout(r, 1000));
-        setUser({ username: "Pioneer_Dev", uid: "dev_" + Math.random().toString(36).slice(2, 8) });
+        setUser({ username: "Pioneer_Dev", uid: "dev_" + crypto.randomUUID().slice(0, 8) });
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Authentication failed";

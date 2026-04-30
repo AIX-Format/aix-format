@@ -1,9 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 
 export function MetaForm() {
   const [formData, setFormData] = useState({
@@ -18,7 +15,7 @@ export function MetaForm() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="agent-name">Agent Name</Label>
+          <label htmlFor="agent-name">Agent Name</label>
           <input 
             id="agent-name"
             placeholder="e.g. Nexus Prime"
@@ -28,7 +25,7 @@ export function MetaForm() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="agent-version">Version</Label>
+          <label htmlFor="agent-version">Version</label>
           <input 
             id="agent-version"
             placeholder="1.0.0"
@@ -40,7 +37,7 @@ export function MetaForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="agent-author">Author (DID or Username)</Label>
+        <label htmlFor="agent-author">Author (DID or Username)</label>
         <input 
           id="agent-author"
           placeholder="did:web:axiom.studio"
@@ -51,7 +48,7 @@ export function MetaForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="agent-desc">Description</Label>
+        <label htmlFor="agent-desc">Description</label>
         <textarea 
           id="agent-desc"
           placeholder="What does this agent do?"
@@ -62,7 +59,7 @@ export function MetaForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="agent-license">License</Label>
+        <label htmlFor="agent-license">License</label>
         <select 
           id="agent-license"
           className="input bg-[var(--color-surface)]"
