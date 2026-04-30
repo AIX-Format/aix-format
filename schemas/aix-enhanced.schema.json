@@ -276,8 +276,8 @@
         "temperature": {
           "type": "number",
           "description": "Sampling temperature",
-          "minimum": 0,
-          "maximum": 2
+          "minimum": 0.0,
+          "maximum": 2.0
         },
         "context_window": {
           "type": "integer",
@@ -592,8 +592,8 @@
             },
             "similarity_threshold": {
               "type": "number",
-              "minimum": 0,
-              "maximum": 1
+              "minimum": 0.0,
+              "maximum": 1.0
             },
             "max_results": {
               "type": "integer",

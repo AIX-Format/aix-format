@@ -85,7 +85,7 @@ export class PiKycAdapter {
       }
     };
 
-        const kyc_proof = {
+    const kyc_proof = {
       version: '2.0',
       provider: "pi_network",
       assurance_level: options.assuranceLevel || 'substantial',
@@ -110,7 +110,7 @@ export class PiKycAdapter {
       };
     }
 
-return { identity_layer, kyc_proof };
+    return { identity_layer, kyc_proof };
   }
 
   static buildDid(method, authority, subject) {

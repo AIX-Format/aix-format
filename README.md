@@ -1,4 +1,5 @@
 <div align="center">
+<<<<<<< HEAD
 
 <a href="https://github.com/Moeabdelaziz007/aix-format">
   <img src="./docs/aix-logo.svg" width="720" alt="AIX FORMAT — Sovereign Agent Standard Logo" />
@@ -24,6 +25,11 @@
 >
 > **[AR]** *المعيار المفتوح الوحيد الذي يجمع تعريف الوكيل الكامل + هوية موقّعة بـ KYC + اقتصاديات في ملف واحد قابل للنقل.*
 
+=======
+  <img src="./apps/studio/public/globe.svg" width="120" alt="Logo"/>
+  <h3>The Global Marketplace for Autonomous AI Agents</h3>
+  <p>Powered by <b>AIX (Artificial Intelligence eXchange)</b> format and secured by <b>Pi Network KYC</b>.</p>
+>>>>>>> remotes/origin/feat/kyc-wizard-tts-12299921071301084280
 </div>
 
 ---
@@ -55,6 +61,7 @@
 
 ---
 
+<<<<<<< HEAD
 ## ✨ Zero-Experience KYC & Live Voice Setup (تجربة KYC سلسة والصوت المباشر)
 
 **[EN]** We believe AI should be accessible to everyone, not just engineers. In upcoming updates, AIX will support **Agentic KYC**—where AI agents guide you through the KYC and setup processes autonomously with a visually pleasing, zero-code UI.
@@ -73,10 +80,11 @@
 
 ---
 
+=======
+>>>>>>> remotes/origin/feat/kyc-wizard-tts-12299921071301084280
 ## 🏗️ Architecture (الهندسة المعمارية)
 
-**[EN]** The project is structured as a modern Monorepo, bridging the core AIX parser with a high-end Next.js front-end.
-**[AR]** تم بناء المشروع على هيكل Monorepo حديث، يربط بين المحلل الأساسي لـ AIX وواجهة أمامية متطورة مبنية بـ Next.js.
+The project is structured as a modern Monorepo, bridging the core AIX parser with a high-end Next.js front-end.
 
 ```mermaid
 graph TD
@@ -97,6 +105,7 @@ graph TD
     Core -->|Deploy to M2M Economy| PiNodes[(🌐 Pi Nodes / MCP)]
 ```
 
+<<<<<<< HEAD
 ---
 
 ## 🎯 The Problem We Solve | المشكلة التي نحلها
@@ -319,6 +328,32 @@ git clone https://github.com/Moeabdelaziz007/aix-format.git
 cd aix-format && npm install
 
 # Launch Sovereign Studio | تشغيل الاستوديو
+=======
+### 🌟 Key Features
+
+1. **Step-by-Step Setup Wizard:** A guided, beginner-friendly process to configure and deploy agents without coding knowledge.
+2. **Interactive Voice Orb with TTS:** Speak to configure agents, and the AIX engine will provide audible feedback confirmation.
+3. **Quantum Topology KYC Security:** High-end visual architecture for Agentic KYC bindings, ensuring a Sovereign Proof of Ownership through Ed25519 signatures and the `@pinetwork-js/sdk`.
+4. **Glassmorphism UI ("Sovereign Aether"):** Ethereal design system relying on deep indigos, charcoals, and translucent layers.
+5. **Polyglot & Model Agnostic:** The Studio acts as the Gateway. The execution layer (AIX core) is designed to run seamlessly on Go/Rust backend execution engines in the future, supporting any LLM.
+
+---
+
+## 🛠️ Quick Start
+
+This repository uses npm workspaces (`apps/studio` and `core/`).
+
+### Prerequisites
+- Node.js >= 18.0.0
+- Pi Browser (for full authentication testing)
+
+### Installation
+```bash
+# Install dependencies for both core and studio
+npm install
+
+# Run the Studio development server
+>>>>>>> remotes/origin/feat/kyc-wizard-tts-12299921071301084280
 npm run dev --prefix apps/studio
 
 # Validate an agent file | التحقق من ملف وكيل
@@ -331,11 +366,11 @@ node bin/aix-validate.js my-agent.aix --strict-kyc --security
 npm test
 ```
 
-**[EN]** Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-**[AR]** افتح [http://localhost:3000](http://localhost:3000) في متصفحك لترى النتيجة.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ---
 
+<<<<<<< HEAD
 ## 🗺️ Roadmap | خارطة الطريق
 
 <table width="100%">
@@ -344,12 +379,20 @@ npm test
 
 **🔴 Phase 1 — Foundation**
 *Days 1–30*
+=======
+## 🔒 AIX Agent Runtime Validator (CLI)
+
+The repository includes a strict validation tool designed for CI/CD pipelines and deployment gateways. This ensures no agent enters the network without meeting structural, cryptographic, and security constraints.
+
+### Usage
+>>>>>>> remotes/origin/feat/kyc-wizard-tts-12299921071301084280
 
 - [ ] A2A AgentCard bidirectional converter
 - [ ] `did:web` / `did:key` W3C DID support
 - [ ] MCP server checksum validation
 - [ ] OSSA v0.5 compatibility layer
 
+<<<<<<< HEAD
 </td>
 <td width="33%" valign="top">
 
@@ -391,9 +434,25 @@ npm test
 ---
 
 ## 🤝 How to Contribute | كيف تساهم
+=======
+### Flags
+
+- `--strict-kyc`: **(Important)** Enforces that the agent is KYC-verified. Fails the validation if a valid `kyc_proof` is missing, or if the `identity_layer` DID is invalid. Also requires `meta.version` to be a `2.x.x` version.
+- `--security`: Verifies the SHA-256 checksum embedded in the `.aix` payload matches the actual file hash.
+- `--verbose`: Outputs deep inspection data (capabilities, APIs, MCP servers, warnings).
+
+### GitHub Actions
+
+A GitHub action is included (`.github/workflows/aix-validation.yml`) which automatically validates all modified `.aix` payloads in Pull Requests, running with the `--strict-kyc` and `--security` flags enabled. If an agent fails KYC checks, the PR is blocked.
+
+---
+
+## 🤝 Credits & Maintainers
+>>>>>>> remotes/origin/feat/kyc-wizard-tts-12299921071301084280
 
 🇬🇧 **[EN]** We welcome contributions! Please read our [CONTRIBUTING.md] and check the open issues.
 
+<<<<<<< HEAD
 🇦🇪 **[AR]** نرحب بمساهماتكم! يُرجى قراءة ملف المساهمة والاطلاع على المهام المفتوحة.
 
 ---
@@ -473,3 +532,6 @@ We've introduced three core components to transform AIX Format into a full Micro
 3.  **Sovereign Monetization**: A multi-tier subscription system integrated into AIX Studio.
 
 Visit `/scan` to analyze your agents or `/pricing` to explore our protocol tiers.
+=======
+*We are building the trust layer for the Machine Economy.*
+>>>>>>> remotes/origin/feat/kyc-wizard-tts-12299921071301084280

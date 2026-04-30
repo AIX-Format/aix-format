@@ -627,24 +627,56 @@ export class AIXParser {
           message: 'Memory MB must be a positive integer'
         });
       }
+
+      if (hw.storage_mb !== undefined && (!Number.isInteger(hw.storage_mb) || hw.storage_mb < 1)) {
+        this.errors.push({
+          code: 'INVALID_VALUE',
+          section: 'requirements.hardware',
+          field: 'storage_mb',
+          message: 'Storage MB must be a positive integer'
+        });
+      }
+
+      if (hw.gpu_memory_mb !== undefined && (!Number.isInteger(hw.gpu_memory_mb) || hw.gpu_memory_mb < 1)) {
+        this.errors.push({
+          code: 'INVALID_VALUE',
+          section: 'requirements.hardware',
+          field: 'gpu_memory_mb',
+          message: 'GPU memory MB must be a positive integer'
+        });
+      }
+    }
+
+    if (requirements.network) {
+      const net = requirements.network;
+      if (net.bandwidth_mbps !== undefined && (typeof net.bandwidth_mbps !== 'number' || net.bandwidth_mbps < 0)) {
+        this.errors.push({
+          code: 'INVALID_VALUE',
+          section: 'requirements.network',
+          field: 'bandwidth_mbps',
+          message: 'Bandwidth must be a non-negative number'
+        });
+      }
     }
 
     if (requirements.vla) {
-      if (!requirements.vla.adapter) {
+      const vla = requirements.vla;
+      if (!vla.adapter) {
         this.errors.push({
           code: 'MISSING_FIELD',
           section: 'requirements.vla',
           field: 'adapter',
-          message: "Cyber-physical agent requires a VLA adapter in requirements.vla"
+          message: `Required field 'requirements.vla.adapter' is missing`
         });
       } else {
         const allowedAdapters = ['openpi', 'π0.7', 'generic'];
+        const validAdapters = allowedAdapters;
         if (!allowedAdapters.includes(requirements.vla.adapter)) {
           this.errors.push({
             code: 'INVALID_VALUE',
             section: 'requirements.vla',
             field: 'adapter',
-            message: "VLA adapter must be one of: " + allowedAdapters.join(', ')
+            message: `Adapter must be one of: ${validAdapters.join(', ')}`
           });
         }
       }
@@ -1067,7 +1099,6 @@ export class AIXAgent {
   toString() {
     return `AIX Agent: ${this.meta.name} (${this.meta.id})`;
   }
-
   /**
    * Validate Live Voice settings.
    * Results are stored in this.errors and this.warnings.
