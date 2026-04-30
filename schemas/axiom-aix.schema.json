@@ -747,6 +747,56 @@
           }
         }
       }
+    },
+    "unified_bom": {
+      "type": "object",
+      "description": "Unified BOM (SaaS-BOM, AI-BOM, Infra-BOM) for regulatory compliance and EU AI Act.",
+      "properties": {
+        "saas_refs": {
+          "type": "array",
+          "description": "References to SaaS dependencies.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ai_refs": {
+          "type": "array",
+          "description": "References to AI/ML models, datasets, or providers.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "infra_refs": {
+          "type": "array",
+          "description": "References to Cloud resources and infrastructure.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "risk_refs": {
+          "type": "array",
+          "description": "Identified risk profiles and threat mitigations.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "compliance_profiles": {
+          "type": "array",
+          "description": "Target compliance frameworks (e.g., EU_AI_ACT, SOC2_TYPE_2).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "export_artifacts": {
+          "type": "array",
+          "description": "URLs or pointers to generated compliance export bundles.",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "additionalProperties": true
     }
   },
   "additionalProperties": true

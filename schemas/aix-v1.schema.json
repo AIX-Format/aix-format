@@ -4,24 +4,40 @@
   "title": "AIX Format Schema v1.0",
   "description": "JSON Schema for AIX (Artificial Intelligence eXchange) file format. Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2026",
   "type": "object",
-  "required": ["meta", "persona", "security"],
+  "required": [
+    "meta",
+    "persona",
+    "security"
+  ],
   "properties": {
     "meta": {
       "type": "object",
       "description": "Agent metadata and identification",
-      "required": ["version", "id", "name", "created", "author"],
+      "required": [
+        "version",
+        "id",
+        "name",
+        "created",
+        "author"
+      ],
       "properties": {
         "version": {
           "type": "string",
           "description": "AIX format version (semantic versioning)",
           "pattern": "^\\d+\\.\\d+(\\.\\d+)?(-[a-z0-9.]+)?(\\+[a-z0-9.]+)?$",
-          "examples": ["1.0", "1.0.0", "1.0.0-beta.1"]
+          "examples": [
+            "1.0",
+            "1.0.0",
+            "1.0.0-beta.1"
+          ]
         },
         "id": {
           "type": "string",
           "description": "Unique identifier (UUID v4)",
           "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
-          "examples": ["550e8400-e29b-41d4-a716-446655440000"]
+          "examples": [
+            "550e8400-e29b-41d4-a716-446655440000"
+          ]
         },
         "name": {
           "type": "string",
@@ -37,7 +53,9 @@
           "type": "string",
           "description": "Creation timestamp (ISO 8601)",
           "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?$",
-          "examples": ["2026-04-24T10:30:00Z"]
+          "examples": [
+            "2026-04-24T10:30:00Z"
+          ]
         },
         "updated": {
           "type": "string",
@@ -63,7 +81,11 @@
         "license": {
           "type": "string",
           "description": "License identifier (SPDX format)",
-          "examples": ["MIT", "Apache-2.0", "GPL-3.0"]
+          "examples": [
+            "MIT",
+            "Apache-2.0",
+            "GPL-3.0"
+          ]
         },
         "homepage": {
           "type": "string",
@@ -88,12 +110,20 @@
           "type": "string",
           "description": "Primary language (ISO 639-1)",
           "pattern": "^[a-z]{2}$",
-          "examples": ["en", "es", "fr"]
+          "examples": [
+            "en",
+            "es",
+            "fr"
+          ]
         },
         "framework": {
           "type": "string",
           "description": "Target AI framework",
-          "examples": ["openai", "anthropic", "cohere"]
+          "examples": [
+            "openai",
+            "anthropic",
+            "cohere"
+          ]
         },
         "runtime_version": {
           "type": "string",
@@ -105,7 +135,10 @@
     "persona": {
       "type": "object",
       "description": "Agent personality and behavior",
-      "required": ["role", "instructions"],
+      "required": [
+        "role",
+        "instructions"
+      ],
       "properties": {
         "role": {
           "type": "string",
@@ -116,12 +149,20 @@
         "tone": {
           "type": "string",
           "description": "Communication style",
-          "examples": ["friendly", "professional", "casual"]
+          "examples": [
+            "friendly",
+            "professional",
+            "casual"
+          ]
         },
         "style": {
           "type": "string",
           "description": "Response style",
-          "examples": ["concise", "detailed", "technical"]
+          "examples": [
+            "concise",
+            "detailed",
+            "technical"
+          ]
         },
         "instructions": {
           "type": "string",
@@ -181,7 +222,10 @@
       "description": "Agent capabilities",
       "items": {
         "type": "object",
-        "required": ["name", "description"],
+        "required": [
+          "name",
+          "description"
+        ],
         "properties": {
           "name": {
             "type": "string",
@@ -234,7 +278,10 @@
       "description": "API integrations",
       "items": {
         "type": "object",
-        "required": ["name", "base_url"],
+        "required": [
+          "name",
+          "base_url"
+        ],
         "properties": {
           "name": {
             "type": "string",
@@ -259,11 +306,21 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["bearer", "api_key", "oauth2", "basic", "none"]
+                "enum": [
+                  "bearer",
+                  "api_key",
+                  "oauth2",
+                  "basic",
+                  "none"
+                ]
               },
               "location": {
                 "type": "string",
-                "enum": ["header", "query", "body"]
+                "enum": [
+                  "header",
+                  "query",
+                  "body"
+                ]
               },
               "key_name": {
                 "type": "string"
@@ -280,7 +337,13 @@
                 },
                 "method": {
                   "type": "string",
-                  "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"]
+                  "enum": [
+                    "GET",
+                    "POST",
+                    "PUT",
+                    "DELETE",
+                    "PATCH"
+                  ]
                 },
                 "description": {
                   "type": "string"
@@ -320,7 +383,11 @@
               },
               "backoff": {
                 "type": "string",
-                "enum": ["exponential", "linear", "constant"]
+                "enum": [
+                  "exponential",
+                  "linear",
+                  "constant"
+                ]
               }
             }
           }
@@ -335,7 +402,10 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["name", "command"],
+            "required": [
+              "name",
+              "command"
+            ],
             "properties": {
               "name": {
                 "type": "string",
@@ -402,7 +472,12 @@
             },
             "storage": {
               "type": "string",
-              "enum": ["local", "cloud", "vector_db", "database"]
+              "enum": [
+                "local",
+                "cloud",
+                "vector_db",
+                "database"
+              ]
             }
           }
         },
@@ -454,7 +529,14 @@
             },
             "backend": {
               "type": "string",
-              "enum": ["file", "database", "redis", "s3", "postgresql", "sqlite"]
+              "enum": [
+                "file",
+                "database",
+                "redis",
+                "s3",
+                "postgresql",
+                "sqlite"
+              ]
             },
             "config": {
               "type": "object"
@@ -470,11 +552,17 @@
         "vla": {
           "type": "object",
           "description": "Vision-Language-Action payload requirements",
-          "required": ["adapter"],
+          "required": [
+            "adapter"
+          ],
           "properties": {
             "adapter": {
               "type": "string",
-              "enum": ["openpi", "π0.7", "generic"],
+              "enum": [
+                "openpi",
+                "π0.7",
+                "generic"
+              ],
               "description": "Identifies which VLA runtime adapter should process this payload."
             },
             "vision": {
@@ -499,15 +587,24 @@
     "security": {
       "type": "object",
       "description": "Security and integrity data",
-      "required": ["checksum"],
+      "required": [
+        "checksum"
+      ],
       "properties": {
         "checksum": {
           "type": "object",
-          "required": ["algorithm", "value"],
+          "required": [
+            "algorithm",
+            "value"
+          ],
           "properties": {
             "algorithm": {
               "type": "string",
-              "enum": ["sha256", "sha512", "blake3"]
+              "enum": [
+                "sha256",
+                "sha512",
+                "blake3"
+              ]
             },
             "value": {
               "type": "string",
@@ -527,7 +624,11 @@
           "properties": {
             "algorithm": {
               "type": "string",
-              "enum": ["RSA-SHA256", "Ed25519", "ECDSA-SHA256"]
+              "enum": [
+                "RSA-SHA256",
+                "Ed25519",
+                "ECDSA-SHA256"
+              ]
             },
             "value": {
               "type": "string",
@@ -558,7 +659,11 @@
             },
             "algorithm": {
               "type": "string",
-              "enum": ["AES-256-GCM", "ChaCha20-Poly1305", "none"]
+              "enum": [
+                "AES-256-GCM",
+                "ChaCha20-Poly1305",
+                "none"
+              ]
             },
             "key_fingerprint": {
               "type": "string"
@@ -628,7 +733,11 @@
     "identity_layer": {
       "type": "object",
       "description": "AxiomID Identity block. axiomid.app is the Root Authority for all issued identities.",
-      "required": ["id", "authority", "issuedAt"],
+      "required": [
+        "id",
+        "authority",
+        "issuedAt"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -653,11 +762,17 @@
         "publicKey": {
           "type": "object",
           "description": "Public key material for cryptographic verification.",
-          "required": ["algorithm", "value"],
+          "required": [
+            "algorithm",
+            "value"
+          ],
           "properties": {
             "algorithm": {
               "type": "string",
-              "enum": ["Ed25519", "secp256k1"],
+              "enum": [
+                "Ed25519",
+                "secp256k1"
+              ],
               "description": "Cryptographic algorithm used to generate the key pair."
             },
             "value": {
@@ -666,7 +781,10 @@
             },
             "encoding": {
               "type": "string",
-              "enum": ["base64url", "hex"],
+              "enum": [
+                "base64url",
+                "hex"
+              ],
               "default": "base64url"
             }
           }
@@ -674,11 +792,17 @@
         "signature": {
           "type": "object",
           "description": "Cryptographic signature over the canonical payload hash.",
-          "required": ["algorithm", "value"],
+          "required": [
+            "algorithm",
+            "value"
+          ],
           "properties": {
             "algorithm": {
               "type": "string",
-              "enum": ["Ed25519", "secp256k1"],
+              "enum": [
+                "Ed25519",
+                "secp256k1"
+              ],
               "description": "Algorithm used to produce the signature."
             },
             "value": {
@@ -687,15 +811,67 @@
             },
             "canonicalization": {
               "type": "string",
-              "enum": ["JCS", "RFC8785"],
+              "enum": [
+                "JCS",
+                "RFC8785"
+              ],
               "default": "JCS",
               "description": "JSON canonicalization scheme used before signing."
             }
           }
         }
       }
+    },
+    "unified_bom": {
+      "type": "object",
+      "description": "Unified BOM (SaaS-BOM, AI-BOM, Infra-BOM) for regulatory compliance and EU AI Act.",
+      "properties": {
+        "saas_refs": {
+          "type": "array",
+          "description": "References to SaaS dependencies.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ai_refs": {
+          "type": "array",
+          "description": "References to AI/ML models, datasets, or providers.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "infra_refs": {
+          "type": "array",
+          "description": "References to Cloud resources and infrastructure.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "risk_refs": {
+          "type": "array",
+          "description": "Identified risk profiles and threat mitigations.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "compliance_profiles": {
+          "type": "array",
+          "description": "Target compliance frameworks (e.g., EU_AI_ACT, SOC2_TYPE_2).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "export_artifacts": {
+          "type": "array",
+          "description": "URLs or pointers to generated compliance export bundles.",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "additionalProperties": true
     }
   },
   "additionalProperties": true
 }
-

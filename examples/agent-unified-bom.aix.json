@@ -1,0 +1,107 @@
+{
+  "aix_version": "1.3.0",
+  "meta": {
+    "name": "LegalCompliance-Agent",
+    "version": "1.0.0",
+    "description": "Agent designed to audit legal contracts and ensure they are compliant, tracking unified dependencies.",
+    "author": "Axiom Corp",
+    "license": "MIT",
+    "id": "did:axiom:axiomid.app:legal-agent-101",
+    "created": "2024-05-10T12:00:00Z"
+  },
+  "identity_layer": {
+    "id": "did:axiom:axiomid.app:legal-agent-101",
+    "authority": "axiomid.app",
+    "issuedAt": "2024-05-10T12:00:00Z",
+    "kyc_tier": 2
+  },
+  "persona": {
+    "system_prompt": "You are a legal contract auditing agent. You must analyze contracts uploaded from the CRM and ensure compliance with internal policies.",
+    "traits": [
+      "analytical",
+      "secure",
+      "compliant"
+    ],
+    "role": "Legal Auditor",
+    "instructions": [
+      "Read contract",
+      "Ensure compliance",
+      "Report violations"
+    ]
+  },
+  "security": {
+    "sandbox_level": "strict",
+    "allowed_domains": [
+      "api.hubapi.com",
+      "api.openai.com"
+    ],
+    "signature": {
+      "hash_alg": "sha256",
+      "value": "base64-encoded-signature-value-here",
+      "public_key": "-----BEGIN PUBLIC KEY-----\\nMIIBIjANBgkqhkiG9w0BAQEFAAO...\\n-----END PUBLIC KEY-----",
+      "signer": "did:axiom:axiomid.app:axiom-auth",
+      "timestamp": "2024-05-10T12:00:00Z"
+    },
+    "checksum": {
+      "algorithm": "sha256",
+      "value": "placeholder_will_be_calculated"
+    }
+  },
+  "abom": {
+    "integrity_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "models": [
+      {
+        "name": "gpt-4-turbo",
+        "provider": "openai",
+        "type": "llm",
+        "license": "proprietary"
+      }
+    ],
+    "datasets": [
+      {
+        "name": "legal-contracts-corpus",
+        "source": "internal",
+        "classification": "confidential"
+      }
+    ]
+  },
+  "unified_bom": {
+    "saas_refs": [
+      "pkg:saas/hubspot/crm-api@v3",
+      "pkg:saas/github/github-actions@v3"
+    ],
+    "ai_refs": [
+      "pkg:ai/openai/gpt-4-turbo",
+      "pkg:dataset/internal/legal-contracts-corpus"
+    ],
+    "infra_refs": [
+      "pkg:aws/lambda/legal-agent-runner",
+      "pkg:azure/cosmosdb/contract-memory"
+    ],
+    "risk_refs": [
+      "risk:external-llm-data-sharing",
+      "risk:high-pii-exposure"
+    ],
+    "compliance_profiles": [
+      "EU_AI_ACT_HIGH_RISK",
+      "SOC2_TYPE_2",
+      "GDPR"
+    ],
+    "export_artifacts": [
+      "https://compliance.axiom.example/bundles/legal-agent-101-compliance.zip"
+    ]
+  },
+  "requirements": {
+    "compute": {
+      "type": "cloud",
+      "min_ram_gb": 4
+    },
+    "mcp_servers": [
+      {
+        "name": "hubspot-connector",
+        "url": "https://mcp.internal/hubspot",
+        "version": "1.0.0"
+      }
+    ]
+  }
+}
