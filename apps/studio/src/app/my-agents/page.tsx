@@ -3,18 +3,31 @@
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import { AgentCard } from '@/components/studio/AgentCard';
-import { useLocalAgents } from '@/hooks/useLocalAgents';
+import { useRegistry } from '@/hooks/useRegistry';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Plus, LayoutGrid, List } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { AgentRecord } from '@/lib/types';
 
 export default function MyAgentsPage() {
-  const { agents, loaded } = useLocalAgents();
+  const { entries, loading } = useRegistry();
   const router = useRouter();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  if (!loaded) return (
+  const agents = useMemo(() => {
+    return entries.map(entry => ({
+      id: entry.did,
+      name: entry.name,
+      role: entry.role,
+      yaml: entry.yaml,
+      createdAt: entry.publishedAt,
+      did: entry.did,
+      kyc_tier: entry.kyc_tier as any,
+    } as AgentRecord));
+  }, [entries]);
+
+  if (loading) return (
     <div className="flex items-center justify-center min-h-screen bg-[var(--color-background)]">
       <div className="w-8 h-8 border-4 border-[var(--color-primary)] 
                       border-t-transparent rounded-full animate-spin" />

@@ -22,9 +22,9 @@ export async function saveRegistry(entries: RegistryEntry[]): Promise<void> {
   }
 }
 
-export async function updateRegistryEntry(id: string, entry: RegistryEntry): Promise<void> {
+export async function updateRegistryEntry(entry: RegistryEntry): Promise<void> {
   const entries = await getRegistry();
-  const index = entries.findIndex(e => e.id === id);
+  const index = entries.findIndex(e => e.did === entry.did);
   
   if (index !== -1) {
     entries[index] = entry;
@@ -35,8 +35,8 @@ export async function updateRegistryEntry(id: string, entry: RegistryEntry): Pro
   await saveRegistry(entries);
 }
 
-export async function deleteRegistryEntry(id: string): Promise<void> {
+export async function deleteRegistryEntry(did: string): Promise<void> {
   const entries = await getRegistry();
-  const filtered = entries.filter(e => e.id !== id);
+  const filtered = entries.filter(e => e.did !== did);
   await saveRegistry(filtered);
 }
