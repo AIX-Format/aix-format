@@ -36,6 +36,7 @@ const navLinks = [
   { href: "/deploy",         label: "Deploy"          },
   { href: "/identity",       label: "Identity"        },
   { href: "/analytics",      label: "Analytics"       },
+  { href: "/docs",           label: "Docs"            },
   { href: "/settings",       label: "Settings"        },
 ];
 
