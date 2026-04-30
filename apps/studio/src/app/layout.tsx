@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope, Inter } from "next/font/google";
+import { Manrope, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
 import { Analytics } from '@vercel/analytics/next';
@@ -20,6 +20,13 @@ const inter = Inter({
   display: "swap",
 });
 
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+});
+
+
 export const metadata: Metadata = {
   title: "Sovereign Pi Agents Studio",
   description: "The Global Marketplace for Autonomous AI Agents, secured by Pi Network KYC.",
@@ -33,7 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${manrope.variable} ${inter.variable} min-h-screen bg-[var(--color-background)] text-[var(--color-on-background)] font-sans antialiased overflow-x-hidden`}
+        className={`${manrope.variable} ${inter.variable} ${jetbrainsMono.variable} min-h-screen bg-[var(--color-background)] text-[var(--color-on-background)] font-sans antialiased overflow-x-hidden`}
       >
         <Toaster richColors theme="dark" position="bottom-right" />
         <SovereignAetherClient />

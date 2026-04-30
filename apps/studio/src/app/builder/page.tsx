@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Button, Card, Input, Badge } from "@/design-system/components";
+import { tokens } from "@/design-system/tokens";
 import { 
   ChevronRight, 
   ChevronLeft, 
@@ -19,23 +21,18 @@ import {
   AlertCircle,
   FileJson,
   FileCode,
-  Database,
-  Activity,
-  UserCheck,
-  ShieldCheck,
-  AlertTriangle,
   Loader2,
   X,
-  ExternalLink
+  ExternalLink,
+  ShieldCheck,
+  UserCheck,
+  Database
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useRegistry } from '@/hooks/useRegistry';
 import { useAbom } from '@/hooks/useAbom';
-import { useKyc } from '@/hooks/useKyc';
 import { toast } from 'sonner';
 import { stringifyYamlSafe, sha256Hex, parseYamlLight, computeManifestChecksum, cn } from "@/lib/utils";
 import { Navbar } from "@/components/layout/Navbar";
-import { useLocalAgents } from "@/hooks/useLocalAgents";
 import { AgentRecord, Manifest, AgentSkill, McpPrompt } from "@/lib/types";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import LiveValidator from "@/components/studio/LiveValidator";
@@ -355,7 +352,7 @@ export default function AgentBuilderPage() {
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
   return (
-    <div className="min-h-screen bg-[#050507] text-[#e0e0e6] font-sans selection:bg-[#00dbe9]/30">
+    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30">
       <Navbar />
       <SovereignStatusBar />
 
@@ -363,19 +360,19 @@ export default function AgentBuilderPage() {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00dbe9] to-[#6366f1] flex items-center justify-center shadow-lg shadow-[#00dbe9]/20">
-                <Rocket className="w-6 h-6 text-black" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-mcp flex items-center justify-center shadow-lg shadow-primary/20">
+                <Rocket className="w-6 h-6 text-primary-dark" />
               </div>
-              <h1 className="text-4xl font-display font-black tracking-tight text-white uppercase italic">
+              <h1 className="text-4xl font-black tracking-tight text-white uppercase italic">
                 Agent Builder
               </h1>
             </div>
-            <p className="text-[#8888a0] max-w-xl leading-relaxed">
+            <p className="text-foreground/50 max-w-xl leading-relaxed">
               Construct high-fidelity AIX manifests with real-time cryptographic integrity and ABOM risk scoring.
             </p>
           </div>
 
-          <div className="flex items-center gap-4 bg-[#0e0e12] border border-white/[0.05] p-1.5 rounded-2xl">
+          <div className="flex items-center gap-4 bg-surface-2 border border-white/5 p-1.5 rounded-2xl">
             {STEPS.map((step) => (
               <button
                 key={step.id}
@@ -383,18 +380,18 @@ export default function AgentBuilderPage() {
                 className={cn(
                   "relative flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300",
                   currentStep === step.id
-                    ? "bg-white/[0.08] text-white shadow-xl shadow-black/40"
+                    ? "bg-white/10 text-white shadow-xl shadow-black/40"
                     : isStepValid(step.id)
-                      ? "text-[#00dbe9] hover:text-white"
-                      : "text-[#404050] hover:text-[#8888a0]"
+                      ? "text-primary hover:text-white"
+                      : "text-foreground/20 hover:text-foreground/40"
                 )}
               >
                 <div className={cn(
                   "w-6 h-6 rounded-full flex items-center justify-center text-[10px] border transition-all",
                   currentStep === step.id
-                    ? "bg-[#00dbe9] border-[#00dbe9] text-black shadow-[0_0_15px_rgba(0,219,233,0.4)]"
+                    ? "bg-primary border-primary text-primary-dark shadow-[0_0_15px_rgba(59,130,246,0.4)]"
                     : isStepValid(step.id)
-                      ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-400"
+                      ? "bg-success/10 border-success/40 text-success"
                       : "bg-white/5 border-white/10 text-white/20"
                 )}>
                   {isStepValid(step.id) ? <CheckCircle2 className="w-3.5 h-3.5" /> : step.id}
@@ -403,7 +400,7 @@ export default function AgentBuilderPage() {
                 {currentStep === step.id && (
                   <motion.div
                     layoutId="activeStep"
-                    className="absolute inset-0 bg-white/[0.05] rounded-xl -z-10"
+                    className="absolute inset-0 bg-white/5 rounded-xl -z-10"
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}
