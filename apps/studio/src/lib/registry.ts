@@ -1,26 +1,42 @@
-import fs from "fs/promises";
-import path from "path";
+import { kv } from "@vercel/kv";
 import { RegistryEntry } from "./types";
 
-const REGISTRY_PATH = path.join(process.cwd(), "data", "registry.json");
+const KV_KEY = "aix_registry";
 
 export async function getRegistry(): Promise<RegistryEntry[]> {
   try {
-    const data = await fs.readFile(REGISTRY_PATH, "utf-8");
-    return JSON.parse(data);
+    const entries = await kv.get<RegistryEntry[]>(KV_KEY);
+    return entries || [];
   } catch (error) {
-    // If file doesn't exist, return empty array
+    console.warn("KV Registry not available, falling back to empty list", error);
     return [];
   }
 }
 
 export async function saveRegistry(entries: RegistryEntry[]): Promise<void> {
-  const dir = path.dirname(REGISTRY_PATH);
   try {
-    await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(REGISTRY_PATH, JSON.stringify(entries, null, 2), "utf-8");
+    await kv.set(KV_KEY, entries);
   } catch (error) {
-    console.error("Failed to save registry:", error);
-    throw new Error("Could not persist registry data");
+    console.error("Failed to save to KV registry:", error);
+    throw new Error("Registry persistence failure");
   }
+}
+
+export async function updateRegistryEntry(id: string, entry: RegistryEntry): Promise<void> {
+  const entries = await getRegistry();
+  const index = entries.findIndex(e => e.id === id);
+  
+  if (index !== -1) {
+    entries[index] = entry;
+  } else {
+    entries.push(entry);
+  }
+  
+  await saveRegistry(entries);
+}
+
+export async function deleteRegistryEntry(id: string): Promise<void> {
+  const entries = await getRegistry();
+  const filtered = entries.filter(e => e.id !== id);
+  await saveRegistry(filtered);
 }
