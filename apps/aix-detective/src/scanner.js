@@ -33,6 +33,26 @@ export function scanPromptInjection(text) {
       name: 'Output Hijack',
       pattern: /\b(output|print|reveal|display|show)\s+(your|the)\s+(system|initial)\s+(prompt|instructions|rules)\b/i,
       severity: 'high'
+    },
+    {
+      name: 'Tool Poisoning (URL Manipulation)',
+      pattern: /https?:\/\/(?![\w.-]+\.(ai|gov|edu|org|com))[\w.-]+/i,
+      severity: 'medium'
+    },
+    {
+      name: 'Hidden Instruction (Markdown Comment)',
+      pattern: /<!--[\s\S]*?-->/i,
+      severity: 'medium'
+    },
+    {
+      name: 'Base64 Obfuscation',
+      pattern: /\b([A-Za-z0-9+/]{40,})={0,2}\b/,
+      severity: 'medium'
+    },
+    {
+      name: 'Shell Injection Attempt',
+      pattern: /(`|\$\(|\$\{|;|\||&)/,
+      severity: 'high'
     }
   ];
 

@@ -50,9 +50,43 @@ async function run() {
     // 2. Identity & KYC
     const idAudit = auditIdentity(data.identity_layer);
 
-    // 3. Prompt Injection
-    const instructions = data.persona?.instructions || "";
-    const injections = scanPromptInjection(instructions);
+    // 3. Prompt Injection (Expanded to cover Persona, Skills, APIs, and MCP)
+    const injections = [];
+    
+    // Scan Persona Instructions
+    if (data.persona?.instructions) {
+      injections.push(...scanPromptInjection(data.persona.instructions).map(inj => ({ ...inj, source: 'Persona Instructions' })));
+    }
+
+    // Scan Skills
+    if (data.skills) {
+      data.skills.forEach((skill, idx) => {
+        const source = `Skill [${idx}: ${skill.name || 'unnamed'}]`;
+        injections.push(...scanPromptInjection(skill.description).map(inj => ({ ...inj, source })));
+        injections.push(...scanPromptInjection(skill.instructions).map(inj => ({ ...inj, source })));
+      });
+    }
+
+    // Scan APIs
+    if (data.apis) {
+      data.apis.forEach((api, idx) => {
+        const source = `API [${idx}: ${api.name || 'unnamed'}]`;
+        injections.push(...scanPromptInjection(api.description).map(inj => ({ ...inj, source })));
+      });
+    }
+
+    // Scan MCP Servers & Tools
+    if (data.mcp) {
+      data.mcp.forEach((server, idx) => {
+        const sourceBase = `MCP Server [${idx}: ${server.name || 'unnamed'}]`;
+        if (server.tools) {
+          server.tools.forEach((tool, tIdx) => {
+            const source = `${sourceBase} Tool [${tIdx}: ${tool.name || 'unnamed'}]`;
+            injections.push(...scanPromptInjection(tool.description).map(inj => ({ ...inj, source })));
+          });
+        }
+      });
+    }
 
     // 4. Final Trust Tier
     const trustTier = calculateTrustTier({
@@ -81,7 +115,7 @@ async function run() {
       console.log(`${colors.green}🛡️ Security: No malicious patterns detected.${colors.reset}`);
     } else {
       console.log(`${colors.red}⚠️ Security: ${injections.length} potential injection patterns found!${colors.reset}`);
-      injections.forEach(inj => console.log(`   - [${inj.severity.toUpperCase()}] ${inj.name}`));
+      injections.forEach(inj => console.log(`   - [${inj.severity.toUpperCase()}] ${inj.name} (Source: ${inj.source})`));
     }
 
     console.log(`\n${colors.bright}Trust Decision: ${getTrustBanner(trustTier)}${colors.reset}`);

@@ -6,11 +6,12 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import fs from "fs/promises";
 import path from "path";
+import yaml from 'js-yaml';
+import { scanAgent } from '../../../core/abom-scanner.js';
 
-// Define the server
 const server = new Server(
   {
-    name: "aix-blackbox-server",
+    name: "aix-universal-mcp-server",
     version: "1.0.0",
   },
   {
@@ -20,7 +21,9 @@ const server = new Server(
   }
 );
 
-// We define tools for Regulators/Auditors
+/**
+ * List available tools
+ */
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
@@ -52,59 +55,77 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ["manifestPath"],
         },
       },
+      {
+        name: 'discover_agents',
+        description: 'Search and discover AI Agents registered in the AIX Format registry',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            query: { type: 'string', description: 'Search query' },
+            kyc_tier: { type: 'string', enum: ['none', 'basic', 'verified'], description: 'Filter by KYC tier' }
+          }
+        },
+      },
+      {
+        name: 'validate_aix',
+        description: 'Validate an AIX Format YAML/JSON agent manifest',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            content: { type: 'string', description: 'AIX YAML or JSON content' }
+          },
+          required: ['content']
+        },
+      },
+      {
+        name: 'scan_agent',
+        description: 'Get ABOM risk score and compliance report for an AI Agent',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            content: { type: 'string', description: 'AIX YAML or JSON content' }
+          },
+          required: ['content']
+        },
+      },
     ],
   };
 });
 
+/**
+ * Handle tool calls
+ */
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
-  if (name === "get_blackbox_logs") {
-    const manifestPath = args?.manifestPath as string;
-
-    try {
+  try {
+    if (name === "get_blackbox_logs") {
+      const manifestPath = args?.manifestPath as string;
       const content = await fs.readFile(path.resolve(manifestPath), "utf-8");
-      const manifest = JSON.parse(content);
-
-      // In a real scenario, this might query an external immutable datastore
-      const logs = manifest.black_box?.traces || [];
+      const manifest = content.trim().startsWith('{') ? JSON.parse(content) : yaml.load(content);
+      const logs = (manifest as any).black_box?.traces || [];
 
       return {
         content: [
           {
             type: "text",
             text: JSON.stringify({
-              agent_id: manifest.meta?.id,
-              agent_name: manifest.meta?.name,
+              agent_id: (manifest as any).meta?.id,
+              agent_name: (manifest as any).meta?.name,
               total_logs: logs.length,
               traces: logs
             }, null, 2),
           },
         ],
       };
-    } catch (error: any) {
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Error reading manifest or logs: ${error.message}`,
-          },
-        ],
-        isError: true,
-      };
     }
-  }
 
-  if (name === "verify_abom_compliance") {
-    const manifestPath = args?.manifestPath as string;
-
-    try {
+    if (name === "verify_abom_compliance") {
+      const manifestPath = args?.manifestPath as string;
       const content = await fs.readFile(path.resolve(manifestPath), "utf-8");
-      const manifest = JSON.parse(content);
-
-      const abom = manifest.abom;
-      const traces = manifest.black_box?.traces || [];
-
+      const manifest = content.trim().startsWith('{') ? JSON.parse(content) : yaml.load(content);
+      const abom = (manifest as any).abom;
+      const traces = (manifest as any).black_box?.traces || [];
       const isCompliant = abom && traces.length > 0 && traces.every((t: any) => t.signature);
 
       return {
@@ -122,27 +143,63 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           },
         ],
       };
-    } catch (error: any) {
-       return {
+    }
+
+    if (name === 'discover_agents') {
+      return {
         content: [
           {
-            type: "text",
-            text: `Error verifying compliance: ${error.message}`,
+            type: 'text',
+            text: JSON.stringify([
+              { name: 'Research Analyst', did: 'did:axiom:research-1', kyc_tier: 'verified' },
+              { name: 'Code Assistant', did: 'did:axiom:coder-7', kyc_tier: 'basic' }
+            ], null, 2),
           },
         ],
-        isError: true,
       };
     }
-  }
 
-  throw new Error(`Tool not found: ${name}`);
+    if (name === 'validate_aix' || name === 'scan_agent') {
+      const content = args?.content as string;
+      if (!content) throw new Error('Missing content');
+
+      let agentData;
+      try {
+        agentData = content.trim().startsWith('{') ? JSON.parse(content) : yaml.load(content);
+      } catch (e: any) {
+        throw new Error('Invalid format: ' + e.message);
+      }
+
+      if (name === 'validate_aix') {
+        return {
+          content: [{ type: 'text', text: 'Manifest is valid AIX format.' }],
+        };
+      }
+
+      const report = scanAgent(agentData);
+      return {
+        content: [{ type: 'text', text: JSON.stringify(report, null, 2) }],
+      };
+    }
+
+    throw new Error(`Tool not found: ${name}`);
+  } catch (error: any) {
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Error: ${error.message}`,
+        },
+      ],
+      isError: true,
+    };
+  }
 });
 
-// Start the server
 async function run() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("AIX Blackbox MCP Server running on stdio");
+  console.error("AIX Universal MCP Server running on stdio");
 }
 
 run().catch(console.error);

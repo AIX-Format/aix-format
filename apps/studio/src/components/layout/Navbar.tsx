@@ -1,6 +1,4 @@
-"use client";
 import { WalletButton } from '@/components/studio/WalletButton';
-
 import { APP_VERSION } from "@/lib/version";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -8,7 +6,6 @@ import { Shield, Cpu, Activity, Wallet, LogOut, ChevronDown, Zap } from "lucide-
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
 interface PiUser {
   username: string;
   uid: string;
@@ -20,12 +17,15 @@ interface PiAuthResult {
 }
 
 const navLinks = [
-  { href: "/", label: "Home" },
+  { href: "/", label: "Studio" },
   { href: "/builder", label: "Builder" },
   { href: "/my-agents", label: "Fleet" },
   { href: "/marketplace", label: "Market" },
-  { href: "/analytics", label: "Analytics" },
+  { href: "/scan", label: "Scanner" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/identity", label: "Identity" },
   { href: "/spec", label: "Spec" },
+  { href: "/network-status", label: "Network" },
   { href: "/settings", label: "Settings" },
 ];
 

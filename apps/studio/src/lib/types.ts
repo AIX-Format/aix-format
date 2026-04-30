@@ -38,6 +38,7 @@ export interface AgentRecord {
   status?: 'online' | 'offline' | 'busy';
   successRate?: number;
   tasksCompleted?: number;
+  manifest?: Manifest;
   published?: boolean;
 }
 
@@ -132,7 +133,7 @@ export interface Manifest {
     id: string;
     authority: string;
     issuedAt: string;
-    kyc_tier?: number;
+    kyc_tier?: string;
   };
   economics: {
     pricing_model: string;

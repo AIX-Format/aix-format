@@ -35,7 +35,8 @@ import { useKyc } from '@/hooks/useKyc';
 import { toast } from 'sonner';
 import { stringifyYamlSafe, sha256Hex, parseYamlLight, computeManifestChecksum, cn } from "@/lib/utils";
 import { Navbar } from "@/components/layout/Navbar";
-import { Manifest, AgentSkill, McpPrompt } from "@/lib/types";
+import { useLocalAgents } from "@/hooks/useLocalAgents";
+import { AgentRecord, Manifest, AgentSkill, McpPrompt } from "@/lib/types";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import LiveValidator from "@/components/studio/LiveValidator";
 import BOMVisualizer from "@/components/studio/BOMVisualizer";
@@ -85,7 +86,7 @@ export default function AgentBuilderPage() {
       id: `did:axiom:axiomid.app:agent-temp`,
       authority: "axiomid.app",
       issuedAt: new Date().toISOString(),
-      kyc_tier: 0
+      kyc_tier: 'unverified'
     },
     economics: {
       pricing_model: "pay_per_call",
@@ -159,6 +160,7 @@ export default function AgentBuilderPage() {
       if (previewFormat === "json") {
         setManifestContent(JSON.stringify(manifest, null, 2));
       } else if (previewFormat === "discovery") {
+        // Dynamic import to avoid SSR issues if any, or just use the local generator
         const { generateAIXDiscovery } = await import("@/lib/mcp-generator");
         const disc = generateAIXDiscovery(manifest, "https://agent.example.com");
         setManifestContent(JSON.stringify(disc, null, 2));
@@ -187,20 +189,24 @@ export default function AgentBuilderPage() {
   };
 
   const handleExportAndSave = async () => {
+    setIsDeploying(true);
     try {
-      const yamlString = await stringifyYamlSafe(formData);
-      
+      const id = crypto.randomUUID();
+      const slug = formData.meta.name.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'unnamed-agent';
+      const agentId = `${slug}-${id.slice(0, 4)}`;
+
+      // Calculate integrity hash of the final manifest
       const integrityHash = await sha256Hex(manifestContent);
       
-      const entry: RegistryEntry = {
-        did: formData.identity_layer.id,
-        name: formData.meta.name,
-        role: formData.persona.role,
-        capabilities: formData.skills.map(s => s.name),
-        kyc_tier: String(formData.identity_layer.kyc_tier || 0),
-        specVersion: formData.meta.version,
-        publishedAt: new Date().toISOString(),
-        yaml: yamlString,
+      const record: AgentRecord = {
+        id: agentId,
+        name: formData.meta.name || "Unnamed Agent",
+        role: formData.persona.role || "AI Assistant",
+        createdAt: new Date().toISOString(),
+        yaml: manifestContent,
+        manifest: JSON.parse(JSON.stringify(formData)),
+        did: `did:aix:${id.replace(/-/g, '').slice(0, 32)}`,
+        kyc_tier: formData.identity_layer.kyc_tier as any,
         abom: {
           ...formData.abom,
           integrity_hash: integrityHash,
@@ -214,7 +220,7 @@ export default function AgentBuilderPage() {
     }
   };
 
-  const handleBlur = (field: string) => {
+    const handleBlur = (field: string) => {
     setTouchedFields(prev => ({ ...prev, [field]: true }));
   };
 
@@ -262,6 +268,11 @@ export default function AgentBuilderPage() {
       if (data.success) {
         setDeployResult({ agentId: data.agentId, manifestUrl: data.manifestUrl });
         toast.success("Agent deployed successfully!");
+        
+        // Also save locally if needed, or navigate
+        setTimeout(() => {
+          router.push(`/agents/${data.agentId}`);
+        }, 1500);
       } else {
         toast.error(data.error || "Deployment failed");
       }
@@ -906,8 +917,8 @@ export default function AgentBuilderPage() {
                                 <Trash2 className="w-4 h-4" />
                               </button>
                               <div className="gap-3">
-                                <input 
-                                  placeholder="Skill name (snake_case)" 
+                                <input
+                                  placeholder="Skill name (snake_case)"
                                   value={skill.name}
                                   onChange={(e) => updateSkill(index, "name", e.target.value)}
                                   className="input py-2 text-xs mb-3"
@@ -998,6 +1009,7 @@ export default function AgentBuilderPage() {
                         </select>
                       </div>
 
+<<<<<<< HEAD
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Currency (Optional)</label>
                         <input
@@ -1007,21 +1019,76 @@ export default function AgentBuilderPage() {
                           placeholder="e.g. PI"
                           className="input"
                         />
+=======
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Currency (Optional)</label>
+                          <input
+                            type="text"
+                            value={formData.economics.currency || ""}
+                            onChange={(e) => updateEconomics("currency", e.target.value)}
+                            placeholder="e.g. PI"
+                            className="input"
+                          />
+                        </div>
+
+                      <div className="pt-6 border-t border-white/[0.05] mt-6">
+                        <div className="flex items-center gap-3 text-xs text-[#8888a0]">
+                          <Shield className="w-4 h-4 text-emerald-500" />
+                          <span>Sovereign Identity Protection Enabled</span>
+                        </div>
+>>>>>>> remotes/origin/feat/aix-saas-ecosystem-7373274762848100795
                       </div>
                     </div>
                   )}
 
-                  {/* Step 5: SBOM */}
                   {currentStep === 5 && (
-                    <div className="space-y-4">
-                      <div className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/10 mb-6">
-                        <div className="flex gap-3">
-                          <Shield className="w-5 h-5 text-purple-400 shrink-0" />
-                          <p className="text-xs text-purple-300/80 leading-relaxed">
-                            Agent SBOM (ABOM) ensures supply chain security by listing all dependencies and assessing inherent risks.
-                          </p>
+                    <div className="space-y-6">
+                      <div className="space-y-4">
+                        <div className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/10 mb-6">
+                          <div className="flex gap-3">
+                            <Shield className="w-5 h-5 text-purple-400 shrink-0" />
+                            <p className="text-xs text-purple-300/80 leading-relaxed">
+                              Agent SBOM (ABOM) ensures supply chain security by listing all dependencies and assessing inherent risks.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">SBOM Format</label>
+                          <select
+                            value={formData.abom.bom_format}
+                            onChange={(e) => updateAbom("bom_format", e.target.value as any)}
+                            className="input appearance-none bg-[#0e0e12]"
+                          >
+                            <option value="CycloneDX">CycloneDX (v1.6)</option>
+                            <option value="SPDX">SPDX</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Risk Level</label>
+                          <select
+                            value={formData.abom.risk_level}
+                            onChange={(e) => updateAbom("risk_level", e.target.value as any)}
+                            className="input appearance-none bg-[#0e0e12]"
+                          >
+                            <option value="low">Low Risk</option>
+                            <option value="medium">Medium Risk</option>
+                            <option value="high">High Risk</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Dependency Tags (CSV)</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. langchain, openai, pinecone"
+                            className="input"
+                            onChange={(e) => updateAbom("dependencies", e.target.value.split(",").map(s => s.trim()))}
+                          />
                         </div>
                       </div>
+<<<<<<< HEAD
                       
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Dependency Tags (CSV)</label>
@@ -1128,9 +1195,20 @@ export default function AgentBuilderPage() {
                           <p className="text-xs text-emerald-300/80 leading-relaxed">
                             Verify your identity to increase agent trust scores. AxiomID provides zero-knowledge KYC for sovereign entities.
                           </p>
-                        </div>
-                      </div>
+=======
 
+                      <div className="space-y-4 pt-6 border-t border-white/5">
+                        <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 mb-6">
+                          <div className="flex gap-3">
+                            <UserCheck className="w-5 h-5 text-emerald-400 shrink-0" />
+                            <p className="text-xs text-emerald-300/80 leading-relaxed">
+                              Verify your identity to increase agent trust scores. AxiomID provides zero-knowledge KYC for sovereign entities.
+                            </p>
+                          </div>
+>>>>>>> remotes/origin/feat/aix-saas-ecosystem-7373274762848100795
+                        </div>
+
+<<<<<<< HEAD
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">AxiomID KYC Tier</label>
                         <div className="grid grid-cols-2 gap-3">
@@ -1149,6 +1227,37 @@ export default function AgentBuilderPage() {
                             </button>
                           ))}
                         </div>
+=======
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">AxiomID KYC Tier</label>
+                          <div className="grid grid-cols-2 gap-3">
+                            {["unverified", "basic", "verified", "institutional"].map((tier) => (
+                              <button
+                                key={tier}
+                                onClick={() => updateIdentity("kyc_tier", tier)}
+                                className={`p-3 rounded-xl border text-left transition-all ${
+                                  formData.identity_layer.kyc_tier === tier
+                                    ? "bg-emerald-500/10 border-emerald-500/50 text-white"
+                                    : "bg-white/5 border-white/5 text-[#8888a0] hover:border-white/20"
+                                }`}
+                              >
+                                <p className="text-[10px] font-bold uppercase tracking-tight">{tier}</p>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5 pt-4">
+                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">DID Authority</label>
+                          <input
+                            type="text"
+                            value={formData.identity_layer.authority}
+                            onChange={(e) => updateIdentity("authority", e.target.value)}
+                            className="input"
+                            placeholder="e.g. axiomid.app"
+                          />
+                        </div>
+>>>>>>> remotes/origin/feat/aix-saas-ecosystem-7373274762848100795
                       </div>
                     </div>
                   )}
@@ -1258,6 +1367,7 @@ export default function AgentBuilderPage() {
                     <Download className="w-4 h-4" />
                   </button>
                 </div>
+<<<<<<< HEAD
                 
                 <div className="flex-1 overflow-hidden relative">
                   {previewFormat === "visualizer" ? (
@@ -1342,6 +1452,15 @@ export default function AgentBuilderPage() {
                       </pre>
                     </motion.div>
                   )}
+=======
+
+                <div className="h-full overflow-hidden flex flex-col">
+                  <div className="flex-1 overflow-auto custom-scrollbar p-6 font-mono text-sm leading-relaxed text-[#8888a0]">
+                    <pre className="whitespace-pre-wrap break-all">
+                      {manifestContent}
+                    </pre>
+                  </div>
+>>>>>>> remotes/origin/feat/aix-saas-ecosystem-7373274762848100795
                 </div>
               </div>
 

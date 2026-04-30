@@ -1,5 +1,4 @@
 "use client";
-
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import { AgentCard } from '@/components/studio/AgentCard';
