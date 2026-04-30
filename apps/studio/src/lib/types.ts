@@ -20,7 +20,7 @@ export interface RegistryEntry extends McpAgent {
   publishedAt: string;
   yaml: string;
   deployment?: DeploymentRecord;
-  abom?: AbomRecord;
+  abom?: AbomData;
 }
 
 export interface AgentRecord {
@@ -31,9 +31,9 @@ export interface AgentRecord {
   yaml: string;
   did?: string;
   kyc_tier?: 'unverified' | 'basic' | 'verified' | 'institutional';
-  abom?: AbomRecord;
+  abom?: AbomData;
   deployment?: DeploymentRecord;
-  // Extended fields for UI state (kept as optional to maintain compatibility with MISSION 9)
+  // Extended fields for UI state
   color?: string;
   status?: 'online' | 'offline' | 'busy';
   successRate?: number;
@@ -43,7 +43,8 @@ export interface AgentRecord {
 
 export type NormalizedAgent = AgentRecord & { isMock: boolean };
 
-export interface AbomRecord {
+// ─── Unified ABOM Data ─────────────────────────────────────────────────────
+export interface AbomData {
   bom_format: 'CycloneDX' | 'SPDX' | 'AIX-NATIVE';
   spec_version: string;
   risk_level: 'low' | 'medium' | 'high';
@@ -64,6 +65,7 @@ export interface AbomRecord {
   governance?: {
     license: string;
     contact?: string;
+    txHash?: string; // Anchored on-chain (Sprint 4)
   };
 }
 
@@ -88,10 +90,6 @@ export interface AgentSkill {
   description: string;
   parameters?: Record<string, unknown>;
 }
-
-// AbomManifest is now deprecated in favor of unified AbomRecord
-// but kept as alias for backwards compatibility if needed in legacy parsers
-export type AbomManifest = AbomRecord;
 
 export interface McpPrompt {
   name: string;
@@ -128,7 +126,7 @@ export interface Manifest {
     pricing_model: string;
     currency: string;
   };
-  abom: AbomManifest;
+  abom: AbomData;
   mcp: {
     prompts: McpPrompt[];
   }
@@ -165,3 +163,32 @@ export interface DeployResponse {
   status: 'deployed' | 'failed';
   error?: string;
 }
+
+export interface VercelDeployResponse {
+  url: string;
+  id: string;
+  readyState: string;
+}
+
+// ─── Scan Result Types ─────────────────────────────────────────────────────
+export interface RiskItem {
+  category: 'Capability' | 'Supply Chain' | 'Identity' | 'Compliance';
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  message: string;
+}
+
+export interface ComplianceReport {
+  eu_cra: boolean;
+  nist_ai_rmf: boolean;
+  kyc_complete: boolean;
+}
+
+export interface ScanResult {
+  score: number;           // 0-100
+  grade: 'A'|'B'|'C'|'D'|'F';
+  risks: RiskItem[];
+  recommendations: string[];
+  compliance: ComplianceReport;
+  timestamp: string;
+}
+

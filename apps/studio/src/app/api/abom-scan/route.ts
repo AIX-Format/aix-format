@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import yaml from "js-yaml";
 import { scanAgent } from "../../../../../../core/abom-scanner";
+import { ScanResult } from "@/lib/types";
 
 /**
  * POST /api/abom-scan

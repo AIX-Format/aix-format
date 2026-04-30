@@ -1,40 +1,23 @@
+import { Manifest, AbomData, ScanResult, RiskItem, ComplianceReport } from '../apps/studio/src/lib/types';
+
 /**
  * ABOM Scanner - Sovereign Risk Scoring Engine
  * Analyzes AIX manifests for security, compliance, and supply chain risks.
  */
 
-import { Manifest, AbomRecord } from '../apps/studio/src/lib/types';
-
-export interface ScanReport {
-  score: number;
-  grade: 'A' | 'B' | 'C' | 'D' | 'F';
-  risks: Array<{
-    category: string;
-    severity: 'low' | 'medium' | 'high' | 'critical';
-    message: string;
-  }>;
-  recommendations: string[];
-  compliance: {
-    eu_cra: boolean;
-    nist_ai_rmf: boolean;
-    kyc_complete: boolean;
-  };
-  timestamp: string;
-}
-
-export function scanAgent(agent: any): ScanReport {
-  const risks: ScanReport['risks'] = [];
+export function scanAgent(agent: Partial<Manifest>): ScanResult {
+  const risks: RiskItem[] = [];
   const recommendations: string[] = [];
   let score = 100; // Start with perfect score
 
   // Basic structure check
   const skills = agent.skills || [];
-  const abom = agent.abom || {};
-  const identity = agent.identity_layer || {};
+  const abom = agent.abom || {} as AbomData;
+  const identity = agent.identity_layer || { kyc_tier: 0 };
 
   // 1. Analyze Capabilities (Skills)
   const highRiskSkills = ['filesystem_access', 'network_request', 'shell_exec', 'code_execution'];
-  skills.forEach((skill: any) => {
+  skills.forEach((skill) => {
     if (highRiskSkills.includes(skill.name)) {
       risks.push({
         category: 'Capability',
@@ -46,7 +29,7 @@ export function scanAgent(agent: any): ScanReport {
   });
 
   // 2. Analyze Supply Chain (Dependencies)
-  const deps = abom.dependencies || abom.constituents || [];
+  const deps = abom.dependencies || [];
   if (deps.length === 0) {
     risks.push({
       category: 'Supply Chain',
@@ -56,16 +39,13 @@ export function scanAgent(agent: any): ScanReport {
     recommendations.push('List all third-party models and libraries in the ABOM section.');
     score -= 10;
   } else {
-    deps.forEach((dep: any) => {
-      const name = typeof dep === 'string' ? dep : dep.name;
-      if (!name) return;
-      
+    deps.forEach((depName: string) => {
       const untrusted = ['legacy-unverified-model', 'unsafe-adapter'];
-      if (untrusted.some(u => name.toLowerCase().includes(u))) {
+      if (untrusted.some(u => depName.toLowerCase().includes(u))) {
         risks.push({
           category: 'Supply Chain',
           severity: 'critical',
-          message: `Untrusted dependency detected: ${name}`
+          message: `Untrusted dependency detected: ${depName}`
         });
         score -= 25;
       }
@@ -85,14 +65,14 @@ export function scanAgent(agent: any): ScanReport {
   }
 
   // 4. Compliance Checks
-  const compliance = {
+  const compliance: ComplianceReport = {
     eu_cra: score > 70 && deps.length > 0,
     nist_ai_rmf: score > 60 && !!abom.risk_level,
     kyc_complete: kycTier >= 2
   };
 
   // Grade calculation
-  let grade: ScanReport['grade'] = 'F';
+  let grade: ScanResult['grade'] = 'F';
   if (score >= 90) grade = 'A';
   else if (score >= 80) grade = 'B';
   else if (score >= 70) grade = 'C';
@@ -107,3 +87,4 @@ export function scanAgent(agent: any): ScanReport {
     timestamp: new Date().toISOString()
   };
 }
+
