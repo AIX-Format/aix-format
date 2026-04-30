@@ -33,9 +33,10 @@ const navLinks = [
   { href: "/",               label: "Studio"          },
   { href: "/marketplace",    label: "Marketplace"     },
   { href: "/builder",        label: "Builder"         },
+  { href: "/deploy",         label: "Deploy"          },
   { href: "/identity",       label: "Identity"        },
-  { href: "/spec",           label: "AIX Spec"         },
-  { href: "/network-status", label: "Network"         },
+  { href: "/analytics",      label: "Analytics"       },
+  { href: "/settings",       label: "Settings"        },
 ];
 
 /* ─── SVG Logo ─── */
