@@ -1,4 +1,5 @@
 "use client";
+import { WalletButton } from '@/components/studio/WalletButton';
 
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
