@@ -18,8 +18,9 @@ import {
 import { AgentPet } from '../../components/shared/AgentPet';
 import FadeIn from '../../components/animations/FadeIn';
 
-// Dynamically import the 3D Graph to avoid SSR issues with ThreeJS
+// Dynamically import the 3D/2D Graphs to avoid SSR issues with ThreeJS
 const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), { ssr: false });
+const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false });
 
 interface Node {
   id: string;
@@ -44,6 +45,7 @@ export default function SpacePage() {
   const [graphData, setGraphData] = useState<{ nodes: Node[], links: Link[] }>({ nodes: [], links: [] });
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mode, setMode] = useState<'2d' | '3d'>('3d');
   const fgRef = useRef<any>();
 
   const fetchData = async () => {
@@ -66,6 +68,45 @@ export default function SpacePage() {
     return () => clearInterval(interval);
   }, []);
 
+  // Trick 1 & 2: Custom 3D Object with Glow & Persona
+  const nodeThreeObject = useCallback((node: Node) => {
+    const group = new THREE.Group();
+
+    // 1. Glowing Sphere (Status Indicator)
+    const sphere = new THREE.Mesh(
+      new THREE.SphereGeometry(node.val),
+      new THREE.MeshStandardMaterial({
+        color: node.color,
+        emissive: node.color,
+        emissiveIntensity: node.status === 'active' ? 2 : node.status === 'flagged' ? 4 : 0.5,
+        transparent: true,
+        opacity: 0.8
+      })
+    );
+    group.add(sphere);
+
+    // 2. Pet Billboard (Sprite)
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.font = '48px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(node.pet?.emoji || '🤖', 32, 32);
+    }
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const sprite = new THREE.Sprite(spriteMaterial);
+    sprite.scale.set(node.val * 2.5, node.val * 2.5, 1);
+    sprite.position.y = node.val + 5;
+    group.add(sprite);
+
+    return group;
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#0A0A0F] text-white overflow-hidden relative">
       {/* HUD Header */}
@@ -76,46 +117,94 @@ export default function SpacePage() {
             <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em]">Sovereign Swarm Topology</span>
           </div>
           <h1 className="text-5xl font-black tracking-tighter">AGENT SPACE</h1>
-          <div className="mt-4 flex items-center gap-4">
+          <div className="mt-4 flex items-center gap-4 pointer-events-auto">
             <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[10px] font-bold text-white/60">LIVE NODES: {graphData.nodes.length}</span>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
-              <Activity className="w-3 h-3 text-indigo-400" />
-              <span className="text-[10px] font-bold text-white/60">ACTIVE LINKS: {graphData.links.length}</span>
+            
+            <div className="flex bg-black/40 border border-white/10 rounded-xl p-1 shadow-2xl backdrop-blur-xl">
+              <button 
+                onClick={() => setMode('2d')}
+                className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all ${mode === '2d' ? 'bg-indigo-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]' : 'text-white/40 hover:text-white'}`}
+              >
+                2D TACTICAL
+              </button>
+              <button 
+                onClick={() => setMode('3d')}
+                className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all ${mode === '3d' ? 'bg-indigo-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]' : 'text-white/40 hover:text-white'}`}
+              >
+                3D IMMERSIVE
+              </button>
             </div>
           </div>
         </FadeIn>
       </header>
 
-      {/* 3D Canvas */}
+      {/* Canvas Area */}
       <div className="w-full h-screen">
         {!loading && (
-          <ForceGraph3D
-            ref={fgRef}
-            graphData={graphData}
-            backgroundColor="#0A0A0F"
-            showNavInfo={false}
-            nodeLabel={(node: any) => `${node.pet?.emoji || '🤖'} ${node.name} (${node.role})`}
-            nodeColor={(node: any) => node.color}
-            nodeVal={(node: any) => node.val}
-            linkWidth={(link: any) => link.value}
-            linkColor={() => 'rgba(99, 102, 241, 0.2)'}
-            linkDirectionalParticles={2}
-            linkDirectionalParticleSpeed={0.005}
-            onNodeClick={(node: any) => {
-              setSelectedNode(node);
-              // Aim at node
-              const distance = 400;
-              const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
-              fgRef.current.cameraPosition(
-                { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
-                node,
-                3000
-              );
-            }}
-          />
+          mode === '3d' ? (
+            <ForceGraph3D
+              ref={fgRef}
+              graphData={graphData}
+              backgroundColor="#0A0A0F"
+              showNavInfo={false}
+              nodeThreeObject={nodeThreeObject}
+              nodeThreeObjectExtend={false}
+              linkWidth={(link: any) => link.value}
+              linkColor={() => 'rgba(99, 102, 241, 0.1)'}
+              linkDirectionalParticles={4}
+              linkDirectionalParticleSpeed={0.005}
+              linkDirectionalParticleWidth={2.5}
+              linkDirectionalParticleColor={() => '#818CF8'}
+              onNodeClick={(node: any) => {
+                setSelectedNode(node);
+                const distance = 400;
+                const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
+                fgRef.current.cameraPosition(
+                  { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
+                  node,
+                  3000
+                );
+              }}
+            />
+          ) : (
+            <ForceGraph2D
+              ref={fgRef}
+              graphData={graphData}
+              backgroundColor="#0A0A0F"
+              nodeLabel={(node: any) => `${node.pet?.emoji || '🤖'} ${node.name}`}
+              nodeColor={(node: any) => node.color}
+              nodeVal={(node: any) => node.val}
+              linkWidth={(link: any) => link.value}
+              linkDirectionalParticles={4}
+              linkDirectionalParticleSpeed={0.005}
+              linkDirectionalParticleWidth={4}
+              linkDirectionalParticleColor={() => '#00FF88'}
+              onNodeClick={(node: any) => setSelectedNode(node)}
+              nodeCanvasObject={(node: any, ctx, globalScale) => {
+                const label = `${node.pet?.emoji || '🤖'} ${node.name}`;
+                const fontSize = 14 / globalScale;
+                ctx.font = `bold ${fontSize}px Inter`;
+                
+                // Glowing Circle (Trick 1)
+                ctx.shadowColor = node.color;
+                ctx.shadowBlur = 20 / globalScale;
+                
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, node.val, 0, 2 * Math.PI, false);
+                ctx.fillStyle = node.color;
+                ctx.fill();
+                
+                // Label with backdrop
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, node.x, node.y + node.val + fontSize + 4);
+              }}
+            />
+          )
         )}
       </div>
 

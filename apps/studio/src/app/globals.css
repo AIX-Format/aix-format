@@ -357,3 +357,18 @@ input, button, textarea, select   { font: inherit; color: inherit; }
   animation: glitch 0.5s infinite;
   text-shadow: 2px 0 var(--color-primary), -2px 0 var(--color-secondary);
 }
+
+/* AIX Space Visual Tricks */
+@keyframes pulse-flagged {
+  0% { filter: drop-shadow(0 0 4px #FF0044); }
+  50% { filter: drop-shadow(0 0 15px #FF0044); }
+  100% { filter: drop-shadow(0 0 4px #FF0044); }
+}
+
+.node-active { filter: drop-shadow(0 0 10px #00FF88); }
+.node-idle { filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.1)); }
+.node-flagged { animation: pulse-flagged 2s infinite; }
+
+.graph-container canvas {
+  outline: none;
+}

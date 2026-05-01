@@ -12,6 +12,7 @@ import {
   BrainCircuit,
   Info
 } from 'lucide-react';
+import Link from 'next/link';
 
 interface MemoryNode {
   id: string;
