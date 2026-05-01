@@ -11,8 +11,10 @@
     "aix-regulator-export": "./bin/aix-regulator-export.js"
   },
   "scripts": {
-    "test": "node --test \"tests/**/*.test.js\"",
-    "test:verbose": "node --test --test-reporter=spec \"tests/**/*.test.js\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
     "validate": "node bin/aix-validate.js",
     "validate:examples": "node bin/aix-validate.js examples/persona-agent.aix && node bin/aix-validate.js examples/tool-agent.aix && node bin/aix-validate.js examples/hybrid-agent.aix",
     "generate:types:unified": "json2ts -i schemas/aix.schema.json -o types/aix.d.ts --strictIndexSignatures --unreachableDefinitions",
@@ -97,12 +99,16 @@
     "zod": "^4.4.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.50.0",
     "@tailwindcss/postcss": "^4.2.4",
+    "@vitest/coverage-v8": "^3.0.0",
     "json-schema-to-typescript": "^15.0.4",
+    "playwright": "^1.50.0",
     "ts-node": "^10.9.2",
     "postcss": "^8.5.12",
     "postcss-loader": "^8.2.1",
     "tailwindcss": "^4.2.4",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vitest": "^3.0.0"
   }
 }
