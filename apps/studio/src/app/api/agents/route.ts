@@ -4,6 +4,8 @@ import { kv, NS, KEYS } from '@/lib/redis';
 import { updateRegistryEntry } from '@/lib/registry';
 import { validateSovereignManifest } from '@/lib/protocol-validator';
 
+import { LATEST_VERSION } from '@/constants/protocol';
+
 /**
  * POST /api/agents
  * Registers a new agent manifest with Runtime Enforcement.
@@ -43,7 +45,7 @@ export async function POST(req: Request) {
       role: manifest.persona?.role || 'Sovereign Agent',
       capabilities: manifest.meta.tags || [],
       kyc_tier: manifest.identity_layer.verification?.status || 'unverified',
-      specVersion: manifest.meta.format_version || '1.3.0',
+      specVersion: manifest.meta.format_version || LATEST_VERSION,
       publishedAt: new Date().toISOString(),
       yaml: JSON.stringify(manifest),
       risk_score: validation.risk_score

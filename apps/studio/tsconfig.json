@@ -20,6 +20,7 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
+      "@aix-types": ["../../packages/aix-types/index.d.ts"],
       "@aix-core/storage": ["../../packages/aix-core/src/index.ts"]
     }
   },
