@@ -89,8 +89,8 @@ export default function DiscoveryPreview({ agentDid, agentName }: Props) {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 px-4 py-2 bg-black/40 rounded-xl border border-white/5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-            <div className={`w-2 h-2 rounded-full ${foundAgent ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]'}`} />
+          <div className="flex items-center gap-3 px-4 py-2  rounded-xl border border-white/5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+            <div className={`w-2 h-2 rounded-full ${foundAgent ? 'bg-emerald-500 [0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500 [0_0_8px_rgba(245,158,11,0.5)]'}`} />
             {foundAgent ? 'Status: Indexed' : 'Status: Unknown'}
           </div>
         </div>

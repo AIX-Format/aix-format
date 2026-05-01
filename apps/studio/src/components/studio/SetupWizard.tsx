@@ -111,7 +111,7 @@ export function SetupWizard() {
 
   return (
     <>
-      <aside className="w-full lg:w-[450px] flex-shrink-0 glass-panel rounded-3xl p-6 flex flex-col h-[calc(100vh-120px)] sticky top-24 overflow-hidden relative">
+      <aside className="w-full lg:w-[450px] flex-shrink-0 glass-panel rounded-sm p-6 flex flex-col h-[calc(100vh-120px)] sticky top-24 overflow-hidden relative">
         {/* Progress bar */}
         <div className="absolute top-0 left-0 w-full h-1 bg-[var(--color-surface-container-high)]">
           <motion.div
@@ -142,7 +142,7 @@ export function SetupWizard() {
                   </p>
                 </div>
               </div>
-              <button onClick={goNext} className="w-full py-4 rounded-xl bg-gradient-primary text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 shadow-[0_0_20px_rgba(0,219,233,0.2)] mt-auto">
+              <button onClick={goNext} className="w-full py-4 rounded-xl bg-gradient-primary text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 [0_0_20px_rgba(0,219,233,0.2)] mt-auto">
                 Let's Begin <ChevronRight className="w-5 h-5" />
               </button>
             </motion.div>
@@ -215,7 +215,7 @@ export function SetupWizard() {
                   </p>
                 </div>
               </div>
-              <button onClick={openKycModal} className="w-full py-4 rounded-xl bg-gradient-primary text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 shadow-[0_0_20px_rgba(0,219,233,0.2)]">
+              <button onClick={openKycModal} className="w-full py-4 rounded-xl bg-gradient-primary text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 [0_0_20px_rgba(0,219,233,0.2)]">
                 Sign via Pi KYC
               </button>
             </motion.div>

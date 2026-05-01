@@ -86,7 +86,7 @@ export const AgentCard = memo(function AgentCard({
                 Deployed
               </span>
             ) : (
-              <span className={`flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] ${statusConfig.textColor}`}>
+              <span className={`flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full  border border-white/[0.06] ${statusConfig.textColor}`}>
                 <span className={`status-dot ${statusConfig.dot}`} />
                 {statusConfig.label}
               </span>
@@ -120,14 +120,14 @@ export const AgentCard = memo(function AgentCard({
 
         {/* ── Metrics ── */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white/[0.03] rounded-xl px-3 py-2.5 border border-white/[0.05]">
+          <div className=" rounded-xl px-3 py-2.5 border border-white/[0.05]">
             <p className="text-[10px] text-[var(--color-on-surface-faint)] uppercase tracking-wider mb-1">Success Rate</p>
             <div className="flex items-center gap-1.5">
               <TrendingUp className="w-3.5 h-3.5 text-[var(--color-success)]" />
               <span className="text-sm font-bold text-white tabular-nums">{successRate}%</span>
             </div>
           </div>
-          <div className="bg-white/[0.03] rounded-xl px-3 py-2.5 border border-white/[0.05]">
+          <div className=" rounded-xl px-3 py-2.5 border border-white/[0.05]">
             <p className="text-[10px] text-[var(--color-on-surface-faint)] uppercase tracking-wider mb-1">Tasks Done</p>
             <div className="flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5 text-[var(--color-accent)]" />
@@ -149,7 +149,7 @@ export const AgentCard = memo(function AgentCard({
           {showDeploy ? (
             <button
               onClick={() => router.push(`/agents/${agent.id}?action=deploy`)}
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black rounded-xl transition-all shadow-[0_10px_20px_rgba(99,102,241,0.2)]"
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black rounded-xl transition-all [0_10px_20px_rgba(99,102,241,0.2)]"
             >
               <Rocket className="w-3 h-3" />
               Deploy

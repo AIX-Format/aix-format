@@ -21,7 +21,7 @@ export const KYABadge: React.FC<KYABadgeProps> = ({ tier, size = 'md' }) => {
   const sizeClasses = size === 'sm' ? 'px-1.5 py-0.5 text-[9px]' : size === 'lg' ? 'px-3 py-1.5 text-sm' : 'px-2 py-1 text-[11px]';
 
   return (
-    <div className={`inline-flex items-center gap-1.5 font-bold border rounded-full backdrop-blur-md uppercase tracking-wider ${config.color} ${sizeClasses}`}>
+    <div className={`inline-flex items-center gap-1.5 font-bold border rounded-full  uppercase tracking-wider ${config.color} ${sizeClasses}`}>
       <Icon className={size === 'sm' ? 'w-2.5 h-2.5' : 'w-3.5 h-3.5'} />
       {config.label}
     </div>

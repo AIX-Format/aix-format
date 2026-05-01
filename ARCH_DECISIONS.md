@@ -200,3 +200,19 @@ Marketplace and User Agent views must be unified behind the `useRegistry` and `u
 ### Alternatives Considered
 ...
 ```
+
+## ADR-008: Infrastructure Design Aesthetic and AXIOM.md SSOT
+**Date: 2025-05-01**
+**Status: Accepted**
+
+### Context
+The AIX ecosystem was using a mix of 'Cyberpunk' glassmorphism and high-contrast monochrome designs. Additionally, agent configuration was fragmented across multiple files.
+
+### Decision
+1. **Visual Identity**: AIX Studio will strictly follow an "Infrastructure Design" aesthetic: high-contrast monochrome (Black/White/Gray), crisp typography, massive whitespace, and flat/clean components. All 'Cyberpunk', glowing gradients, and heavy glassmorphism are prohibited.
+2. **SSOT**: `AXIOM.md` is the absolute Single Source of Truth for agent DNA, topology, and runtime configuration. `AXIOM_AGENTS.md` is deprecated and removed.
+3. **Parsing**: All core components (Rust, Go, TS) must use official YAML/Markdown parsers to read `AXIOM.md` to ensure structural integrity.
+
+### Consequences
+- Studio UI components must be refactored to remove glows and blurs.
+- Go agency engine requires a migration from manual string parsing to a YAML library.

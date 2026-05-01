@@ -14,7 +14,7 @@ const ACTIVITIES = [
 
 export const LiveActivityTicker = () => {
   return (
-    <div className="w-full bg-black/40 border-y border-white/5 py-2 overflow-hidden whitespace-nowrap relative">
+    <div className="w-full  border-y border-white/5 py-2 overflow-hidden whitespace-nowrap relative">
       <div className="flex animate-marquee hover:[animation-play-state:paused]">
         {[...ACTIVITIES, ...ACTIVITIES].map((activity, index) => (
           <div

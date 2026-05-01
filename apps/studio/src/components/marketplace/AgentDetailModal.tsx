@@ -48,7 +48,7 @@ export const AgentDetailModal: React.FC<AgentDetailModalProps> = ({ item, onClos
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-[#050508]/90 backdrop-blur-sm"
+          className="absolute inset-0 bg-[#050508]/90 "
         />
 
         {/* Modal Content */}
@@ -56,7 +56,7 @@ export const AgentDetailModal: React.FC<AgentDetailModalProps> = ({ item, onClos
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-5xl h-[90vh] bg-[#0a0a0f] border border-white/10 rounded-[32px] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)] flex flex-col"
+          className="relative w-full max-w-5xl h-[90vh] bg-[#0a0a0f] border border-white/10 rounded-[32px] overflow-hidden [0_0_100px_rgba(0,0,0,0.5)] flex flex-col"
         >
           {/* Header */}
           <div className="relative h-64 flex-shrink-0">
@@ -69,14 +69,14 @@ export const AgentDetailModal: React.FC<AgentDetailModalProps> = ({ item, onClos
             
             <button 
               onClick={onClose}
-              className="absolute top-6 right-6 z-20 p-2 rounded-full bg-black/40 hover:bg-black/60 text-white/60 hover:text-white transition-all"
+              className="absolute top-6 right-6 z-20 p-2 rounded-full  hover:bg-black/60 text-white/60 hover:text-white transition-all"
             >
               <X size={20} />
             </button>
 
             <div className="absolute bottom-6 left-8 right-8 z-20 flex items-end justify-between">
               <div className="flex items-center gap-6">
-                <div className="w-24 h-24 rounded-2xl border-2 border-white/10 overflow-hidden bg-black shadow-2xl">
+                <div className="w-24 h-24 rounded-2xl border-2 border-white/10 overflow-hidden bg-black ">
                   <img src={item.author.avatar} alt={item.name} className="w-full h-full object-cover" />
                 </div>
                 <div>
@@ -220,7 +220,7 @@ economics:
 
                   <div className="space-y-6">
                     <h4 className="text-sm font-bold uppercase tracking-widest text-white/40">Model Provenance</h4>
-                    <div className="p-6 rounded-2xl bg-black/40 border border-white/10 space-y-4">
+                    <div className="p-6 rounded-2xl  border border-white/10 space-y-4">
                        <div className="flex justify-between items-center">
                          <span className="text-sm text-white/60">Model Provider</span>
                          <span className="text-sm font-bold text-white">Mistral AI</span>
@@ -316,7 +316,7 @@ economics:
           </div>
 
           {/* Footer */}
-          <div className="flex-shrink-0 px-8 py-6 border-t border-white/5 bg-black/40 flex items-center justify-between">
+          <div className="flex-shrink-0 px-8 py-6 border-t border-white/5  flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button className="flex items-center gap-2 text-sm font-bold text-white/40 hover:text-white transition-colors">
                 <Share2 size={16} /> Share
@@ -333,7 +333,7 @@ economics:
                   {item.price.type === 'free' ? 'FREE' : `${item.price.amount} ${item.price.currency}`}
                 </div>
               </div>
-              <button className="px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-lg shadow-blue-900/20">
+              <button className="px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all  /20">
                 Install Component
               </button>
             </div>
