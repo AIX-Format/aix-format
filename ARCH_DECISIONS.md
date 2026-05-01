@@ -146,6 +146,36 @@ Marketplace and User Agent views must be unified behind the `useRegistry` and `u
 
 ---
 
+## ADR-006 — Triple Threat Stack & AIX Essence
+
+| Field | Value |
+|-------|-------|
+| **Status** | ✅ Accepted |
+| **Date** | 2026-05-01 |
+| **Applies to** | Entire AIX Ecosystem, `aix-agent-skills` repo |
+
+### Decision
+
+1. **Triple Threat Stack**: AIX officially adopts a polyglot architecture:
+   - **Rust (DNA)**: Core logic, security parsers, and cryptographic primitives. Compiled to WASM for cross-platform runtime.
+   - **Go (Agency)**: High-concurrency orchestration layer and channel gateway (WhatsApp/Telegram).
+   - **TypeScript (Forge)**: Studio UI, DX tooling, and rapid prototyping.
+2. **AIX Essence**: All agentic capabilities (Skills, MCP servers, Plugins, APIs) are unified into a single format called an **Essence**.
+3. **Identity Graph**: Sovereign identity is anchored by `did:axiom`, with `bsuid` as the primary operational key for channel-scoped interactions.
+
+### Consequences
+
+- **Performance**: Rust/Go provide the performance needed for the GrandAgent's orchestration.
+- **Portability**: WASM allows the same core logic to run in the browser (Studio) and on the server (Agency).
+- **Simplicity**: Developers interact with a single unit (Essence) rather than juggling multiple standards.
+
+### Alternatives Considered
+
+- **All-TypeScript**: Rejected for performance and security isolation concerns at the core level.
+- **Python for AI**: Rejected in favor of Go/Rust for system-level predictability and concurrency.
+
+---
+
 ## How to Add a New ADR
 
 1. Copy the template below.
