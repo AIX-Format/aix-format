@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://amrikyy.ai/schemas/modules/memory.schema.json",
+  "title": "AIX Memory Module",
+  "type": "object",
+  "properties": {
+    "episodic": {
+      "type": "object",
+      "description": "Conversation history",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "max_messages": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "retention_days": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "storage": {
+          "type": "string",
+          "enum": [
+            "local",
+            "cloud",
+            "vector_db",
+            "database"
+          ]
+        }
+      }
+    },
+    "semantic": {
+      "type": "object",
+      "description": "Knowledge graphs",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "embedding_model": {
+          "type": "string"
+        },
+        "vector_db": {
+          "type": "string"
+        },
+        "similarity_threshold": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "max_results": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "procedural": {
+      "type": "object",
+      "description": "Workflows and processes",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "storage": {
+          "type": "string"
+        },
+        "max_workflows": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "persistence": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "backend": {
+          "type": "string",
+          "enum": [
+            "file",
+            "database",
+            "redis",
+            "s3",
+            "postgresql",
+            "sqlite"
+          ]
+        },
+        "config": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,121 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://amrikyy.ai/schemas/modules/requirements.schema.json",
+  "title": "AIX Requirements Module",
+  "type": "object",
+  "properties": {
+    "hardware": {
+      "type": "object",
+      "description": "Hardware requirements",
+      "properties": {
+        "cpu_cores": {
+          "type": "integer",
+          "description": "Minimum CPU cores required",
+          "minimum": 1
+        },
+        "memory_mb": {
+          "type": "integer",
+          "description": "Minimum RAM in MB",
+          "minimum": 1
+        },
+        "storage_mb": {
+          "type": "integer",
+          "description": "Minimum storage in MB",
+          "minimum": 1
+        },
+        "gpu_required": {
+          "type": "boolean",
+          "description": "Whether GPU is required",
+          "default": false
+        },
+        "gpu_memory_mb": {
+          "type": "integer",
+          "description": "Minimum GPU memory in MB (if GPU required)",
+          "minimum": 1
+        }
+      }
+    },
+    "software": {
+      "type": "object",
+      "description": "Software dependencies",
+      "properties": {
+        "runtime": {
+          "type": "string",
+          "description": "Required runtime environment"
+        },
+        "dependencies": {
+          "type": "array",
+          "description": "Required software dependencies",
+          "items": {
+            "type": "string"
+          }
+        },
+        "python_version": {
+          "type": "string",
+          "description": "Required Python version (if applicable)"
+        },
+        "node_version": {
+          "type": "string",
+          "description": "Required Node.js version (if applicable)"
+        }
+      }
+    },
+    "network": {
+      "type": "object",
+      "description": "Network requirements",
+      "properties": {
+        "internet_access": {
+          "type": "boolean",
+          "description": "Whether internet access is required",
+          "default": false
+        },
+        "bandwidth_mbps": {
+          "type": "number",
+          "description": "Minimum bandwidth in Mbps",
+          "minimum": 0
+        },
+        "allowed_domains": {
+          "type": "array",
+          "description": "Domains that the agent needs to access",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "vla": {
+      "type": "object",
+      "description": "Vision-Language-Action payload requirements",
+      "required": [
+        "adapter"
+      ],
+      "properties": {
+        "adapter": {
+          "type": "string",
+          "enum": [
+            "openpi",
+            "π0.7",
+            "generic"
+          ],
+          "description": "Identifies which VLA runtime adapter should process this payload."
+        },
+        "vision": {
+          "type": "object",
+          "description": "Visual perception inputs.",
+          "additionalProperties": true
+        },
+        "language": {
+          "type": "object",
+          "description": "Natural language instruction or context.",
+          "additionalProperties": true
+        },
+        "action": {
+          "type": "object",
+          "description": "Motor or decision action outputs.",
+          "additionalProperties": true
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

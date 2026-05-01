@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://amrikyy.ai/schemas/modules/black_box.schema.json",
+  "title": "AIX Black Box Module",
+  "type": "object",
+  "properties": {
+    "enabled": {
+      "type": "boolean",
+      "description": "Whether the black box logging is enabled"
+    },
+    "traces": {
+      "type": "array",
+      "description": "Cryptographically signed trace logs for the regulator package",
+      "items": {
+        "type": "object",
+        "required": [
+          "timestamp",
+          "action",
+          "signature"
+        ],
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "action": {
+            "type": "string",
+            "description": "The action or tool that was executed"
+          },
+          "details": {
+            "type": "object",
+            "description": "Details about the execution, parameters, output or memory state"
+          },
+          "signature": {
+            "type": "object",
+            "required": [
+              "algorithm",
+              "value"
+            ],
+            "properties": {
+              "algorithm": {
+                "type": "string",
+                "default": "ed25519"
+              },
+              "value": {
+                "type": "string",
+                "description": "Base64 encoded Ed25519 signature of the log entry"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

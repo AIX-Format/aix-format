@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://amrikyy.ai/schemas/modules/mcp.schema.json",
+  "title": "AIX MCP Module",
+  "type": "object",
+  "properties": {
+    "servers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "command"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Server identifier"
+          },
+          "command": {
+            "type": "string",
+            "description": "Executable command"
+          },
+          "args": {
+            "type": "array",
+            "description": "Command arguments",
+            "items": {
+              "type": "string"
+            }
+          },
+          "env": {
+            "type": "object",
+            "description": "Environment variables",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "timeout": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "auto_start": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

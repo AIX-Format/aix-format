@@ -1,0 +1,164 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://amrikyy.ai/schemas/modules/security.schema.json",
+  "title": "AIX Security Module",
+  "type": "object",
+  "required": [
+    "checksum"
+  ],
+  "properties": {
+    "authentication": {
+      "type": "array",
+      "description": "Supported authentication schemes",
+      "items": {
+        "type": "object",
+        "properties": {
+          "scheme": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "checksum": {
+      "type": "object",
+      "required": [
+        "algorithm",
+        "value"
+      ],
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "enum": [
+            "sha256",
+            "sha512",
+            "blake3"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "description": "Hex-encoded hash value",
+          "pattern": "^[0-9a-f]+$"
+        },
+        "scope": {
+          "type": "string",
+          "description": "What is included in checksum",
+          "default": "content"
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "description": "Digital signature",
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "enum": [
+            "RSA-SHA256",
+            "Ed25519",
+            "ECDSA-SHA256"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "description": "Base64-encoded signature"
+        },
+        "public_key": {
+          "type": "string",
+          "description": "PEM-encoded public key"
+        },
+        "signer": {
+          "type": "string",
+          "description": "Signer identifier"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Signing timestamp (ISO 8601)",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?$"
+        }
+      }
+    },
+    "encryption": {
+      "type": "object",
+      "description": "Encryption metadata",
+      "properties": {
+        "encrypted": {
+          "type": "boolean",
+          "default": false
+        },
+        "algorithm": {
+          "type": "string",
+          "enum": [
+            "AES-256-GCM",
+            "ChaCha20-Poly1305",
+            "none"
+          ]
+        },
+        "key_fingerprint": {
+          "type": "string"
+        }
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "description": "Capability restrictions",
+      "properties": {
+        "allowed_operations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "restricted_operations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "restricted_domains": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "max_api_calls_per_minute": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_memory_mb": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sandbox": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "compliance": {
+      "type": "object",
+      "description": "Compliance and audit",
+      "properties": {
+        "standards": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "certifications": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "audit_log": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

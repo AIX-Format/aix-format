@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://amrikyy.ai/schemas/modules/persona.schema.json",
+  "title": "AIX Persona Module",
+  "type": "object",
+  "required": [
+    "role",
+    "instructions"
+  ],
+  "properties": {
+    "role": {
+      "type": "string",
+      "description": "Agent's primary role",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "tone": {
+      "type": "string",
+      "description": "Communication style",
+      "examples": [
+        "friendly",
+        "professional",
+        "casual"
+      ]
+    },
+    "style": {
+      "type": "string",
+      "description": "Response style",
+      "examples": [
+        "concise",
+        "detailed",
+        "technical"
+      ]
+    },
+    "instructions": {
+      "type": "string",
+      "description": "Core behavioral instructions",
+      "minLength": 1,
+      "maxLength": 10000
+    },
+    "constraints": {
+      "type": "array",
+      "description": "Behavioral constraints",
+      "items": {
+        "type": "string"
+      }
+    },
+    "personality_traits": {
+      "type": "object",
+      "description": "Personality attributes",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "example_responses": {
+      "type": "array",
+      "description": "Sample conversations",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "temperature": {
+      "type": "number",
+      "description": "Sampling temperature",
+      "minimum": 0.0,
+      "maximum": 2.0
+    },
+    "context_window": {
+      "type": "integer",
+      "description": "Preferred context size",
+      "minimum": 1
+    },
+    "response_format": {
+      "type": "string",
+      "description": "Preferred output format"
+    }
+  },
+  "additionalProperties": true
+}

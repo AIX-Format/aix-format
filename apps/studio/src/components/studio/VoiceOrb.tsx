@@ -1,21 +1,8 @@
-<<<<<<< HEAD
 "use client";
 import { APP_VERSION } from "@/lib/version";
-
-<<<<<<< HEAD
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, Volume2, Activity, Settings2, Cpu, Radio } from "lucide-react";
-=======
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion } from "framer-motion";
-import { Mic, MicOff, Settings, Activity, Volume2 } from "lucide-react";
->>>>>>> remotes/origin/jules-15708352574097526392-78f13669
-=======
-import { useEffect, useState, useRef } from "react";
-import { motion } from "framer-motion";
-import { Mic, MicOff, Activity, Volume2 } from "lucide-react";
->>>>>>> remotes/origin/feat/kyc-wizard-tts-12299921071301084280
 import { cn } from "@/lib/utils";
 
 interface VoiceOrbProps {
@@ -23,23 +10,11 @@ interface VoiceOrbProps {
   isProcessing: boolean;
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 /* ─── Canvas waveform ─── */
 function WaveCanvas({ active, color }: { active: boolean; color: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef  = useRef<number>(0);
   const timeRef   = useRef(0);
-=======
-export function VoiceOrb({ onTranscript, isProcessing }: VoiceOrbProps) {
-  const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const recognitionRef = useRef<any>(null);
-
-  // Expose a global or prop-based way to trigger speech
-  // For simplicity in this demo, we listen to processing state changes
-  const prevProcessing = useRef(isProcessing);
->>>>>>> remotes/origin/feat/kyc-wizard-tts-12299921071301084280
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -216,40 +191,9 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
     if (isListening) {
       recognitionRef.current.stop();
       setIsListening(false);
-<<<<<<< HEAD
     } else {
       try { recognitionRef.current.start(); setIsListening(true); }
       catch { setIsListening(false); }
-=======
-export function VoiceOrb({ onTranscript, isProcessing: externalProcessing = false }: VoiceOrbProps) {
-  const [isActive, setIsActive] = useState(false);
-  const [internalProcessing, setInternalProcessing] = useState(false);
-
-  const isProcessing = externalProcessing || internalProcessing;
-
-  const handleToggle = () => {
-    if (!isActive) {
-      setIsActive(true);
-      // Simulate listening state
-      setTimeout(() => {
-        setInternalProcessing(true);
-        setTimeout(() => {
-          setInternalProcessing(false);
-          setIsActive(false);
-          if (onTranscript) {
-            onTranscript("Create a customer support agent");
-          }
-        }, 2000);
-      }, 3000);
-    } else {
-      setIsActive(false);
-      setInternalProcessing(false);
->>>>>>> remotes/origin/jules-15708352574097526392-78f13669
-=======
-    } else {
-      recognitionRef.current.start();
-      setIsListening(true);
->>>>>>> remotes/origin/feat/kyc-wizard-tts-12299921071301084280
     }
   };
 
@@ -257,8 +201,6 @@ export function VoiceOrb({ onTranscript, isProcessing: externalProcessing = fals
   const orbScale = 1 + micLevel * 0.06;
 
   return (
-<<<<<<< HEAD
-<<<<<<< HEAD
     <div className="glass-heavy rounded-3xl p-8 flex flex-col items-center gap-6 w-full border border-[rgba(0,212,255,0.1)] relative overflow-hidden">
 
       {/* Background ambient glow */}
@@ -277,7 +219,7 @@ export function VoiceOrb({ onTranscript, isProcessing: externalProcessing = fals
           <h3 className="text-base font-display font-bold text-white tracking-tight">Sovereign Voice Engine</h3>
           <p className="text-[11px] text-[var(--color-on-surface-variant)] mt-0.5 flex items-center gap-1.5">
             <span className="status-dot status-online" />
-            Pi Network Secured · AIX v${APP_VERSION}
+            Pi Network Secured · AIX v{APP_VERSION}
           </p>
         </div>
         <button className="btn btn-ghost btn-sm p-2 rounded-xl" aria-label="Voice settings">
@@ -315,35 +257,6 @@ export function VoiceOrb({ onTranscript, isProcessing: externalProcessing = fals
         />
 
         {/* Core orb button */}
-=======
-    <div className="flex flex-col items-center justify-center gap-6">
-      <div className="relative flex items-center justify-center w-32 h-32">
-        {/* Outer Ripple */}
-        {(isListening || isProcessing || isSpeaking) && (
-          <motion.div
-            initial={{ scale: 1, opacity: 0.5 }}
-            animate={{ scale: 1.5, opacity: 0 }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "easeOut" }}
-            className={cn(
-              "absolute inset-0 rounded-full border",
-              isSpeaking ? "border-[#d2bbff]" : "border-[var(--color-primary)]"
-            )}
-          />
-        )}
-        {(isListening || isProcessing || isSpeaking) && (
-          <motion.div
-            initial={{ scale: 1, opacity: 0.3 }}
-            animate={{ scale: 1.8, opacity: 0 }}
-            transition={{ repeat: Infinity, duration: 2, ease: "easeOut", delay: 0.5 }}
-            className={cn(
-              "absolute inset-0 rounded-full border",
-               isSpeaking ? "border-white" : "border-[var(--color-secondary)]"
-            )}
-          />
-        )}
-
-        {/* Core Orb */}
->>>>>>> remotes/origin/feat/kyc-wizard-tts-12299921071301084280
         <motion.button
           onClick={toggleListening}
           whileHover={{ scale: 1.06 }}
@@ -415,7 +328,6 @@ export function VoiceOrb({ onTranscript, isProcessing: externalProcessing = fals
             ? "Analyzing AIX manifest…"
             : "Tap orb to deploy or configure agents via voice"}
         </p>
-<<<<<<< HEAD
       </div>
 
       {/* Waveform visualizer */}
@@ -446,52 +358,6 @@ export function VoiceOrb({ onTranscript, isProcessing: externalProcessing = fals
         <span className="flex items-center gap-1.5">
           <Radio className="w-3 h-3" /> Pi KYC Active
         </span>
-=======
-    <div className="flex flex-col items-center justify-center p-8 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 w-full">
-      <div className="relative mb-8">
-        <motion.div
-          animate={{
-            scale: isActive ? [1, 1.2, 1] : 1,
-            opacity: isActive ? [0.5, 0.8, 0.5] : 0.2
-          }}
-          transition={{
-            repeat: Infinity,
-            duration: 2
-          }}
-          className="absolute inset-0 bg-blue-500/30 rounded-full blur-xl"
-        />
-
-        <button
-          onClick={handleToggle}
-          className={cn(
-            "relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300",
-            isActive
-              ? "bg-blue-600 shadow-[0_0_30px_rgba(37,99,235,0.5)]"
-              : "bg-gray-800 border border-white/20 hover:border-white/40 hover:bg-gray-700"
-          )}
-        >
-          {isProcessing ? (
-            <Activity className="w-10 h-10 text-white animate-pulse" />
-          ) : isActive ? (
-            <Mic className="w-10 h-10 text-white" />
-          ) : (
-            <MicOff className="w-10 h-10 text-gray-400" />
-          )}
-        </button>
-      </div>
-
-      <div className="text-center space-y-2">
-        <h3 className="text-xl font-medium text-white tracking-wider">VoiceOrb</h3>
-        <p className="text-gray-400 text-sm h-5">
-          {isProcessing
-            ? "Processing DNA..."
-            : isActive
-              ? "Listening..."
-              : "Tap to begin voice configuration"}
-        </p>
->>>>>>> remotes/origin/jules-15708352574097526392-78f13669
-=======
->>>>>>> remotes/origin/feat/kyc-wizard-tts-12299921071301084280
       </div>
     </div>
   );

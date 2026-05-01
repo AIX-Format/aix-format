@@ -1,0 +1,160 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://amrikyy.ai/schemas/modules/abom.schema.json",
+  "title": "AIX ABOM Module",
+  "type": "object",
+  "properties": {
+    "integrity_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the ABOM constituents/dependencies for integrity verification"
+    },
+    "models": {
+      "type": "array",
+      "description": "Base models and architectures utilized by the agent",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "version"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "parameters": {
+            "type": "string",
+            "description": "e.g. 70B, 8B"
+          },
+          "weights_hash": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "datasets": {
+      "type": "array",
+      "description": "Training or fine-tuning datasets used",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "provenance": {
+            "type": "string"
+          },
+          "sensitivity": {
+            "type": "string",
+            "enum": [
+              "public",
+              "proprietary",
+              "sensitive"
+            ]
+          }
+        }
+      }
+    },
+    "constituents": {
+      "type": "array",
+      "description": "Software components and dependencies",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "version"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "hash": {
+            "type": "string"
+          },
+          "license": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "properties": {
+        "ethical_constraints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "compliance_attestations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "environmental_impact": {
+      "type": "object",
+      "properties": {
+        "training_energy_kwh": {
+          "type": "number"
+        },
+        "carbon_offset": {
+          "type": "boolean"
+        }
+      }
+    },
+    "saas_services": {
+      "type": "array",
+      "description": "SaaS-BOM: Integrated SaaS applications and API dependencies",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "provider"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "endpoints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "data_flow": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Types of data shared with this SaaS (e.g. PII, telemetry)"
+          },
+          "compliance_tier": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "description": "Compliance and risk tier for the SaaS provider"
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}
