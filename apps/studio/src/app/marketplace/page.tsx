@@ -71,16 +71,15 @@ export default function MarketplacePage() {
       {/* Header Section */}
       <header className="mb-12">
         <FadeIn>
-          <div className="flex items-center gap-2 text-xs font-bold text-blue-500 uppercase tracking-[0.2em] mb-4">
-            <span className="w-8 h-[1px] bg-blue-500" />
-            Discover the Ecosystem
+          <div className="flex items-center gap-2 text-xs font-bold text-indigo-500 uppercase tracking-[0.2em] mb-4">
+            <span className="w-8 h-[1px] bg-indigo-500" />
+            Adopt Your AI Companion
           </div>
-          </div>
-          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">
-            AIX Marketplace
+          <h1 className="text-6xl font-black mb-6 bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent tracking-tighter">
+            Pet Adoption Center
           </h1>
-          <p className="text-lg text-white/40 max-w-2xl mb-10">
-            Secure, verified, and high-performance components for your AI agent architecture. Built on the AIX open standard.
+          <p className="text-xl text-white/40 max-w-2xl mb-10 font-medium">
+            Browse through our verified collection of AI pets. Each pet comes with a unique set of skills, memory, and personality, ready to be adopted into your fleet.
           </p>
         </FadeIn>
 

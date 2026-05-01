@@ -6,7 +6,8 @@ import {
   kv, 
   evaluateAgent, 
   executeDeadHand, 
-  sendHeartbeat 
+  sendHeartbeat,
+  PetOrchestrator 
 } from "@aix-core/storage";
 import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
@@ -66,11 +67,14 @@ export async function POST(req: NextRequest) {
     // Send heartbeat to prevent Dead Hand timeout
     await sendHeartbeat(actualAgentId);
 
-    // 3. FETCH AGENT MANIFEST
+    // 3. EVOLUTION: Pet Activity Pulse
+    await PetOrchestrator.pulseActivity(actualAgentId);
+
+    // 4. FETCH AGENT MANIFEST
     const agentData = await kv.get<any>(KEYS.registry(actualAgentId));
     if (!agentData) return NextResponse.json({ error: "Agent not found" }, { status: 404 });
 
-    // 4. EXECUTE REASONING STEP (The "Thought")
+    // 5. EXECUTE REASONING STEP (The "Thought")
     const systemPrompt = `
       ${agentData.persona?.instructions || 'You are a sovereign agent.'}
       
@@ -94,7 +98,7 @@ export async function POST(req: NextRequest) {
       messages: process.history.map(h => ({ role: h.role as any, content: h.content }))
     });
 
-    // 5. PARSE REASONING & SENTINEL TOKENS
+    // 6. PARSE REASONING & SENTINEL TOKENS
     let status: any = 'THINKING';
     let action = undefined;
     let thought = undefined;
@@ -107,11 +111,14 @@ export async function POST(req: NextRequest) {
     } else if (text.includes('FINAL_ANSWER:')) {
       status = 'COMPLETED';
       thought = text.split('FINAL_ANSWER:')[0].replace('THOUGHT:', '').replace('NO_REPLY', '').trim();
+      // Agent finished successfully -> Evolution boost
+      await PetOrchestrator.pulseActivity(actualAgentId, true);
+      await PetOrchestrator.settle(actualAgentId);
     } else {
       thought = text.replace('THOUGHT:', '').replace('NO_REPLY', '').trim();
     }
 
-    // 6. UPDATE PROCESS STATE
+    // 7. UPDATE PROCESS STATE
     const updatedProcess = await GatewayManager.pulse(process.id, {
       status,
       lastThought: thought,

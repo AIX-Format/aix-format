@@ -52,12 +52,30 @@ export async function updateRegistryEntry(entry: RegistryEntry): Promise<void> {
 }
 
 /**
- * Removes an entry from the registry by DID.
+ * Transfers ownership of an agent (Pet Gifting).
+ * Preserves all memory, skills, and evolution state.
  */
-export async function deleteRegistryEntry(did: string): Promise<void> {
-  await kv.del(KEYS.registry(did));
+export async function transferOwnership(did: string, fromUserId: string, toUserId: string): Promise<void> {
+  const entry = await kv.get<RegistryEntry & { ownerId?: string }>(KEYS.registry(did));
+  if (!entry) throw new Error("Agent not found");
 
-  const dids = await kv.get<string[]>(GLOBAL_INDEX_KEY) || [];
-  const filtered = dids.filter(d => d !== did);
-  await kv.set(GLOBAL_INDEX_KEY, filtered);
+  // Update owner in registry
+  entry.ownerId = toUserId;
+  await kv.set(KEYS.registry(did), entry);
+
+  // Update user-specific indices
+  const fromKey = `user:${fromUserId}:agents`;
+  const toKey = `user:${toUserId}:agents`;
+
+  const fromAgents = await kv.get<string[]>(fromKey) || [];
+  await kv.set(fromKey, fromAgents.filter(d => d !== did));
+
+  const toAgents = await kv.get<string[]>(toKey) || [];
+  if (!toAgents.includes(did)) {
+    toAgents.push(did);
+    await kv.set(toKey, toAgents);
+  }
+
+  console.log(`[Pet Gifting] Agent ${did} transferred from ${fromUserId} to ${toUserId}`);
 }
+

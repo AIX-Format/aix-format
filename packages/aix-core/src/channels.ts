@@ -73,6 +73,15 @@ export class ChannelManager {
   }
 
   /**
+   * Generates a "One-Link" deployment URL for Telegram.
+   * Format: https://t.me/aix_deploy_bot?start=agt_1234
+   */
+  static getOneLinkUrl(agentId: string): string {
+    const MANAGER_BOT_USERNAME = 'aix_deploy_bot';
+    return `https://t.me/${MANAGER_BOT_USERNAME}?start=${agentId}`;
+  }
+
+  /**
    * Retrieves all active channels for an agent.
    */
   static async getChannels(agentId: string): Promise<ChannelConfig> {

@@ -16,6 +16,7 @@ import {
   Globe
 } from 'lucide-react';
 import { AgentRecord } from '@/lib/types';
+import { AgentPet } from '@/components/shared/AgentPet';
 
 interface Props {
   agent: AgentRecord;
@@ -66,16 +67,7 @@ export const AgentCard = memo(function AgentCard({
 
         {/* ── Top row ── */}
         <div className="flex items-start justify-between">
-          <div
-            className="w-12 h-12 rounded-2xl flex items-center justify-center border flex-shrink-0"
-            style={{
-              background:  `linear-gradient(135deg, ${color}18, ${color}30)`,
-              borderColor: `${color}30`,
-              boxShadow:   `0 0 16px ${color}20`,
-            }}
-          >
-            <BrainCircuit className="w-6 h-6" style={{ color }} />
-          </div>
+          <AgentPet pet={agent.pet} size="md" />
 
           <div className="flex items-center gap-2">
             {agent.deployment?.status === 'deploying' ? (

@@ -46,31 +46,61 @@ export const AgentPet: React.FC<AgentPetProps> = ({ pet, className = '', size = 
     return <CircleUser className={`${SIZE_MAP[size]} text-zinc-600 ${className}`} />;
   }
 
-  const petInfo = PET_MAP[pet.type] || PET_MAP.fox;
+  // Dead Hand Override: If agent is flagged or dead-handed, transform into Red Wolf
+  const isAngry = pet.mood === 'alert';
+  const effectiveType = isAngry ? 'wolf' : pet.type;
+  const petInfo = PET_MAP[effectiveType] || PET_MAP.fox;
   const Icon = petInfo.icon;
+  const effectiveColor = isAngry ? '#EF4444' : (pet.color || petInfo.color);
+
+  // Animation classes based on mood
+  const moodClasses = {
+    busy: 'opacity-50 grayscale-[0.5] scale-95', // "Tired" look
+    alert: 'animate-pulse scale-110 shadow-[0_0_30px_rgba(239,68,68,0.5)]', // "Angry/Dead Hand"
+    creative: 'animate-bounce',
+    happy: 'hover:scale-110 transition-transform',
+    energized: 'animate-[spin_10s_linear_infinite] shadow-[0_0_40px_rgba(255,255,255,0.2)]',
+    sleep: 'opacity-30 blur-[1px] scale-90'
+  };
+
+  const currentMoodClass = moodClasses[pet.mood as keyof typeof moodClasses] || '';
 
   return (
-    <div className={`relative flex items-center justify-center ${className}`}>
+    <div className={`relative flex items-center justify-center ${className} ${currentMoodClass}`}>
+      {/* Sleep ZZZ Indicator */}
+      {pet.mood === 'sleep' && (
+        <div className="absolute -top-6 -left-2 text-xl font-black text-indigo-400/50 animate-bounce select-none">
+          ZZZ...
+        </div>
+      )}
       {/* Visual representation of the Pet */}
       <div 
-        className={`rounded-full flex items-center justify-center bg-zinc-900 border-2 transition-all duration-500 shadow-[0_0_20px_rgba(0,0,0,0.5)]`}
+        className={`rounded-full flex items-center justify-center bg-zinc-900 border-2 transition-all duration-700 shadow-[0_0_20px_rgba(0,0,0,0.5)]`}
         style={{ 
-          borderColor: pet.color || petInfo.color,
-          backgroundColor: `${pet.color || petInfo.color}15`,
+          borderColor: effectiveColor,
+          backgroundColor: `${effectiveColor}15`,
           width: size === 'xl' ? '120px' : size === 'lg' ? '80px' : size === 'md' ? '48px' : '32px',
           height: size === 'xl' ? '120px' : size === 'lg' ? '80px' : size === 'md' ? '48px' : '32px'
         }}
       >
         <Icon 
-          className={`${SIZE_MAP[size]} transition-all duration-500`} 
-          style={{ color: pet.color || petInfo.color }}
+          className={`${SIZE_MAP[size]} transition-all duration-700`} 
+          style={{ color: effectiveColor }}
         />
         
+        {/* Accessories Layer */}
+        {pet.accessories?.map((acc, idx) => (
+          <div key={idx} className="absolute -top-1 -left-1">
+             <Zap className="w-4 h-4 text-yellow-400 drop-shadow-lg" />
+          </div>
+        ))}
+
         {/* Mood Indicator */}
         <div 
-          className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-zinc-950 shadow-xl"
+          className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-zinc-950 shadow-xl transition-all duration-500"
           style={{ 
-            backgroundColor: pet.mood === 'busy' ? '#F59E0B' : pet.mood === 'alert' ? '#EF4444' : '#10B981' 
+            backgroundColor: isAngry ? '#EF4444' : pet.mood === 'busy' ? '#F59E0B' : '#10B981',
+            transform: pet.mood === 'busy' ? 'scale(0.8)' : 'scale(1)'
           }}
           title={`Mood: ${pet.mood}`}
         />
@@ -78,10 +108,11 @@ export const AgentPet: React.FC<AgentPetProps> = ({ pet, className = '', size = 
 
       {/* Level Badge for LG/XL */}
       {(size === 'lg' || size === 'xl') && (
-        <div className="absolute -top-2 -right-2 px-3 py-1 bg-zinc-950 border border-white/10 rounded-full">
+        <div className="absolute -top-4 -right-4 px-3 py-1 bg-zinc-950 border border-white/10 rounded-full shadow-2xl">
           <span className="text-[10px] font-black text-white uppercase tracking-widest">LVL {pet.level}</span>
         </div>
       )}
     </div>
   );
 };
+

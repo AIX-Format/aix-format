@@ -31,10 +31,11 @@ export interface DeploymentRecord {
 export interface PetConfig {
   type: 'fox' | 'octopus' | 'owl' | 'bee' | 'lion' | 'dolphin' | 'wolf' | 'butterfly' | 'elephant' | 'eagle';
   color: string;
-  mood: 'curious' | 'busy' | 'happy' | 'tired' | 'alert' | 'creative';
+  mood: 'curious' | 'busy' | 'happy' | 'tired' | 'alert' | 'creative' | 'sleep' | 'energized';
   level: number;
   accessories?: string[];
 }
+
 
 /**
  * RegistryEntry: Canonical + UI Overlays
