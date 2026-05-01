@@ -24,6 +24,7 @@ export interface StorageAdapter {
   sadd(key: string, ...members: any[]): Promise<number>;
   srem(key: string, ...members: any[]): Promise<number>;
   smembers<T>(key: string): Promise<T[]>;
+  mget<T>(...keys: string[]): Promise<(T | null)[]>;
 }
 
 import { NS, TTL, KEYS } from './storage/keys';
@@ -186,6 +187,11 @@ class UpstashRedisAdapter implements StorageAdapter {
 
   async smembers<T>(key: string): Promise<T[]> {
     return (await this.withRetry(() => this.client.smembers<T>(key), 'SMEMBERS', key)) || [];
+  }
+
+  async mget<T>(...keys: string[]): Promise<(T | null)[]> {
+    if (keys.length === 0) return [];
+    return (await this.withRetry(() => this.client.mget<T>(...keys), 'MGET', keys[0])) || keys.map(() => null);
   }
 }
 
