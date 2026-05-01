@@ -111,10 +111,17 @@ export const WikiBrain: React.FC<WikiBrainProps> = ({ agentId }) => {
     );
   };
 
-  if (loading) return <div className="h-40 bg-white/5 rounded-2xl animate-pulse" />;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[300px] gap-4">
+        <div className="w-10 h-10 rounded-full border-2 border-white/5 border-t-purple-500/50 animate-spin" />
+        <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">Retrieving Knowledge Nodes</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 bg-zinc-950 border border-white/5 rounded-3xl shadow-2xl">
+    <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xs font-black text-indigo-500 uppercase tracking-[0.3em] flex items-center gap-2">
           <BrainCircuit size={16} />
@@ -129,13 +136,19 @@ export const WikiBrain: React.FC<WikiBrainProps> = ({ agentId }) => {
         {tree && renderNode(tree)}
       </div>
 
-      <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
-        <div className="text-[10px] text-white/30 font-medium max-w-[200px]">
-          Knowledge nodes are automatically indexed via the Sovereign Gateway pulse loop.
+      {!tree && (
+        <div className="py-20 flex flex-col items-center justify-center text-center opacity-40">
+          <Database size={40} className="mb-4 text-white/10" />
+          <p className="text-sm font-bold text-white">No memory nodes found</p>
+          <p className="text-xs text-white/50 mt-1">Start a session to build the agent's knowledge graph.</p>
         </div>
-        <button className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-[10px] font-black text-white transition-all shadow-lg shadow-indigo-500/20">
-          RE-INDEX BRAIN
-        </button>
+      )}
+
+      <div className="mt-8 pt-6 border-t border-white/5">
+        <div className="text-[10px] text-white/30 font-medium leading-relaxed">
+          Knowledge nodes are automatically indexed via the Sovereign Gateway pulse loop.
+          This graph represents the hierarchical memory of the agent across all sessions.
+        </div>
       </div>
     </div>
   );
