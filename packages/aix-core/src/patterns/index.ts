@@ -3,7 +3,7 @@
  * Foundation for Lego Block Composition & Russian Doll Nesting.
  */
 
-import { kv } from "../index";
+import { kv } from "../storage/adapter";
 
 // --- Lego Block Pattern (Composition) ---
 export abstract class AgentBlock {
