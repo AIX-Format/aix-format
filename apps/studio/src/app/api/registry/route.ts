@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRegistry, updateRegistryEntry, deleteRegistryEntry } from "@/lib/registry";
-import { RegistryEntry } from "@/lib/types";
+import { getRegistry, updateRegistryEntry, deleteRegistryEntry, type RegistryEntry } from "@aix-core/storage";
 
 /**
  * GET /api/registry
@@ -66,7 +65,6 @@ export async function DELETE(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     
-    // Also check body if not in query param
     let did = id;
     if (!did) {
       const body = await req.json().catch(() => ({}));

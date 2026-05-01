@@ -1,72 +1,57 @@
-import { kv, NS, KEYS } from '@/lib/redis';
 import { RegistryEntry } from "./types";
 
 /**
- * AIX Global Agent Registry (Hardened)
- * Standardizes storage patterns for sovereign agents using per-agent keys.
+ * AIX Global Agent Registry (Client Wrapper)
+ * Uses the /api/registry endpoint to interact with the sovereign index.
  */
 
-const GLOBAL_INDEX_KEY = `${NS.REGISTRY}:index`;
-
 /**
- * Retrieves all agents from the global registry.
- * Fetches the index first, then resolves individual entries in parallel.
+ * Retrieves all agents from the global registry via API.
  */
 export async function getRegistry(): Promise<RegistryEntry[]> {
   try {
-    const dids = await kv.get<string[]>(GLOBAL_INDEX_KEY);
-    if (!dids || dids.length === 0) return [];
-
-    const entries = await Promise.all(
-      dids.map(did => kv.get<RegistryEntry>(KEYS.registry(did)))
-    );
-
-    return entries.filter((e): e is RegistryEntry => e !== null);
+    const res = await fetch('/api/registry');
+    if (!res.ok) throw new Error("Failed to fetch registry");
+    return await res.json();
   } catch (error) {
-    console.warn("[Registry] Failed to fetch global registry:", error);
+    console.warn("[Registry] Client fetch failed:", error);
     return [];
   }
 }
 
 /**
- * Upserts a single entry in the registry.
+ * Upserts a single entry in the registry via API.
  */
 export async function updateRegistryEntry(entry: RegistryEntry): Promise<void> {
   try {
-    const did = entry.did;
+    const res = await fetch('/api/registry', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entry),
+    });
     
-    // 1. Store individual entry
-    await kv.set(KEYS.registry(did), entry);
-
-    // 2. Update global index (using a set-like array for now to maintain compatibility with Upstash adapter)
-    const dids = await kv.get<string[]>(GLOBAL_INDEX_KEY) || [];
-    if (!dids.includes(did)) {
-      dids.push(did);
-      await kv.set(GLOBAL_INDEX_KEY, dids);
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || "Registry update failure");
     }
-    
-    console.log(`[Registry] Updated entry for: ${did}`);
   } catch (error) {
-    console.error(`[Registry] Update failed for ${entry.did}:`, error);
-    throw new Error("Registry update failure");
+    console.error(`[Registry] Client update failed for ${entry.did}:`, error);
+    throw error;
   }
 }
 
 /**
- * Removes an entry from the registry by DID.
+ * Removes an entry from the registry by DID via API.
  */
 export async function deleteRegistryEntry(did: string): Promise<void> {
   try {
-    // 1. Delete individual entry
-    await kv.del(KEYS.registry(did));
-
-    // 2. Remove from global index
-    const dids = await kv.get<string[]>(GLOBAL_INDEX_KEY) || [];
-    const filtered = dids.filter(d => d !== did);
-    await kv.set(GLOBAL_INDEX_KEY, filtered);
+    const res = await fetch(`/api/registry?id=${did}`, {
+      method: 'DELETE',
+    });
     
-    console.log(`[Registry] Deleted entry for: ${did}`);
+    if (!res.ok) throw new Error("Registry delete failure");
   } catch (error) {
-    console.error(`[Registry] Delete failed for ${did}:`, error);
+    console.error(`[Registry] Client delete failed for ${did}:`, error);
+    throw error;
   }
 }

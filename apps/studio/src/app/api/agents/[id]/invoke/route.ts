@@ -1,10 +1,11 @@
 import { kv, KEYS, NS } from '@/lib/redis';
 import { NextResponse } from 'next/server';
+import { getLearnedProcedures, recordSuccessfulProcedure } from '@aix-core/storage';
+import { google } from '@ai-sdk/google';
+import { generateText } from 'ai';
 
 /**
- * Agent Invocation API (TASK 5)
- * The "run" endpoint for sovereign agents.
- * Connects manifest, memory, and skills via the MCP Router.
+ * AIX Sovereign Invocation Engine (AgenticKit + Hermes + Critic)
  */
 
 export async function POST(
@@ -12,57 +13,107 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { message, context, sessionId } = await req.json();
+    const { message, context, sessionId, skipCritic = false } = await req.json();
     const agentId = params.id;
 
-    // 1. Fetch Agent Manifest from Registry
-    // Using core standardized registry key
-    const registryKey = KEYS.registry(agentId);
-    const agentData = await kv.get<any>(registryKey);
-    
+    // 1. Fetch Agent Manifest
+    const agentData = await kv.get<any>(KEYS.registry(agentId));
     if (!agentData) {
       return NextResponse.json({ error: 'Agent not found in registry' }, { status: 404 });
     }
 
-    // 2. Fetch Agent Memory (Last 10 interactions)
-    const memoryKey = KEYS.memory(agentId);
-    const memory = await kv.lrange<string>(memoryKey, 0, 10);
-    const parsedMemory = memory.map(e => JSON.parse(e));
+    // 2. Retrieve Layer 2 Memory (Learned Skills/Procedures)
+    const learnedSkills = await getLearnedProcedures(agentId);
+    const skillContext = learnedSkills.length > 0 
+      ? `Proven successful procedures for this agent:\n${JSON.stringify(learnedSkills.slice(0, 3))}`
+      : "No previous successful procedures learned yet.";
 
-    // 3. Fetch Agent Skills (Set members)
-    const skillsKey = `${NS.SKILLS}:agent:${agentId}`;
-    const skills = await kv.smembers<string>(skillsKey);
-
-    // 4. Route via MCP Router
-    // Note: We use absolute URL for internal fetch in Next.js if available, 
-    // or call the logic. For now, following the user's fetch pattern.
+    // 3. Revenue & Quota Check
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const routerResponse = await fetch(`${baseUrl}/api/mcp-router`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         agentDid: agentData.did || agentId,
-        agent: agentData, 
-        message, 
-        memory: parsedMemory, 
-        skills, 
-        context,
-        userId: sessionId || 'anonymous' // Standardizing on sessionId for quota
+        userId: sessionId || 'anonymous',
+        endpointType: 'invoke'
       })
     });
 
     const routerResult = await routerResponse.json();
+    if (!routerResult.success) {
+      return NextResponse.json(routerResult, { status: routerResponse.status });
+    }
 
-    // 5. Update Memory with the new interaction (Fire and forget)
+    // 4. EXECUTION (Executor Agent)
+    const systemPrompt = `
+      ${agentData.persona?.instructions || 'You are a sovereign AI agent.'}
+      
+      HERMES MEMORY CONTEXT (SUCCESSFUL PATTERNS):
+      ${skillContext}
+      
+      User Context: ${JSON.stringify(context || {})}
+    `;
+
+    const { text, finishReason, toolCalls } = await generateText({
+      model: google('gemini-2.0-flash'),
+      system: systemPrompt,
+      prompt: message,
+    });
+
+    // 5. CRITIC PATTERN (Pattern 8: Agent reviews output)
+    let isSuccess = finishReason === 'stop' || finishReason === 'tool-calls';
+    let criticFeedback = null;
+
+    if (isSuccess && !skipCritic) {
+      const { text: feedback } = await generateText({
+        model: google('gemini-2.0-flash-lite-preview'), // Lightweight critic
+        system: "You are the AIX Protocol Critic. Review the agent's response for accuracy, safety, and goal achievement. Output only 'VALID' or 'INVALID' followed by a brief reason.",
+        prompt: `User Goal: ${message}\nAgent Response: ${text}`
+      });
+      
+      criticFeedback = feedback;
+      if (feedback.includes('INVALID')) {
+        isSuccess = false;
+        console.warn(`[Critic] Run invalidated for ${agentId}: ${feedback}`);
+      }
+    }
+
+    // 6. HERMES LEARNING: Save what worked (Validated by Critic)
+    if (isSuccess) {
+      void recordSuccessfulProcedure(agentId, message, [
+        { 
+          tool: toolCalls?.length ? 'tool_execution' : 'direct_response', 
+          input: message, 
+          output: text, 
+          success: true 
+        }
+      ]);
+    }
+
+    // 7. Update Layer 1 Memory (Session)
+    const memoryKey = KEYS.memory(agentId);
     void kv.lpush(memoryKey, JSON.stringify({ 
       role: 'user', 
       content: message, 
       timestamp: Date.now() 
     })).then(() => {
-      kv.ltrim(memoryKey, 0, 49); // Keep MAX_ENTRIES limit
+      kv.lpush(memoryKey, JSON.stringify({ 
+        role: 'assistant', 
+        content: text, 
+        timestamp: Date.now(),
+        critic: criticFeedback
+      }));
+      kv.ltrim(memoryKey, 0, 49);
     });
 
-    return NextResponse.json(routerResult);
+    return NextResponse.json({
+      success: true,
+      response: text,
+      critic: criticFeedback,
+      billing: routerResult,
+      learned: isSuccess
+    });
   } catch (err: any) {
     console.error("[Invoke Error]:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });

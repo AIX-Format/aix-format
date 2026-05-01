@@ -1,51 +1,61 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { nanoid } from 'nanoid';
-import { kv, NS } from '@/lib/redis';
-
+import { kv, NS, KEYS } from '@/lib/redis';
 import { updateRegistryEntry } from '@/lib/registry';
+import { validateSovereignManifest } from '@/lib/protocol-validator';
 
 /**
  * POST /api/agents
- * Registers a new agent manifest.
+ * Registers a new agent manifest with Runtime Enforcement.
  */
 export async function POST(req: Request) {
   try {
     const manifest = await req.json();
 
-    if (!manifest.meta?.name) {
-      return NextResponse.json({ success: false, error: 'Manifest validation failed: Agent name is required' }, { status: 400 });
+    // 1. Runtime Protocol Enforcement (Sovereign Pattern 1)
+    const validation = validateSovereignManifest(manifest);
+    if (!validation.valid) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Sovereign Protocol Violation',
+        details: validation.errors 
+      }, { status: 400 });
     }
 
     const agentId = `aix_${nanoid(10)}`;
-    const did = manifest.identity_layer?.id || `did:axiom:temp:${agentId}`;
+    const did = manifest.identity_layer.id;
     const userAgentsKey = KEYS.session('user_default:agents');
 
-    // Store manifest using standardized registry key
+    // 2. Store manifest using standardized registry key
     await kv.set(KEYS.registry(did), manifest);
     
-    // Add to user's fleet list
+    // 3. Add to user's fleet list
     const fleet = await kv.get<string[]>(userAgentsKey) || [];
     if (!fleet.includes(did)) {
       fleet.push(did);
       await kv.set(userAgentsKey, fleet);
     }
 
-    // Update global registry for marketplace
+    // 4. Update global registry for marketplace
     await updateRegistryEntry({
-      did: manifest.identity_layer?.id || agentId,
+      did: did,
       name: manifest.meta.name,
       role: manifest.persona?.role || 'Sovereign Agent',
       capabilities: manifest.meta.tags || [],
-      kyc_tier: manifest.identity_layer?.kyc_tier || 'unverified',
+      kyc_tier: manifest.identity_layer.verification?.status || 'unverified',
       specVersion: manifest.meta.format_version || '1.3.0',
       publishedAt: new Date().toISOString(),
-      yaml: JSON.stringify(manifest)
+      yaml: JSON.stringify(manifest),
+      risk_score: validation.risk_score
     } as any);
 
     return NextResponse.json({
       success: true,
       agentId,
-      manifestUrl: `/agents/${agentId}`
+      did,
+      risk_score: validation.risk_score,
+      warnings: validation.warnings,
+      manifestUrl: `/agents/${did}`
     });
   } catch (error: any) {
     console.error('Deploy API Error:', error);
@@ -72,7 +82,6 @@ export async function GET(req: NextRequest) {
     const userAgentsKey = KEYS.session('user_default:agents');
     const agentIds = await kv.get<string[]>(userAgentsKey) || [];
     
-    // Fetch manifests for each ID (batch)
     const manifests = await Promise.all(
       agentIds.map(async (aid) => {
         const m = await kv.get<any>(KEYS.registry(aid));

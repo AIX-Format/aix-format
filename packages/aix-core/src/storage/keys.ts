@@ -21,10 +21,14 @@ export const NS = {
   HEALTH: 'aix:health',         // System health checks
   WIZARD_SESSION: 'aix:wizard:session', // aix:wizard:session:{sessionId}
   
-  // New: Agent Intelligence & Communication
-  MEMORY: 'aix:memory',         // aix:memory:{agentId}:{userId}
-  SKILLS: 'aix:skills',         // aix:skills:{skillId}
-  INVOKE: 'aix:invoke'          // aix:invoke:{traceId}
+  // Agent Intelligence & Learning (Hermes Layers)
+  MEMORY_SESSION: 'aix:mem:sess',   // Layer 1: Session (24h)
+  MEMORY_SKILL: 'aix:mem:skill',     // Layer 2: Learned Skills (Permanent)
+  MEMORY_CONTEXT: 'aix:mem:ctx',     // Layer 3: Task Context (Per task)
+  MEMORY_EPISODIC: 'aix:mem:epi',    // Layer 4: Long-term Patterns (Permanent)
+  
+  SKILLS: 'aix:skills',         
+  INVOKE: 'aix:invoke'          
 } as const;
 
 /** Helper functions for key generation to ensure consistency */
@@ -36,8 +40,15 @@ export const KEYS = {
   session: (uid: string) => `aix:sessions:${uid}`,
   mcpQuota: (tenantId: string) => `aix:mcp:quota:${tenantId}`,
   wizardSession: (sessionId: string) => `wizard:session:${sessionId}`,
-  memory: (agentId: string) => `agent:${agentId}:memory`,
-  skill: (skillId: string) => `agent:${agentId}:skills`,
+  
+  // Intelligence Layers
+  memory: (agentId: string) => `agent:${agentId}:memory`, // Legacy/Standard
+  memSession: (agentId: string, sid: string) => `agent:${agentId}:mem:sess:${sid}`,
+  memSkill: (agentId: string) => `agent:${agentId}:mem:skill`,
+  memContext: (agentId: string, taskId: string) => `agent:${agentId}:mem:ctx:${taskId}`,
+  memEpisodic: (agentId: string) => `agent:${agentId}:mem:epi`,
+  
+  skill: (skillId: string) => `agent:${agentId}:skills`, // Existing
   invoke: (traceId: string) => `agent:${traceId}:invoke`
 };
 
@@ -49,7 +60,14 @@ export const TTL = {
   METRICS: 60 * 60 * 24 * 90,  // 90 Days
   SCAN: 60 * 60 * 24 * 7,      // 7 Days
   HEALTH: 300,                  // 5 Minutes
-  MEMORY: 60 * 60 * 24 * 30,    // 30 Days (Conversation Context)
+  
+  // Intelligence TTLs
+  MEM_SESSION: 60 * 60 * 24,    // 24 Hours
+  MEM_SKILL: 0,                 // Permanent
+  MEM_CONTEXT: 60 * 60 * 12,    // 12 Hours (Task duration)
+  MEM_EPISODIC: 0,              // Permanent
+  
+  MEMORY: 60 * 60 * 24 * 30,    // 30 Days (Standard Context)
   SKILLS: 0,                    // Permanent
   INVOKE: 60 * 60               // 1 Hour (Request Trace)
 } as const;

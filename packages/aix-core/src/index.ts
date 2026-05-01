@@ -28,6 +28,8 @@ export interface StorageAdapter {
 
 import { NS, TTL, KEYS } from './storage/keys';
 export { NS, TTL, KEYS };
+export * from './registry';
+export * from './learning';
 
 /** Map our generic StorageOptions → Upstash SetCommandOptions */
 import type { SetCommandOptions } from '@upstash/redis';

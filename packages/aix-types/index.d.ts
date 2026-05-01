@@ -151,3 +151,14 @@ export interface AIXManifest {
   build_provenance?: BuildProvenance;
   economics: Economics;
 }
+
+export interface RegistryEntry {
+  did: string;
+  name: string;
+  role: string;
+  capabilities: string[];
+  kyc_tier: string;
+  specVersion: string;
+  publishedAt: string;
+  yaml: string;
+}
