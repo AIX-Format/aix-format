@@ -46,6 +46,18 @@ export function useVoiceWizard() {
     }
   }, [state]);
 
+  // وظيفة إخفاء البيانات الحساسة (PII Masking)
+  const maskPII = (text: string): string => {
+    return text
+      // إخفاء رسائل البريد الإلكتروني
+      .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[EMAIL]")
+      // إخفاء أرقام الهواتف (أنماط عامة)
+      .replace(/\+?\d{10,13}/g, "[PHONE]")
+      // إخفاء التواريخ
+      .replace(/\d{4}-\d{2}-\d{2}/g, "[DATE]")
+      .replace(/\d{2}\/\d{2}\/\d{4}/g, "[DATE]");
+  };
+
   const processAudio = async (audioBlob: Blob) => {
     try {
       const formData = new FormData();
@@ -62,7 +74,10 @@ export function useVoiceWizard() {
       }
 
       const data = await res.json();
-      setTranscript(data.transcript);
+
+      // تطبيق الإخفاء قبل تحديث الحالة
+      const sanitizedTranscript = maskPII(data.transcript);
+      setTranscript(sanitizedTranscript);
 
       setState('done');
 

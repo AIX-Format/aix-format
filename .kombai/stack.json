@@ -1,0 +1,15 @@
+// Kombai Tech Stack Configuration
+// Each value must be a string or an array of strings.
+// Example: "Framework": "Vite" or "Project Type": ["React", "Vue"]
+{
+  "Project Type": "React",
+  "Framework": "NextJS 16",
+  "Build Tool": "Next.js",
+  "Tailwind Version": "v4",
+  "TS/JS": "TS",
+  "Testing Framework": "Vitest",
+  "Server Runtime": "Node.js v20",
+  "Deployment Platform": "Vercel",
+  "Icon Set": "Lucide",
+  "Language backend": "Go"
+}
