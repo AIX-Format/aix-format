@@ -1,7 +1,7 @@
-import { kv } from "@/lib/redis";
+import { kv, NS } from '../../../../../packages/aix-core/src/index';
 import { RegistryEntry } from "./types";
 
-const KV_KEY = "aix_registry";
+const KV_KEY = `${NS.REGISTRY}:global`;
 
 /**
  * Retrieves all agents from the global registry.

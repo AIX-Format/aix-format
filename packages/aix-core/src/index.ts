@@ -58,29 +58,42 @@ import { Redis } from '@upstash/redis';
 
 class UpstashRedisAdapter implements StorageAdapter {
   private client: Redis;
+  private isConnected: boolean = false;
 
   constructor() {
-    if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
-      console.warn('[Storage] Missing Upstash Redis credentials. Storage operations will fail.');
-    }
+    const url = process.env.UPSTASH_REDIS_REST_URL;
+    const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-    this.client = new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL || '',
-      token: process.env.UPSTASH_REDIS_REST_TOKEN || '',
-    });
+    if (!url || !token) {
+      console.warn('[Storage] Missing Upstash Redis credentials. All storage operations will be bypassed.');
+      // Initialize with empty strings to avoid crashes, but logic will check isConnected
+      this.client = new Redis({ url: 'http://localhost', token: 'mock' });
+      this.isConnected = false;
+    } else {
+      this.client = new Redis({ url, token });
+      this.isConnected = true;
+    }
+  }
+
+  private checkConnection() {
+    if (!this.isConnected) {
+      throw new Error('[Storage] Connection not initialized. Check environment variables.');
+    }
   }
 
   async get<T>(key: string): Promise<T | null> {
     try {
+      this.checkConnection();
       return await this.client.get<T>(key);
     } catch (error) {
       console.error(`[Storage] GET failed for ${key}:`, error);
-      return null;
+      return null; // Graceful degradation
     }
   }
 
   async set(key: string, value: unknown, options?: StorageOptions): Promise<void> {
     try {
+      this.checkConnection();
       const upstashOpts = toSetOptions(options);
       if (upstashOpts) {
         await this.client.set(key, value, upstashOpts);
@@ -89,12 +102,14 @@ class UpstashRedisAdapter implements StorageAdapter {
       }
     } catch (error) {
       console.error(`[Storage] SET failed for ${key}:`, error);
-      throw error;
+      // We throw here because failing to save state (like a manifest) is critical
+      throw new Error(`[Storage] Persistent write failed for ${key}`);
     }
   }
 
   async del(key: string | string[]): Promise<void> {
     try {
+      this.checkConnection();
       await this.client.del(...(Array.isArray(key) ? key : [key]));
     } catch (error) {
       console.error(`[Storage] DEL failed for ${key}:`, error);
@@ -103,6 +118,7 @@ class UpstashRedisAdapter implements StorageAdapter {
 
   async incr(key: string): Promise<number> {
     try {
+      this.checkConnection();
       return await this.client.incr(key);
     } catch (error) {
       console.error(`[Storage] INCR failed for ${key}:`, error);
@@ -112,6 +128,7 @@ class UpstashRedisAdapter implements StorageAdapter {
 
   async decr(key: string): Promise<number> {
     try {
+      this.checkConnection();
       return await this.client.decr(key);
     } catch (error) {
       console.error(`[Storage] DECR failed for ${key}:`, error);
@@ -121,6 +138,7 @@ class UpstashRedisAdapter implements StorageAdapter {
 
   async expire(key: string, seconds: number): Promise<void> {
     try {
+      this.checkConnection();
       await this.client.expire(key, seconds);
     } catch (error) {
       console.error(`[Storage] EXPIRE failed for ${key}:`, error);
@@ -129,6 +147,7 @@ class UpstashRedisAdapter implements StorageAdapter {
 
   async exists(key: string): Promise<boolean> {
     try {
+      this.checkConnection();
       const count = await this.client.exists(key);
       return count > 0;
     } catch (error) {

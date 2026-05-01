@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "version": "1.2.0",
+    "id": "did:axiom:axiomid.app:medium-agent",
+    "name": "Data Synchronizer",
+    "created": "2026-05-01T00:00:00Z",
+    "author": "Mohamed Abdelaziz",
+    "type": "utility",
+    "format_version": "1.3.0"
+  },
+  "persona": {
+    "role": "Data Sync",
+    "instructions": "Move data between endpoints."
+  },
+  "security": {
+    "checksum": {
+      "algorithm": "sha256",
+      "value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "sandboxed": false
+  },
+  "identity_layer": {
+    "id": "did:axiom:axiomid.app:medium-agent",
+    "authority": "axiomid.app",
+    "issuedAt": "2026-05-01T00:00:00Z",
+    "kyc_tier": 1,
+    "verified": false
+  },
+  "abom": {
+    "integrity_hash": "sha256:medium_proof_456",
+    "risk_level": "medium",
+    "governance": {
+      "human_oversight": false
+    }
+  }
+}

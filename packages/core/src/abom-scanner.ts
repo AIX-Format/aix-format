@@ -1,4 +1,4 @@
-import { AgentRecord, AbomManifest } from '../../apps/studio/src/lib/types';
+import { AIXManifest, ABOM } from './types';
 
 export interface ScanReport {
   score: number;

@@ -20,7 +20,13 @@ export async function GET(req: NextRequest) {
         name: "Sovereign Pioneer",
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.did}`,
       },
-      kyaTier: (entry.kyc_tier === "sovereign" ? 4 : entry.kyc_tier === "full" ? 2 : 1) as any,
+      kyaTier: (() => {
+        if (typeof entry.kyc_tier === 'number') return entry.kyc_tier;
+        if (entry.kyc_tier === "sovereign") return 3;
+        if (entry.kyc_tier === "full" || entry.kyc_tier === "verified") return 2;
+        if (entry.kyc_tier === "basic") return 1;
+        return 0;
+      })() as any,
       trustScore: 90,
       rating: 4.5,
       reviewCount: 0,

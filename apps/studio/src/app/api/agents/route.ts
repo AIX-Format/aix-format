@@ -2,6 +2,8 @@ import { NextResponse, NextRequest } from 'next/server';
 import { nanoid } from 'nanoid';
 import { kv, NS } from '../../../../../packages/aix-core/src/index';
 
+import { updateRegistryEntry } from '@/lib/registry';
+
 /**
  * POST /api/agents
  * Registers a new agent manifest.
@@ -24,6 +26,18 @@ export async function POST(req: Request) {
     const fleet = await kv.get<string[]>(userAgentsKey) || [];
     fleet.push(agentId);
     await kv.set(userAgentsKey, fleet);
+
+    // Update global registry for marketplace
+    await updateRegistryEntry({
+      did: manifest.identity_layer?.id || agentId,
+      name: manifest.meta.name,
+      role: manifest.persona?.role || 'Sovereign Agent',
+      capabilities: manifest.meta.tags || [],
+      kyc_tier: manifest.identity_layer?.kyc_tier || 'unverified',
+      specVersion: manifest.meta.format_version || '1.3.0',
+      publishedAt: new Date().toISOString(),
+      yaml: JSON.stringify(manifest)
+    } as any);
 
     return NextResponse.json({
       success: true,

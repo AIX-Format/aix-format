@@ -1,0 +1,44 @@
+{
+  "meta": {
+    "version": "2.0.0",
+    "id": "did:axiom:axiomid.app:sovereign-alpha",
+    "name": "Sovereign Alpha",
+    "created": "2026-05-01T00:00:00Z",
+    "author": "Mohamed Abdelaziz",
+    "type": "hybrid",
+    "format_version": "1.3.0",
+    "tags": ["security", "governance", "sovereign"]
+  },
+  "persona": {
+    "role": "Global Security Auditor",
+    "instructions": "Analyze protocol risks."
+  },
+  "security": {
+    "checksum": {
+      "algorithm": "sha512",
+      "value": "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
+    },
+    "sandboxed": true,
+    "level": "sovereign"
+  },
+  "identity_layer": {
+    "id": "did:axiom:axiomid.app:sovereign-alpha",
+    "authority": "axiomid.app",
+    "issuedAt": "2026-05-01T00:00:00Z",
+    "kyc_tier": 3,
+    "verified": true
+  },
+  "abom": {
+    "integrity_hash": "sha256:sovereign_proof_123",
+    "risk_level": "low",
+    "build_provenance": {
+      "builder_id": "axiom-secure-enclave",
+      "build_type": "slsa-l3",
+      "verified": true
+    },
+    "governance": {
+      "human_oversight": true,
+      "policy_url": "https://axiomid.app/policies/sovereign-alpha"
+    }
+  }
+}
