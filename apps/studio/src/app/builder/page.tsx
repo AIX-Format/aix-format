@@ -27,7 +27,8 @@ import {
   ShieldCheck,
   UserCheck,
   Database,
-  Lock
+  Lock,
+  Mic
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAbom } from '@/hooks/useAbom';
@@ -38,6 +39,7 @@ import { AgentRecord, Manifest, AgentSkill, McpPrompt } from "@/lib/types";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import LiveValidator from "@/components/studio/LiveValidator";
 import BOMVisualizer from "@/components/studio/BOMVisualizer";
+import { VoiceWizard } from "@/components/studio/VoiceWizard";
 import { validateBuilderField, FieldError } from "@/lib/builder-validation";
 
 const STEPS = [
@@ -65,6 +67,7 @@ export default function AgentBuilderPage() {
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
   const [showUndo, setShowUndo] = useState(false);
   const [undoTimeout, setUndoTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [isVoiceWizardOpen, setIsVoiceWizardOpen] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState<Manifest>({
@@ -186,6 +189,25 @@ export default function AgentBuilderPage() {
     setIsGenerating(false);
     setOnboardingStep('wizard');
     toast.success("Manifest skeleton generated!");
+  };
+
+  const handleVoiceWizardComplete = (generatedManifest: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...generatedManifest,
+      meta: { ...prev.meta, ...generatedManifest.meta },
+      economics: { ...prev.economics, ...generatedManifest.economics },
+      persona: { ...prev.persona, ...generatedManifest.persona }
+    }));
+    setIsVoiceWizardOpen(false);
+    setOnboardingStep('wizard');
+    toast.success("Voice Wizard draft applied!");
+  };
+
+  const handleVoiceWizardDeploy = async (generatedManifest: any) => {
+    handleVoiceWizardComplete(generatedManifest);
+    // Future: Trigger actual deployment logic here
+    toast.info("Proceeding to final review before deployment...");
   };
 
   // Generate Manifest Content (Async)
@@ -518,16 +540,35 @@ The agent is anchored via **AxiomID** at **${formData.identity_layer.id}**.`;
                      </button>
                    ))}
                 </div>
-                <button
-                  disabled={!userIntent || isGenerating}
-                  onClick={() => handleMagicGenerate(userIntent)}
-                  className="px-10 py-4 bg-primary text-black font-black uppercase tracking-widest rounded-2xl shadow-[0_20px_50px_rgba(0,219,233,0.3)] hover:scale-105 transition-all disabled:opacity-50 flex items-center gap-3"
-                >
-                  {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
-                  Generate DNA
-                </button>
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setIsVoiceWizardOpen(true)}
+                    className="px-8 py-4 rounded-2xl border border-red-500/30 bg-red-500/10 text-red-500 font-black uppercase tracking-widest hover:bg-red-500/20 transition-all flex items-center gap-3"
+                  >
+                    <Mic className="w-5 h-5" />
+                    Setup with Voice
+                  </button>
+                  <button
+                    disabled={!userIntent || isGenerating}
+                    onClick={() => handleMagicGenerate(userIntent)}
+                    className="px-10 py-4 bg-primary text-black font-black uppercase tracking-widest rounded-2xl shadow-[0_20px_50px_rgba(0,219,233,0.3)] hover:scale-105 transition-all disabled:opacity-50 flex items-center gap-3"
+                  >
+                    {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
+                    Generate DNA
+                  </button>
+                </div>
               </div>
             </div>
+
+            <AnimatePresence>
+              {isVoiceWizardOpen && (
+                <VoiceWizard 
+                  onClose={() => setIsVoiceWizardOpen(false)} 
+                  onComplete={handleVoiceWizardComplete}
+                  onDeploy={handleVoiceWizardDeploy}
+                />
+              )}
+            </AnimatePresence>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 opacity-40 hover:opacity-100 transition-opacity">
                <div className="p-6 rounded-[2rem] border border-white/5 bg-white/[0.01] space-y-2">

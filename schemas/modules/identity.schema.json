@@ -1,7 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://amrikyy.ai/schemas/modules/identity.schema.json",
-  "title": "AIX Identity Module (Provider Agnostic)",
+  "$id": "https://axiomid.app/schemas/modules/identity.schema.json",
+  "title": "AIX Identity Module v1.3.0",
+  "description": "Provider-agnostic identity layer with support for Pi Network, WorldID, and AxiomID.",
   "type": "object",
   "required": [
     "id",
@@ -11,45 +12,58 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "Unique decentralized identifier (DID) for the agent."
+      "description": "Unique decentralized identifier (DID) for the agent. Supports did:axiom, did:web, did:pi.",
+      "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9._%\\-]+(:[a-zA-Z0-9._%\\-]+)*$"
     },
     "provider": {
       "type": "object",
       "required": ["type", "name"],
+      "additionalProperties": false,
       "properties": {
         "type": {
           "type": "string",
-          "enum": ["pi_network", "world_id", "ens", "custom"],
-          "description": "The identity provider type."
+          "enum": ["pi_network", "world_id", "ens", "did_web", "axiom_id", "custom"],
+          "description": "The standardized category of the identity provider."
         },
         "name": {
           "type": "string",
-          "description": "Friendly name of the provider."
+          "description": "Friendly name of the provider (e.g., 'Pi Network Mainnet')."
         },
         "authority": {
           "type": "string",
-          "description": "The root authority domain or address (e.g., axiomid.app)."
+          "description": "The root authority domain (e.g., axiomid.app) or contract address."
+        },
+        "chain_id": {
+          "type": "string",
+          "description": "Blockchain network identifier if applicable (e.g., 'pi-testnet')."
         }
       }
     },
     "verification": {
       "type": "object",
+      "required": ["status"],
+      "additionalProperties": false,
       "properties": {
         "status": {
           "type": "string",
-          "enum": ["unverified", "verified", "rejected", "pending"],
+          "enum": ["unverified", "basic", "verified", "institutional", "sovereign"],
           "default": "unverified"
         },
         "trust_level": {
           "type": "integer",
-          "description": "Normalized trust score or tier (0-3).",
+          "description": "Normalized trust score (0: None, 1: Low, 2: Medium, 3: High/Sovereign).",
           "minimum": 0,
           "maximum": 3,
           "default": 0
         },
         "provider_specific_tier": {
           "type": "string",
-          "description": "Original tier/status from the provider (e.g., Pi KYC Tier 2)."
+          "description": "The raw tier value from the provider (e.g., 'KYC_LEVEL_2')."
+        },
+        "proof_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Link to verifiable credential or proof of identity."
         }
       }
     },
@@ -65,8 +79,9 @@
       "type": "object",
       "required": ["algorithm", "value"],
       "properties": {
-        "algorithm": { "type": "string" },
-        "value": { "type": "string" }
+        "algorithm": { "type": "string", "enum": ["Ed25519", "secp256k1", "RSA"] },
+        "value": { "type": "string", "description": "Encoded public key material." },
+        "encoding": { "type": "string", "enum": ["base64url", "hex", "pem"], "default": "base64url" }
       }
     },
     "signature": {
@@ -74,7 +89,8 @@
       "required": ["algorithm", "value"],
       "properties": {
         "algorithm": { "type": "string" },
-        "value": { "type": "string" }
+        "value": { "type": "string" },
+        "signer": { "type": "string", "description": "The DID or ID of the signing entity." }
       }
     }
   },

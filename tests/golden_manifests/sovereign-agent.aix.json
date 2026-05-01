@@ -23,10 +23,30 @@
   },
   "identity_layer": {
     "id": "did:axiom:axiomid.app:sovereign-alpha",
-    "authority": "axiomid.app",
-    "issuedAt": "2026-05-01T00:00:00Z",
-    "kyc_tier": 3,
-    "verified": true
+    "provider": {
+      "type": "axiom_id",
+      "name": "Axiom Sovereign Root",
+      "authority": "axiomid.app"
+    },
+    "verification": {
+      "status": "sovereign",
+      "trust_level": 3
+    },
+    "issuedAt": "2026-05-01T00:00:00Z"
+  },
+  "economics": {
+    "settlement": {
+      "layer": "pi_network",
+      "network": "mainnet",
+      "currency": "PI",
+      "address": "GDY...ALPHA"
+    },
+    "pricing_model": "pro",
+    "revenue_routing": {
+      "base_price": 5000,
+      "risk_multiplier_enabled": true,
+      "platform_fee_percent": 10
+    }
   },
   "abom": {
     "integrity_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",

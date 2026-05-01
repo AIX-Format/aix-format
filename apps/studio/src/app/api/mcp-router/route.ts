@@ -2,30 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { kv, NS } from "@/lib/storage/redis";
 import { scanAgent } from "@/lib/abom-scanner";
 import { getRegistry } from "@/lib/registry";
-
-// Internal scaling for currency to avoid floating point issues (1 unit = 0.000001 Pi)
-const PI_SCALE = 1_000_000;
-
-interface PricingConfig {
-  base_price: number;
-  platform_fee: number;
-  quota: number;
-  cutoff: "hard" | "grace" | "soft";
-}
-
-const DEFAULT_PRICING: Record<string, PricingConfig> = {
-  free:       { base_price: 0,     platform_fee: 0.20, quota: 100,   cutoff: "hard"  },
-  builder:    { base_price: 0.005, platform_fee: 0.20, quota: 1000,  cutoff: "hard"  },
-  pro:        { base_price: 0.01,  platform_fee: 0.10, quota: 10000, cutoff: "grace" },
-  enterprise: { base_price: 0.05,  platform_fee: 0.05, quota: -1,    cutoff: "soft"  },
-};
-
-const RISK_PREMIUMS = [
-  { min: 90, multiplier: 0.0  },
-  { min: 70, multiplier: 0.1  },
-  { min: 40, multiplier: 0.25 },
-  { min: 0,  multiplier: 0.5  },
-];
+import { calculatePrice, isQuotaExceeded, PI_SCALE, DEFAULT_PRICING } from "@/lib/pricing";
 
 /**
  * MCP Revenue Router — POST /api/mcp-router
@@ -33,12 +10,18 @@ const RISK_PREMIUMS = [
  * Flow:
  *  1. Identify user tier & quota
  *  2. Scan target agent ABOM for risk
- *  3. Calculate price & platform fee
+ *  3. Calculate price & platform fee via Pricing Engine
  *  4. Update quota & track spend metrics
  */
 export async function POST(req: NextRequest) {
   try {
-    const { userId, agentDid, endpointType, tier = "free" } = await req.json();
+    const body = await req.json().catch(() => null);
+    
+    if (!body) {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+
+    const { userId, agentDid, endpointType, tier = "free" } = body;
 
     if (!userId || !agentDid) {
       return NextResponse.json(
@@ -47,56 +30,58 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Pricing config
-    const config = DEFAULT_PRICING[tier] ?? DEFAULT_PRICING.free;
-    const quotaKey = `${NS.REVENUE}:quota:${userId}`;
-
-    // 2. Quota check (Redis-backed)
+    // 1. Quota check (Redis-backed)
+    const quotaKey = `${NS.MCP}:${userId}`; // Corrected namespace usage
     const usedQuota = (await kv.get<number>(quotaKey)) ?? 0;
-    if (config.quota !== -1 && usedQuota >= config.quota) {
+    
+    if (isQuotaExceeded(usedQuota, tier)) {
+      const config = DEFAULT_PRICING[tier] ?? DEFAULT_PRICING.free;
       if (config.cutoff === "hard") {
-        return NextResponse.json({ error: "Quota exceeded" }, { status: 429 });
+        return NextResponse.json(
+          { error: "Quota exceeded", code: "QUOTA_EXHAUSTED" }, 
+          { status: 429 }
+        );
       }
     }
 
-    // 3. Agent risk scoring
+    // 2. Agent risk scoring & Registry lookup
     const registry = await getRegistry();
     const agent = registry.find((a: { did: string }) => a.did === agentDid);
-    const abomReport = agent
-      ? scanAgent(JSON.parse((agent as { yaml: string }).yaml))
-      : { score: 50 };
+    
+    // Default to a neutral score if agent not found or YAML missing
+    let riskScore = 50; 
+    try {
+      if (agent && (agent as any).yaml) {
+        const report = scanAgent(JSON.parse((agent as any).yaml));
+        riskScore = report.score;
+      }
+    } catch (e) {
+      console.warn(`[MCP Router] Failed to scan agent ${agentDid}, using default risk.`);
+    }
 
-    const riskMultiplier =
-      RISK_PREMIUMS.find((p) => abomReport.score >= p.min)?.multiplier ?? 0;
+    // 3. Price calculation via Unified Engine
+    const { totalCost, platformFee, developerShare, riskMultiplier } = calculatePrice(
+      tier,
+      riskScore,
+      endpointType
+    );
 
-    // 4. Price calculation: Pt = (Bp × Mc) × (1 + Rp)
-    const complexityMap: Record<string, number> = {
-      stdio: 1.0,
-      http:  1.2,
-      sse:   1.5,
-    };
-    const complexityMultiplier = complexityMap[endpointType] ?? 1.0;
-    const baseCost   = config.base_price * complexityMultiplier;
-    const totalCost  = baseCost * (1 + riskMultiplier);
-    const platformFee    = totalCost * config.platform_fee;
-    const developerShare = totalCost - platformFee;
-
-    // 5. Atomic quota increment
+    // 4. Atomic quota increment
     const newUsed = await kv.incr(quotaKey);
 
-    // 6. Metric tracking (fire-and-forget, failures don't abort the response)
-    const spendKey     = `${NS.REVENUE}:spend:${userId}`;
-    const earningKey   = `${NS.REVENUE}:earnings:${agentDid}`;
+    // 5. Metric tracking (fire-and-forget)
+    const spendKey   = `${NS.METRICS}:spend:${userId}`;
+    const earningKey = `${NS.METRICS}:earnings:${agentDid}`;
 
     void Promise.all([
-      kv.incr(`${NS.REVENUE}:total_calls`),
+      kv.incr(`${NS.METRICS}:global:calls`),
       kv.get<number>(spendKey).then((cur) =>
         kv.set(spendKey, ((cur ?? 0) + totalCost * PI_SCALE))
       ),
       kv.get<number>(earningKey).then((cur) =>
         kv.set(earningKey, ((cur ?? 0) + developerShare * PI_SCALE))
       ),
-    ]).catch((err) => console.error("[MCP Router] Metrics write error:", err));
+    ]).catch((err) => console.error("[MCP Router] Telemetry Error:", err));
 
     return NextResponse.json({
       success: true,
@@ -104,19 +89,21 @@ export async function POST(req: NextRequest) {
       currency: "Pi",
       quota: {
         used:      newUsed,
-        total:     config.quota,
-        remaining: config.quota === -1 ? -1 : config.quota - newUsed,
+        total:     (DEFAULT_PRICING[tier] ?? DEFAULT_PRICING.free).quota,
+        remaining: (DEFAULT_PRICING[tier] ?? DEFAULT_PRICING.free).quota === -1 
+          ? -1 
+          : (DEFAULT_PRICING[tier] ?? DEFAULT_PRICING.free).quota - newUsed,
       },
       routing: {
         target:    agentDid,
-        riskScore: abomReport.score,
+        riskScore: riskScore,
         premium:   riskMultiplier,
       },
     });
   } catch (error) {
-    console.error("[MCP Router] Execution Error:", error);
+    console.error("[MCP Router] Fatal Error:", error);
     return NextResponse.json(
-      { error: "Internal Router Error" },
+      { error: "Internal Server Error", code: "INTERNAL_ERROR" },
       { status: 500 }
     );
   }

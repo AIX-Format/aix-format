@@ -13,8 +13,17 @@ test('Official Schema Validation: AIX v1.3.0', async (t) => {
   const ajv = new Ajv({ allErrors: true, strict: false });
   addFormats(ajv);
 
+  // Load modules first so Ajv can resolve references
+  const securitySchema = JSON.parse(await fs.readFile('schemas/modules/security.schema.json', 'utf8'));
+  const identitySchema = JSON.parse(await fs.readFile('schemas/modules/identity.schema.json', 'utf8'));
+  const economicsSchema = JSON.parse(await fs.readFile('schemas/modules/economics.schema.json', 'utf8'));
+  
+  ajv.addSchema(securitySchema);
+  ajv.addSchema(identitySchema);
+  ajv.addSchema(economicsSchema);
+
   // Load the frozen schema
-  const schemaContent = await fs.readFile('schemas/aix.schema.json', 'utf8');
+  const schemaContent = await fs.readFile('schemas/core/aix.schema.json', 'utf8');
   const schema = JSON.parse(schemaContent);
   const validate = ajv.compile(schema);
 

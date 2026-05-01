@@ -1,62 +1,80 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://amrikyy.ai/schemas/modules/economics.schema.json",
-  "title": "AIX Economics Module (Multi-Chain Settlement)",
+  "$id": "https://axiomid.app/schemas/modules/economics.schema.json",
+  "title": "AIX Economics Module v1.3.0",
+  "description": "Multi-chain settlement and revenue routing for sovereign AI agents.",
   "type": "object",
+  "required": ["settlement", "pricing_model"],
   "properties": {
     "settlement": {
       "type": "object",
-      "description": "Provider-agnostic settlement layer configuration.",
       "required": ["layer", "network"],
+      "additionalProperties": false,
       "properties": {
         "layer": {
           "type": "string",
-          "enum": ["pi_network", "ethereum", "solana", "stripe", "custom"],
-          "description": "The settlement layer/provider."
+          "enum": ["pi_network", "ethereum", "solana", "stripe", "mcp_internal", "custom"],
+          "description": "Primary settlement layer for transactions."
         },
         "network": {
           "type": "string",
-          "description": "Target network (e.g., mainnet, testnet)."
-        },
-        "contract_address": {
-          "type": "string",
-          "description": "On-chain contract address if applicable."
+          "description": "Target network (e.g., 'mainnet', 'testnet', 'local')."
         },
         "escrow_enabled": {
           "type": "boolean",
+          "description": "Enable secure cryptographic escrow for service delivery.",
           "default": false
         },
         "currency": {
           "type": "string",
+          "description": "Default currency code (e.g. 'PI', 'ETH', 'USDC').",
           "default": "PI"
+        },
+        "address": {
+          "type": "string",
+          "description": "Wallet address or recipient ID for revenue distribution."
         }
       }
     },
-    "pricing": {
+    "pricing_model": {
+      "type": "string",
+      "enum": ["free", "pay_per_call", "subscription", "builder", "pro"],
+      "description": "Standardized pricing model for the AI marketplace."
+    },
+    "revenue_routing": {
       "type": "object",
       "properties": {
-        "model": {
-          "type": "string",
-          "enum": ["pay_per_call", "subscription", "freemium", "tiered"],
-          "default": "pay_per_call"
+        "base_price": {
+          "type": "number",
+          "description": "Base cost per interaction (in micro-units).",
+          "minimum": 0
         },
-        "plans": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["name", "cost"],
-            "properties": {
-              "name": { "type": "string" },
-              "cost": {
-                "type": "object",
-                "required": ["amount", "currency"],
-                "properties": {
-                  "amount": { "type": "number", "minimum": 0 },
-                  "currency": { "type": "string" }
-                }
-              }
-            }
-          }
+        "risk_multiplier_enabled": {
+          "type": "boolean",
+          "description": "Apply dynamic premiums based on ABOM risk scores.",
+          "default": true
+        },
+        "quota_limit": {
+          "type": "integer",
+          "description": "Maximum allowed requests per cycle (e.g. 1000/day).",
+          "minimum": 0
+        },
+        "platform_fee_percent": {
+          "type": "number",
+          "description": "Percentage taken by the registry (0-100).",
+          "default": 10
+        }
+      }
+    },
+    "tiers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "features"],
+        "properties": {
+          "name": { "type": "string" },
+          "features": { "type": "array", "items": { "type": "string" } },
+          "monthly_price": { "type": "number" }
         }
       }
     }

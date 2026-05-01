@@ -21,9 +21,15 @@
   },
   "identity_layer": {
     "id": "did:axiom:axiomid.app:low-risk-agent",
-    "authority": "axiomid.app",
-    "issuedAt": "2026-05-01T00:00:00Z",
-    "kyc_tier": "verified"
+    "provider": {
+      "type": "axiom_id",
+      "name": "AxiomID"
+    },
+    "verification": {
+      "status": "verified",
+      "trust_level": 2
+    },
+    "issuedAt": "2026-05-01T00:00:00Z"
   },
   "abom": {
     "integrity_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
