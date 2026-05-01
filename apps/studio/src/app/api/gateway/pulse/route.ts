@@ -7,7 +7,8 @@ import {
   evaluateAgent, 
   executeDeadHand, 
   sendHeartbeat,
-  PetOrchestrator 
+  PetOrchestrator,
+  PulseEngine 
 } from "@aix-core/storage";
 import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
@@ -39,6 +40,14 @@ export async function POST(req: NextRequest) {
     } else {
       if (!agentId || !task) return NextResponse.json({ error: "Missing agentId or task" }, { status: 400 });
       process = await GatewayManager.spawn(agentId, task);
+      
+      // Emit Pulse Event
+      await PulseEngine.emit({
+        type: 'INVOCATION',
+        agentId: process.agentId,
+        agentName: agentId,
+        message: `New task initiated: ${task.slice(0, 30)}...`
+      });
     }
 
     if (!process) return NextResponse.json({ error: "Failed to initialize process" }, { status: 500 });
@@ -58,6 +67,15 @@ export async function POST(req: NextRequest) {
     const threat = await evaluateAgent(actualAgentId);
     if (threat) {
       await executeDeadHand(threat);
+      
+      // Emit Pulse Security Alert
+      await PulseEngine.emit({
+        type: 'SECURITY_ALERT',
+        agentId: actualAgentId,
+        agentName: actualAgentId,
+        message: `DEAD HAND TRIGGERED: ${threat.reason}`
+      });
+
       return NextResponse.json({ 
         error: `Dead Hand Triggered: ${threat.reason}`,
         threatLevel: threat.threatLevel 
@@ -108,12 +126,40 @@ export async function POST(req: NextRequest) {
       status = 'ACTING';
       action = text.split('ACTION:')[1].trim();
       thought = text.split('ACTION:')[0].replace('THOUGHT:', '').replace('NO_REPLY', '').trim();
+      
+      // Emit Pulse Action Event
+      await PulseEngine.emit({
+        type: 'AGENT_CALL',
+        agentId: actualAgentId,
+        agentName: agentData.name,
+        message: `Executing tool: ${action.split('(')[0]}`
+      });
+
+      // Record Connection for WorkFlow Canvas if it's an A2A call
+      if (action.includes('invokeAgent') || action.includes('callAgent')) {
+        const targetId = action.match(/['"](.*?)['"]/)?.[1];
+        if (targetId) {
+          await kv.sadd('aix:graph:connections', JSON.stringify({
+            from: actualAgentId,
+            to: targetId,
+            timestamp: Date.now()
+          }));
+        }
+      }
     } else if (text.includes('FINAL_ANSWER:')) {
       status = 'COMPLETED';
       thought = text.split('FINAL_ANSWER:')[0].replace('THOUGHT:', '').replace('NO_REPLY', '').trim();
       // Agent finished successfully -> Evolution boost
       await PetOrchestrator.pulseActivity(actualAgentId, true);
       await PetOrchestrator.settle(actualAgentId);
+
+      // Emit Pulse Completion
+      await PulseEngine.emit({
+        type: 'EVOLUTION',
+        agentId: actualAgentId,
+        agentName: agentData.name,
+        message: `Task completed successfully!`
+      });
     } else {
       thought = text.replace('THOUGHT:', '').replace('NO_REPLY', '').trim();
     }

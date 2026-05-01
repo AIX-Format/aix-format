@@ -36,6 +36,7 @@ export * from './memory-readable';
 export * from './dead-hand';
 export * from './channels';
 export * from './pets';
+export * from './pulse';
 
 /** Map our generic StorageOptions → Upstash SetCommandOptions */
 import type { SetCommandOptions } from '@upstash/redis';

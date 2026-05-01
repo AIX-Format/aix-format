@@ -32,6 +32,7 @@ import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import DeployModal from '@/components/studio/DeployModal';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
+import { WikiBrain } from '@/components/shared/WikiBrain';
 
 export default function AgentDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -169,13 +170,7 @@ export default function AgentDetailPage() {
           </div>
 
           <div className="lg:col-span-4 space-y-10">
-            <div className="p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 backdrop-blur-xl">
-              <div className="flex items-center gap-3 mb-6"><Fingerprint className="text-indigo-400" /><h3 className="text-lg font-bold text-white">Sovereign Identity</h3></div>
-              <div className="space-y-4">
-                <div className="space-y-1"><p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Axiom DID</p><p className="font-mono text-sm text-indigo-300 break-all leading-relaxed bg-black/20 p-3 rounded-xl border border-white/5">{agent.did || 'did:axiom:pending'}</p></div>
-                <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold px-3 py-2 bg-emerald-500/5 rounded-lg border border-emerald-500/10 w-fit"><UserCheck className="w-4 h-4" /> KYC Verified • {agent.kyc_tier}</div>
-              </div>
-            </div>
+            <WikiBrain agentId={agent.did || `local:${agent.id}`} />
             
             <div className="p-8 rounded-3xl bg-zinc-900 border border-zinc-800">
               <h3 className="text-sm font-black text-zinc-500 uppercase tracking-[0.2em] mb-6">Capabilities</h3>
