@@ -32,6 +32,7 @@ const categories = [
     label: "Build", 
     links: [
       { href: "/builder", label: "Agent Builder" },
+      { href: "/space", label: "Agent Space" },
       { href: "/builder?template=true", label: "Templates" }
     ] 
   },
@@ -40,14 +41,14 @@ const categories = [
     links: [
       { href: "/mcp", label: "MCP Registry" },
       { href: "/playground", label: "API Explorer" },
-      { href: "/skills", label: "Skills Catalog" },
-      { href: "/plugins", label: "Plugin Directory" }
+      { href: "/skills", label: "Skills Catalog" }
     ] 
   },
   { 
     label: "Run", 
     links: [
       { href: "/fleet", label: "My Fleet" },
+      { href: "/pulse", label: "Live Pulse" },
       { href: "/analytics", label: "Monitoring" }
     ] 
   },
@@ -61,7 +62,7 @@ const categories = [
     label: "Trust", 
     links: [
       { href: "/settings", label: "Identity & KYC" },
-      { href: "/settings", label: "ABOM Scanner" }
+      { href: "/scan", label: "ABOM Scanner" }
     ] 
   },
   { 
@@ -71,6 +72,9 @@ const categories = [
     ] 
   }
 ];
+
+// Flatten categories for mobile menu
+const navLinks = categories.flatMap(cat => cat.links);
 
 export function Navbar() {
   const pathname = usePathname();

@@ -13,8 +13,8 @@ import {
   Search,
   Activity
 } from 'lucide-react';
-import { AgentPet } from '../../components/shared/AgentPet';
-import FadeIn from '../../components/animations/FadeIn';
+import { AgentPet } from '@/components/shared/AgentPet';
+import FadeIn from '@/components/animations/FadeIn';
 
 interface PulseEvent {
   id: string;

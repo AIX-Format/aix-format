@@ -2,14 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { UploadCloud, ShieldCheck, ShieldX, CheckCircle2, AlertTriangle } from "lucide-react";
-import { parseYamlSafe } from "@/lib/utils";
-
-async function sha256Hex(input: string): Promise<string> {
-  const msgUint8 = new TextEncoder().encode(input);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-}
+import { parseYamlSafe, sha256Hex } from "@/lib/utils";
 
 const REQUIRED_AIX_KEYS = ["meta", "persona", "security", "identity_layer"] as const;
 
@@ -59,7 +52,7 @@ export default function LiveValidator({
       if (name.endsWith(".json") || content.trim().startsWith("{")) {
         parsed = JSON.parse(content) as Record<string, unknown>;
       } else {
-        parsed = await parseYamlSafe(content);
+        parsed = parseYamlSafe(content);
       }
 
       const computedHash = await sha256Hex(content.replace(/\r\n/g, "\n"));
