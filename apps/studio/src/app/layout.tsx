@@ -6,7 +6,10 @@ import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from 'sonner';
 import { WalletProvider } from '@/components/providers/WalletProvider';
+import { VoiceCommandProvider } from '@/components/providers/VoiceCommandProvider';
 import { SovereignAetherClient } from '@/components/studio/SovereignAetherClient';
+import { GlobalVoiceCommandPalette } from '@/components/studio/GlobalVoiceCommandPalette';
+import { GlobalVoiceFAB } from '@/components/studio/GlobalVoiceFAB';
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -45,11 +48,16 @@ export default function RootLayout({
       >
         <Toaster richColors theme="dark" position="bottom-right" />
         <SovereignAetherClient />
-        <div className="relative z-10 flex flex-col min-h-screen">
-          <WalletProvider>
-            {children}
-          </WalletProvider>
-        </div>
+        <VoiceCommandProvider>
+          <div className="relative z-10 flex flex-col min-h-screen">
+            <WalletProvider>
+              {children}
+            </WalletProvider>
+          </div>
+          {/* Global voice UI — rendered once, available on every page */}
+          <GlobalVoiceCommandPalette />
+          <GlobalVoiceFAB />
+        </VoiceCommandProvider>
 
         {/*
           Pi Network SDK — must use afterInteractive.
