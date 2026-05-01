@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Manifest, AgentSkill, McpPrompt } from "@/lib/types";
 import { computeManifestChecksum } from "@/lib/utils";
 import { validateBuilderField, FieldError } from "@/lib/builder-validation";
@@ -13,9 +13,11 @@ export function useBuilderState() {
     meta: {
       name: "my-first-agent",
       version: "1.0.0",
-      format_version: "1.3",
+      format_version: "1.3.0",
       author: "Axiom Developer",
       description: "A sovereign AI agent built to assist with general tasks.",
+      type: 'persona',
+      created: new Date().toISOString()
     },
     persona: {
       role: "General Assistant",
@@ -27,7 +29,9 @@ export function useBuilderState() {
       checksum: {
         algorithm: "sha256",
         value: "pending"
-      }
+      },
+      sandboxed: true,
+      level: 'standard'
     },
     identity_layer: {
       id: `did:axiom:axiomid.app:agent-temp`,
@@ -38,7 +42,14 @@ export function useBuilderState() {
       },
       verification: {
         status: 'unverified',
-        trust_level: 0
+        trust_level: 0,
+        kyc_tier: 'basic',
+        dead_hand: {
+          enabled: false,
+          inactivity_limit_days: 30,
+          last_active_at: new Date().toISOString(),
+          status: 'dormant'
+        }
       },
       issuedAt: new Date().toISOString()
     },
@@ -49,28 +60,23 @@ export function useBuilderState() {
         escrow_enabled: false,
         currency: 'PI'
       },
-      pricing_model: "free",
+      pricing_model: "pay_per_call",
       currency: "PI"
     },
     abom: {
-      bom_format: "CycloneDX",
-      spec_version: "1.6",
-      risk_level: "low",
       integrity_hash: "pending",
+      risk_level: "low",
+      governance: {
+        human_oversight: true
+      },
       capabilities: [] as string[],
-      generated_by: "AIX-Studio",
       timestamp: new Date().toISOString(),
-      dependencies: [] as string[],
-      saas_services: [] as Array<{
-        name: string;
-        endpoint?: string;
-        usage_policy?: string;
-        tier?: string;
-      }>
+      saas_services: []
     },
     mcp: {
-      prompts: [] as McpPrompt[]
-    }
+      endpoints: []
+    },
+    is_shadow_clone: false
   });
 
   const [errors, setErrors] = useState<Record<string, FieldError | null>>({});
@@ -80,20 +86,21 @@ export function useBuilderState() {
     return computeManifestChecksum(formData);
   }, [formData]);
 
-  const handleFieldChange = (section: keyof Manifest | 'meta' | 'persona', field: string, value: any) => {
+  const updateField = useCallback((path: string, value: any) => {
+    const keys = path.split('.');
     setFormData(prev => {
-      if (section === 'meta' || section === 'persona') {
-        return {
-          ...prev,
-          [section]: { ...(prev as any)[section], [field]: value }
-        };
+      const next = JSON.parse(JSON.stringify(prev));
+      let current = next;
+      for (let i = 0; i < keys.length - 1; i++) {
+        current = current[keys[i]];
       }
-      return { ...prev, [section]: value };
+      current[keys[keys.length - 1]] = value;
+      return next;
     });
 
-    const error = validateBuilderField(field, value);
-    setErrors(prev => ({ ...prev, [field]: error }));
-  };
+    const error = validateBuilderField(keys[keys.length - 1], value);
+    setErrors(prev => ({ ...prev, [keys[keys.length - 1]]: error }));
+  }, []);
 
   const handleBlur = (field: string) => {
     setTouchedFields(prev => ({ ...prev, [field]: true }));
@@ -114,7 +121,7 @@ export function useBuilderState() {
       case 4: // Economics
         return !!formData.economics.settlement.layer;
       case 5: // Security
-        return formData.identity_layer.kyc_tier !== 'unverified';
+        return true;
       case 6: // Finalize
         return true;
       default:
@@ -129,9 +136,12 @@ export function useBuilderState() {
     setFormData,
     errors,
     touchedFields,
+    setTouchedFields,
+    setErrors,
     liveChecksum,
-    handleFieldChange,
+    updateField,
     handleBlur,
     isStepValid,
   };
 }
+
