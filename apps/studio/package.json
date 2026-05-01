@@ -26,7 +26,7 @@
     "lucide-react": "^0.484.0",
     "@aix-core/storage": "*",
     "nanoid": "^5.1.9",
-    "next": "^16.2.4",
+    "next": "^15.3.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "sonner": "^2.0.7",
