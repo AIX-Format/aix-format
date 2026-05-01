@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { kv, NS, KEYS } from '@/lib/storage/redis';
+import { kv, NS, KEYS } from '@/lib/redis';
 
 /**
  * GET /api/analytics

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { kv, NS, TTL, KEYS } from "@/lib/storage/redis";
+import { kv, NS, TTL, KEYS } from "@/lib/redis";
 import { AuthResult, PiUser } from "@/lib/types";
 
 const SESSION_TTL = TTL.SESSIONS;

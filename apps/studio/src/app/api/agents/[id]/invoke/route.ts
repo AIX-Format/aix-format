@@ -1,4 +1,4 @@
-import { kv, KEYS, NS } from '@/lib/storage/redis';
+import { kv, KEYS, NS } from '@/lib/redis';
 import { NextResponse } from 'next/server';
 
 /**

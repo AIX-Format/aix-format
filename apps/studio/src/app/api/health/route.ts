@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { kv, NS } from "@/lib/storage/redis";
+import { kv, NS } from "@/lib/redis";
 import { getRegistry } from '@/lib/registry';
 
 /**

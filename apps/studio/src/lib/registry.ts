@@ -1,4 +1,4 @@
-import { kv, NS, KEYS } from '@/lib/storage/redis';
+import { kv, NS, KEYS } from '@/lib/redis';
 import { RegistryEntry } from "./types";
 
 /**

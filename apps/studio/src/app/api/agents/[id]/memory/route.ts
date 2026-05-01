@@ -1,4 +1,4 @@
-import { kv, KEYS } from '@/lib/storage/redis';
+import { kv, KEYS } from '@/lib/redis';
 
 /**
  * Agent Memory API (B1)

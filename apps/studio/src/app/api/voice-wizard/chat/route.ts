@@ -1,4 +1,4 @@
-import { kv, KEYS, TTL } from '@/lib/storage/redis';
+import { kv, KEYS, TTL } from '@/lib/redis';
 import { streamText } from 'ai';
 import { google } from '@ai-sdk/google';
 

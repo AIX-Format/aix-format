@@ -1,4 +1,4 @@
-import { kv, NS } from '@/lib/storage/redis';
+import { kv, NS } from '@/lib/redis';
 
 /**
  * Agent Skills Attachment API

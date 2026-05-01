@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { scanAgent } from "@/lib/scanner"; // Assuming scanner is available via alias
 import { Manifest } from "@/lib/types";
-import { kv, NS, TTL } from "@/lib/storage/redis";
+import { kv, NS, TTL } from "@/lib/redis";
 import { sha256Hex, parseYamlLight } from "@/lib/utils";
 
 /**

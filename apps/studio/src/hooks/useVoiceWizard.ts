@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 
 /**
  * AIX Voice Wizard Hook
  * Manages the full cycle: Listen (STT) -> Process (LLM) -> Speak (TTS).
+ * Now includes Session Persistence (TASK 3 / WIRING).
  */
 export function useVoiceWizard() {
   const [messages, setMessages] = useState<any[]>([]);
@@ -11,6 +12,53 @@ export function useVoiceWizard() {
   const [manifest, setManifest] = useState<any>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [sessionId, setSessionId] = useState<string>('');
+  const [step, setStep] = useState(0);
+
+  // Initialize Session
+  useEffect(() => {
+    let sid = localStorage.getItem('aix_wizard_session_id');
+    if (!sid) {
+      sid = crypto.randomUUID();
+      localStorage.setItem('aix_wizard_session_id', sid);
+    }
+    setSessionId(sid);
+    loadSession(sid);
+  }, []);
+
+  const loadSession = async (sid: string) => {
+    try {
+      const res = await fetch('/api/voice-wizard/session', {
+        headers: { 'x-session-id': sid }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMessages(data.messages || []);
+        setStep(data.step || 0);
+        if (data.partialManifest) setManifest(data.partialManifest);
+      }
+    } catch (err) {
+      console.error("Failed to load session", err);
+    }
+  };
+
+  const saveSession = useCallback(async (msgs: any[], currentStep: number, partial: any) => {
+    if (!sessionId) return;
+    try {
+      await fetch('/api/voice-wizard/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          sessionId, 
+          messages: msgs, 
+          step: currentStep, 
+          partialManifest: partial 
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to save session", err);
+    }
+  }, [sessionId]);
 
   // ... (recordAudio, transcribe, chat, speak remain the same but use isProcessing)
 
@@ -70,7 +118,11 @@ export function useVoiceWizard() {
     
     const res = await fetch('/api/voice-wizard/chat', {
       method: 'POST',
-      body: JSON.stringify({ messages: newMessages }),
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-session-id': sessionId 
+      },
+      body: JSON.stringify({ messages: newMessages, sessionId }),
     });
     
     if (!res.ok) throw new Error("LLM failed");
@@ -94,7 +146,14 @@ export function useVoiceWizard() {
       }
     }
     
-    setMessages([...newMessages, { role: 'assistant', content: reply }]);
+    const finalMessages = [...newMessages, { role: 'assistant', content: reply }];
+    setMessages(finalMessages);
+    
+    // Auto-save session
+    const nextStep = reply.includes('MANIFEST_COMPLETE:') ? 5 : step + 1;
+    setStep(nextStep);
+    saveSession(finalMessages, nextStep, manifest);
+    
     return reply;
   };
 
