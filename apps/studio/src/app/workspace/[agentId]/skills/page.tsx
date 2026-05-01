@@ -64,7 +64,12 @@ export default function SkillsPage() {
   const manifestCaps: string[] = agent?.manifest?.abom?.capabilities ?? [];
 
   return (
-    <div className="p-6 space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="p-6 space-y-6"
+    >
       <div>
         <h2 className="text-2xl font-black text-white tracking-tight">Skill Tree</h2>
         <p className="text-sm text-white/30 mt-0.5">
@@ -168,6 +173,6 @@ export default function SkillsPage() {
           </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }
