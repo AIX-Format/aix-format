@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRegistry, saveRegistry } from "@/lib/registry";
+import { getRegistry } from "@/lib/registry";
 import { RegistryEntry } from "@/lib/types";
 
 /**

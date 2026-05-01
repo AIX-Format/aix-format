@@ -7,6 +7,7 @@ import { MarketplaceItem } from '../../lib/marketplace-api';
 import { KYABadge } from './KYABadge';
 import { TrustScore } from './TrustScore';
 import { RatingStars } from './RatingStars';
+import { DNABadge } from '../studio/DNABadge';
 
 interface AgentCardProps {
   item: MarketplaceItem;
@@ -54,6 +55,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ item, view = 'grid', onCli
           <div className="flex items-center gap-3 mb-2">
             <span className="text-sm text-white/60">by {item.author.name}</span>
             <KYABadge tier={item.kyaTier} size="sm" />
+            <DNABadge status={item.status === 'compromised' ? 'compromised' : (item.dnaHash ? 'verified' : 'unverified')} hash={item.dnaHash} />
             <RatingStars rating={item.rating} count={item.reviewCount} />
           </div>
 
@@ -88,6 +90,9 @@ export const AgentCard: React.FC<AgentCardProps> = ({ item, view = 'grid', onCli
         />
         <div className="absolute top-3 left-3 z-20">
           <KYABadge tier={item.kyaTier} />
+        </div>
+        <div className="absolute top-10 left-3 z-20">
+          <DNABadge status={item.status === 'compromised' ? 'compromised' : (item.dnaHash ? 'verified' : 'unverified')} hash={item.dnaHash} />
         </div>
         <div className="absolute top-3 right-3 z-20">
           <TrustScore score={item.trustScore} />

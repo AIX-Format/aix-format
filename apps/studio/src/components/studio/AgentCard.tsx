@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { AgentRecord } from '@/lib/types';
 import { AgentPet } from '@/components/shared/AgentPet';
+import { DNABadge } from './DNABadge';
 
 interface Props {
   agent: AgentRecord;
@@ -68,6 +69,7 @@ export const AgentCard = memo(function AgentCard({
         {/* ── Top row ── */}
         <div className="flex items-start justify-between">
           <AgentPet pet={agent.pet} size="md" />
+          <DNABadge status={agent.manifest?.identity_layer?.dna_hash ? (agent.status === 'compromised' ? 'compromised' : 'verified') : 'unverified'} hash={agent.manifest?.identity_layer?.dna_hash} />
 
           <div className="flex items-center gap-2">
             {agent.deployment?.status === 'deploying' ? (
