@@ -342,6 +342,23 @@ The agent is anchored via **AxiomID** at **${formData.identity_layer.id}**.`;
         const manifest = JSON.parse(JSON.stringify(formData));
         manifest.security.checksum.value = liveChecksum;
 
+        // Generate DNA Fingerprint
+        try {
+          const res = await fetch('/api/dna/sign', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(manifest),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.dna_hash) {
+              manifest.identity_layer.dna_hash = data.dna_hash;
+            }
+          }
+        } catch (err) {
+          console.error("Failed to generate DNA fingerprint", err);
+        }
+
         const response = await fetch('/api/agents', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

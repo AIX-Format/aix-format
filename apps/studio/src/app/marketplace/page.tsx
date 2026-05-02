@@ -16,14 +16,14 @@ import {
 import { useMarketplace } from '../../hooks/useMarketplace';
 import { SearchBar } from '../../components/marketplace/SearchBar';
 import { FilterSidebar } from '../../components/marketplace/FilterSidebar';
-import { AgentCard } from '@/components/agents/AgentCard';
+import { AgentCard } from '../../components/marketplace/AgentCard';
 import { SkillCard } from '../../components/marketplace/SkillCard';
 import { MCPCard } from '../../components/marketplace/MCPCard';
 import { PluginCard } from '../../components/marketplace/PluginCard';
 import { APICard } from '../../components/marketplace/APICard';
 import { AgentDetailModal } from '../../components/marketplace/AgentDetailModal';
-import { KYABadge } from '@/components/agents/AgentCard';
-import FadeIn from '../../components/animations/FadeIn';
+import { KYABadge } from '../../components/marketplace/KYABadge';
+
 
 const CATEGORIES = [
   { id: 'all', label: 'All Items', icon: LayoutGrid },
@@ -70,7 +70,7 @@ export default function MarketplacePage() {
       <AgentDetailModal item={selectedItem} onClose={() => setSelectedItem(null)} />
       {/* Header Section */}
       <header className="mb-12">
-        <FadeIn>
+        <div>
           <div className="flex items-center gap-2 text-xs font-bold text-indigo-500 uppercase tracking-[0.2em] mb-4">
             <span className="w-8 h-[1px] bg-indigo-500" />
             Adopt Your AI Companion
@@ -81,7 +81,7 @@ export default function MarketplacePage() {
           <p className="text-xl text-white/40 max-w-2xl mb-10 font-medium">
             Browse through our verified collection of AI pets. Each pet comes with a unique set of skills, memory, and personality, ready to be adopted into your fleet.
           </p>
-        </FadeIn>
+        </div>
 
         <div className="flex flex-col md:flex-row gap-6 items-center justify-between bg-white/5 p-6 rounded-3xl border border-white/10 backdrop-blur-xl">
           <SearchBar value={search} onChange={setSearch} isLoading={isLoading} />
@@ -144,8 +144,8 @@ export default function MarketplacePage() {
               >
                 <div className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mr-2">Sub-categories:</div>
                 {CATEGORIES.find(c => c.id === type)?.sub?.map(s => (
-                  <button key={s.name} className="px-4 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[10px] font-bold text-white/60 hover:text-white transition-all">
-                    {s.name}
+                  <button key={s} className="px-4 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[10px] font-bold text-white/60 hover:text-white transition-all">
+                    {s}
                   </button>
                 ))}
               </motion.div>
@@ -173,7 +173,7 @@ export default function MarketplacePage() {
                   };
 
                   if (view === 'list' || item.type === 'agent') {
-                    return <AgentCard context="marketplace" item={item} view={view} onClick={props.onClick} key={props.key} />;
+                    return <AgentCard {...props} view={view} />;
                   }
 
                   switch (item.type) {
@@ -181,7 +181,7 @@ export default function MarketplacePage() {
                     case 'mcp': return <MCPCard {...props} />;
                     case 'plugin': return <PluginCard {...props} />;
                     case 'api': return <APICard {...props} />;
-                    default: return <AgentCard context="marketplace" item={item} onClick={props.onClick} key={props.key} />;
+                    default: return <AgentCard {...props} />;
                   }
                 })}
               </motion.div>

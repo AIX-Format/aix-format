@@ -1,6 +1,8 @@
 export type KYATier = 0 | 1 | 2 | 3 | 4;
 
 export interface MarketplaceItem {
+  status?: string;
+  dnaHash?: string;
   id: string;
   type: 'agent' | 'skill' | 'mcp' | 'plugin' | 'api';
   name: string;

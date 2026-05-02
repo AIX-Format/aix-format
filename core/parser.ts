@@ -116,6 +116,7 @@ export interface IdentityLayer {
   expiresAt?: string;
   publicKey?: PublicKey;
   signature?: Signature;
+  dna_hash?: string;
 }
 
 export interface Skill {
