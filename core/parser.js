@@ -781,29 +781,66 @@ export class AIXParser {
   /**
    * Validate economics section (v1.2)
    */
-  validateEconomics(economics) {
-    if (economics.pricing) {
-      this.validatePricing(economics.pricing);
-    }
+  validateEconomics(econ) {
+    if (econ.pricing) this.validatePricing(econ.pricing);
+    if (econ.pi_smart_contract) this.validatePiSmartContract(econ.pi_smart_contract);
+    
+    if (econ.wallets) this.validateWallets(econ.wallets);
+    if (econ.payment_gateways) this.validatePaymentGateways(econ.payment_gateways);
+    if (econ.delegation) this.validateDelegation(econ.delegation);
+    if (econ.treasury) this.validateTreasury(econ.treasury);
+  }
 
-    if (economics.pi_smart_contract) {
-      const psc = economics.pi_smart_contract;
-      if (!psc.address) {
-        this.errors.push({
-          code: 'MISSING_FIELD',
-          section: 'economics.pi_smart_contract',
-          field: 'address',
-          message: "Pi smart contract requires an 'address'"
-        });
+  validatePiSmartContract(psc) {
+    if (!psc.address) {
+      this.errors.push({
+        code: 'MISSING_FIELD',
+        section: 'economics.pi_smart_contract',
+        field: 'address',
+        message: "Pi smart contract requires an 'address'"
+      });
+    }
+    if (psc.network && !['pi-mainnet', 'pi-testnet', 'sandbox'].includes(psc.network)) {
+      this.errors.push({
+        code: 'INVALID_VALUE',
+        section: 'economics.pi_smart_contract',
+        field: 'network',
+        message: "Network must be 'pi-mainnet', 'pi-testnet', or 'sandbox'"
+      });
+    }
+  }
+
+  validateWallets(wallets) {
+    if (!Array.isArray(wallets)) {
+      this.errors.push({ code: 'INVALID_TYPE', section: 'economics', field: 'wallets', message: 'wallets must be an array' });
+      return;
+    }
+    wallets.forEach((w, i) => {
+      if (!w.chain || !w.address) {
+        this.errors.push({ code: 'MISSING_FIELD', section: `economics.wallets[${i}]`, message: 'Wallet requires chain and address' });
       }
-      if (psc.network && !['pi-mainnet', 'pi-testnet'].includes(psc.network)) {
-        this.errors.push({
-          code: 'INVALID_VALUE',
-          section: 'economics.pi_smart_contract',
-          field: 'network',
-          message: "Network must be 'pi-mainnet' or 'pi-testnet'"
-        });
-      }
+    });
+  }
+
+  validatePaymentGateways(gateways) {
+    const sec = 'economics.payment_gateways';
+    if (gateways.stripe_acp && gateways.stripe_acp.enabled && !gateways.stripe_acp.merchant_id) {
+      this.warnings.push({ code: 'MISSING_MERCHANT_ID', section: sec, field: 'stripe_acp.merchant_id', message: 'Stripe ACP enabled without merchant_id' });
+    }
+    if (gateways.paypal_ap2 && gateways.paypal_ap2.enabled && !gateways.paypal_ap2.mandate_id) {
+      this.warnings.push({ code: 'MISSING_MANDATE_ID', section: sec, field: 'paypal_ap2.mandate_id', message: 'PayPal AP2 enabled without mandate_id' });
+    }
+  }
+
+  validateDelegation(del) {
+    if (del.allow_recursive && del.max_depth > 5) {
+      this.warnings.push({ code: 'HIGH_DELEGATION_DEPTH', section: 'economics.delegation', message: 'Max delegation depth > 5 may increase security risk' });
+    }
+  }
+
+  validateTreasury(tre) {
+    if (tre.flash_loan_arbitrage_enabled && !this.data.security?.guardian_logic?.mempool_monitor) {
+      this.warnings.push({ code: 'RISKY_TREASURY_CONFIG', section: 'economics.treasury', message: 'Flash loan arbitrage enabled without guardian mempool monitor' });
     }
   }
 
@@ -951,6 +988,9 @@ export class AIXParser {
   }
 
   validateSecurity(data, content) {
+    if (data.security && data.security.guardian_logic) {
+      this.validateGuardianLogic(data.security.guardian_logic);
+    }
     if (!data.security || !data.security.checksum) return;
 
     const { algorithm, value } = data.security.checksum;
@@ -1061,6 +1101,11 @@ export class AIXAgent {
   get pi_network() { return this.data.pi_network; }
   get economics() { return this.data.economics; }
   get abom() { return this.data.abom; }
+  get guardian_logic() { return this.data.security?.guardian_logic; }
+  get wallets() { return this.data.economics?.wallets || []; }
+  get payment_gateways() { return this.data.economics?.payment_gateways; }
+  get delegation() { return this.data.economics?.delegation; }
+  get treasury() { return this.data.economics?.treasury; }
   get lineage() { return this.data.meta?.lineage || []; }
 
   getCapabilities() {
@@ -1138,5 +1183,15 @@ export class AIXAgent {
     }
 
     return { errors: this.errors, warnings: this.warnings };
+  }
+
+  validateGuardianLogic(logic) {
+    if (logic.front_run_defense && !logic.mempool_monitor) {
+      this.errors.push({
+        code: 'INCONSISTENT_CONFIG',
+        section: 'security.guardian_logic',
+        message: 'front_run_defense requires mempool_monitor to be enabled'
+      });
+    }
   }
 }
