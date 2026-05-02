@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"sort"
+	"sync"
 	"time"
 )
 
@@ -52,51 +53,105 @@ type AgentExecutionPlan struct {
 }
 
 type SwarmRouter struct {
+	mu              sync.RWMutex
 	agents          map[string]AgentNode
 	deadLetterQueue []TaskDescriptor
 	breaker         *CircuitBreaker
 }
 
+type CircuitState string
+
+const (
+	StateClosed   CircuitState = "closed"
+	StateOpen     CircuitState = "open"
+	StateHalfOpen CircuitState = "half-open"
+)
+
 type CircuitBreaker struct {
+	mu               sync.RWMutex
 	FailureThreshold int
+	SuccessThreshold int
 	FailureCount     int
+	SuccessCount     int
 	LastFailure      time.Time
 	OpenDuration     time.Duration
-	State            string // "closed", "open", "half-open"
+	State            CircuitState
 }
 
-func NewCircuitBreaker(threshold int, duration time.Duration) *CircuitBreaker {
+func NewCircuitBreaker(failureThreshold int, successThreshold int, duration time.Duration) *CircuitBreaker {
 	return &CircuitBreaker{
-		FailureThreshold: threshold,
+		FailureThreshold: failureThreshold,
+		SuccessThreshold: successThreshold,
 		OpenDuration:     duration,
-		State:            "closed",
+		State:            StateClosed,
 	}
 }
 
 func (cb *CircuitBreaker) RecordFailure() {
+	cb.mu.Lock()
+	defer cb.mu.Unlock()
+
 	cb.FailureCount++
-	if cb.FailureCount >= cb.FailureThreshold {
-		cb.State = "open"
+	cb.SuccessCount = 0
+	if cb.State == StateHalfOpen || cb.FailureCount >= cb.FailureThreshold {
+		cb.State = StateOpen
 		cb.LastFailure = time.Now()
-		log.Printf("[CircuitBreaker] State changed to OPEN after %d failures\n", cb.FailureCount)
+		log.Printf("[CircuitBreaker] State changed to OPEN (Failures: %d)\n", cb.FailureCount)
 	}
 }
 
 func (cb *CircuitBreaker) RecordSuccess() {
-	cb.FailureCount = 0
-	cb.State = "closed"
+	cb.mu.Lock()
+	defer cb.mu.Unlock()
+
+	if cb.State == StateHalfOpen {
+		cb.SuccessCount++
+		if cb.SuccessCount >= cb.SuccessThreshold {
+			cb.State = StateClosed
+			cb.FailureCount = 0
+			cb.SuccessCount = 0
+			log.Println("[CircuitBreaker] State changed to CLOSED (Recovered)")
+		}
+	} else if cb.State == StateClosed {
+		cb.FailureCount = 0
+	}
 }
 
 func (cb *CircuitBreaker) IsAllowed() bool {
-	if cb.State == "closed" {
+	cb.mu.RLock()
+	defer cb.mu.RUnlock()
+
+	if cb.State == StateClosed {
 		return true
 	}
-	if time.Since(cb.LastFailure) > cb.OpenDuration {
-		cb.State = "half-open"
-		log.Println("[CircuitBreaker] State changed to HALF-OPEN")
+	if cb.State == StateOpen {
+		if time.Since(cb.LastFailure) > cb.OpenDuration {
+			// Transition to half-open is handled here implicitly or explicitly
+			// For simplicity in this implementation, we'll allow it and caller can probe
+			return true
+		}
+		return false
+	}
+	return true // half-open allows probing
+}
+
+// CheckAndProbe handles the state transition to Half-Open
+func (cb *CircuitBreaker) CheckAndProbe() bool {
+	cb.mu.Lock()
+	defer cb.mu.Unlock()
+
+	if cb.State == StateClosed {
 		return true
 	}
-	return false
+	if cb.State == StateOpen {
+		if time.Since(cb.LastFailure) > cb.OpenDuration {
+			cb.State = StateHalfOpen
+			log.Println("[CircuitBreaker] State transitioned to HALF-OPEN (Probing)")
+			return true
+		}
+		return false
+	}
+	return true // already half-open
 }
 
 type ErrorResponse struct {
@@ -117,9 +172,9 @@ func NewSwarmRouter() *SwarmRouter {
 	r := &SwarmRouter{
 		agents:          make(map[string]AgentNode),
 		deadLetterQueue: make([]TaskDescriptor, 0),
-		breaker:         NewCircuitBreaker(5, 30*time.Second),
+		breaker:         NewCircuitBreaker(5, 3, 30*time.Second),
 	}
-	log.Println("[SwarmRouter] Initialized successfully with Circuit Breaker (threshold: 5)")
+	log.Println("[SwarmRouter] Initialized successfully with Adaptive Circuit Breaker")
 	return r
 }
 
@@ -127,6 +182,9 @@ func (r *SwarmRouter) RegisterAgent(agent AgentNode) error {
 	if r == nil {
 		return errors.New("router instance is nil")
 	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	if r.agents == nil {
 		return errors.New("agents map is not initialized")
 	}
@@ -157,14 +215,18 @@ func (r *SwarmRouter) RouteTask(task TaskDescriptor) (*AgentExecutionPlan, error
 		return nil, errors.New("router instance is nil")
 	}
 	
-	// Check Circuit Breaker
-	if !r.breaker.IsAllowed() {
+	// Check and Probe Circuit Breaker
+	if !r.breaker.CheckAndProbe() {
 		return nil, fmt.Errorf("routing service is currently unavailable: circuit breaker is in %s state", r.breaker.State)
 	}
 
 	if task.ID == "" {
 		return nil, errors.New("task ID cannot be empty")
 	}
+
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
 	if len(task.RequiredCapabilities) == 0 {
 		return nil, errors.New("task must have at least one required capability")
 	}
@@ -196,14 +258,17 @@ func (r *SwarmRouter) RouteTask(task TaskDescriptor) (*AgentExecutionPlan, error
 	}
 
 	if len(candidates) == 0 {
-		r.deadLetterQueue = append(r.deadLetterQueue, task)
-		log.Printf("[SwarmRouter] No suitable agent found for task %s (type: %s), sent to DLQ\n", task.ID, task.Type)
-		
-		// Record failure in circuit breaker
-		r.breaker.RecordFailure()
-		
-		return nil, fmt.Errorf("routing failed: no suitable agent found for task %s with capabilities %v: %w", 
-			task.ID, task.RequiredCapabilities, errors.New("no_agent_match"))
+		// Error Discrimination: Missing capabilities is a "Permanent" error for this task,
+		// but if the whole agent pool is empty, it might be a "Transient" infrastructure issue.
+		if len(r.agents) == 0 {
+			r.breaker.RecordFailure()
+			return nil, fmt.Errorf("infrastructure failure: no agents registered in the swarm")
+		}
+
+		// Not recording breaker failure for specific task mismatches to avoid false positives
+		// unless failure rate across different tasks is high.
+		return nil, fmt.Errorf("task mismatch: no suitable agent found for task %s with capabilities %v", 
+			task.ID, task.RequiredCapabilities)
 	}
 
 	sort.Slice(candidates, func(i, j int) bool {
