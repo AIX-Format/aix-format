@@ -22,7 +22,10 @@
     "aix",
     "session"
   ],
+<<<<<<< HEAD
   "sideEffects": false,
+=======
+>>>>>>> 6932819 (chore(deps): sync shared dependency versions across workspace)
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc",
@@ -32,10 +35,14 @@
     "compress:measure": "tsc --noEmit && du -sh dist/ 2>/dev/null || echo 'Run build first'"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@upstash/redis": "^1.34.3",
     "@xenova/transformers": "^2.17.2"
+=======
+    "@upstash/redis": "^1.37.0"
+>>>>>>> 6932819 (chore(deps): sync shared dependency versions across workspace)
   },
   "devDependencies": {
-    "typescript": "^5.4.5"
+    "typescript": "^5.7.3"
   }
 }

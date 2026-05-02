@@ -18,9 +18,9 @@
   "author": "AMRIKYY AI Solutions",
   "license": "Apache-2.0",
   "dependencies": {
-    "zod": "^3.23.8"
+    "zod": "^4.4.1"
   },
   "devDependencies": {
-    "typescript": "^5.4.5"
+    "typescript": "^5.7.3"
   }
 }

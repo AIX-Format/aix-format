@@ -152,20 +152,20 @@ class UpstashRedisAdapter implements StorageAdapter {
   }
 
   async sadd(key: string, ...members: any[]): Promise<number> {
-    return this.withRetry(() => this.client.sadd(key, ...members), 'SADD', key) as any;
+    return this.withRetry(() => this.client.sadd(key, ...members as [any, ...any[]]), 'SADD', key) as any;
   }
 
   async srem(key: string, ...members: any[]): Promise<number> {
-    return this.withRetry(() => this.client.srem(key, ...members), 'SREM', key) as any;
+    return this.withRetry(() => this.client.srem(key, ...members as [any, ...any[]]), 'SREM', key) as any;
   }
 
   async smembers<T>(key: string): Promise<T[]> {
-    return (await this.withRetry(() => this.client.smembers<T>(key), 'SMEMBERS', key)) || [];
+    return (await this.withRetry(() => this.client.smembers(key), 'SMEMBERS', key)) as unknown as T[] || [];
   }
 
   async mget<T>(...keys: string[]): Promise<(T | null)[]> {
     if (keys.length === 0) return [];
-    return (await this.withRetry(() => this.client.mget<T>(...keys), 'MGET', keys[0])) || keys.map(() => null);
+    return (await this.withRetry(() => this.client.mget(...keys), 'MGET', keys[0])) as unknown as (T | null)[] || keys.map(() => null);
   }
 }
 
