@@ -24,7 +24,11 @@
     "detective": "node apps/aix-detective/index.js",
     "lint": "echo 'Linting not configured yet'",
     "format": "echo 'Formatting not configured yet'",
-    "docs": "echo 'Documentation generation not configured yet'"
+    "docs": "echo 'Documentation generation not configured yet'",
+    "schema:sync:check": "ts-node scripts/schema-type-sync.ts",
+    "schema:sync:fix": "npm run generate:types:unified && npm run schema:sync:check",
+    "dead-code:scan": "bash scripts/dead-code-scan.sh",
+    "dead-code:report": "cat .generated/dead-code-report.md"
   },
   "keywords": [
     "ai",
@@ -102,7 +106,9 @@
   "devDependencies": {
     "@playwright/test": "^1.50.0",
     "@tailwindcss/postcss": "^4.2.4",
+    "@types/node": "^20.0.0",
     "@vitest/coverage-v8": "^3.0.0",
+    "ajv": "^8.12.0",
     "json-schema-to-typescript": "^15.0.4",
     "playwright": "^1.50.0",
     "postcss": "^8.5.12",

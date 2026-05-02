@@ -53,6 +53,12 @@ jobs:
           UPSTASH_REDIS_REST_TOKEN: placeholder_token
           NEXT_PUBLIC_STUDIO_VERSION: "1.3.0"
 
+      # ── Schema-Type Drift Check ─────────────────────────────────────────
+      - name: Schema-Type Sync Verification
+        run: npm run schema:sync:check
+        env:
+          CI: true
+
       # ── Build ───────────────────────────────────────────────────────────
       - name: Build Next.js (Turbopack)
         working-directory: apps/studio
