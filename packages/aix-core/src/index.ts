@@ -21,6 +21,7 @@ export * from './swarm/commands';
 export * from './swarm/factory';
 export * from './swarm/blocks';
 export * from './swarm/hierarchy';
+export * from './voice/ManifestBuilder';
 
 export default kv;
 
