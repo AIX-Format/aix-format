@@ -2,6 +2,8 @@ package router
 
 import (
 	"errors"
+	"fmt"
+	"log"
 	"sort"
 )
 
@@ -51,14 +53,29 @@ type SwarmRouter struct {
 }
 
 func NewSwarmRouter() *SwarmRouter {
-	return &SwarmRouter{
+	if r := &SwarmRouter{
 		agents:          make(map[string]AgentNode),
 		deadLetterQueue: make([]TaskDescriptor, 0),
+	}; r != nil {
+		log.Println("[SwarmRouter] Initialized successfully")
+		return r
 	}
+	return nil
 }
 
-func (r *SwarmRouter) RegisterAgent(agent AgentNode) {
+func (r *SwarmRouter) RegisterAgent(agent AgentNode) error {
+	if r == nil {
+		return errors.New("router is nil")
+	}
+	if agent.ID == "" {
+		return errors.New("agent ID cannot be empty")
+	}
+	if _, exists := r.agents[agent.ID]; exists {
+		return fmt.Errorf("agent with ID %s already registered", agent.ID)
+	}
 	r.agents[agent.ID] = agent
+	log.Printf("[SwarmRouter] Registered agent: %s (role: %s, trust: %d)\n", agent.ID, agent.Role, agent.TrustLevel)
+	return nil
 }
 
 type candidate struct {
@@ -67,6 +84,16 @@ type candidate struct {
 }
 
 func (r *SwarmRouter) RouteTask(task TaskDescriptor) (*AgentExecutionPlan, error) {
+	if r == nil {
+		return nil, errors.New("router is nil")
+	}
+	if task.ID == "" {
+		return nil, errors.New("task ID cannot be empty")
+	}
+	if len(task.RequiredCapabilities) == 0 {
+		return nil, errors.New("task must have at least one required capability")
+	}
+
 	var candidates []candidate
 
 	for _, agent := range r.agents {
@@ -95,7 +122,8 @@ func (r *SwarmRouter) RouteTask(task TaskDescriptor) (*AgentExecutionPlan, error
 
 	if len(candidates) == 0 {
 		r.deadLetterQueue = append(r.deadLetterQueue, task)
-		return nil, errors.New("no suitable agent found, sent to DLQ")
+		log.Printf("[SwarmRouter] No suitable agent found for task %s (type: %s), sent to DLQ\n", task.ID, task.Type)
+		return nil, fmt.Errorf("no suitable agent found for task %s: required capabilities %v", task.ID, task.RequiredCapabilities)
 	}
 
 	sort.Slice(candidates, func(i, j int) bool {
@@ -103,18 +131,26 @@ func (r *SwarmRouter) RouteTask(task TaskDescriptor) (*AgentExecutionPlan, error
 	})
 
 	fallback := []string{}
-	for i := 1; i < len(candidates); i++ {
+	for i := 1; i < len(candidates) && i < 4; i++ { // Limit fallback chain to 3 agents
 		fallback = append(fallback, candidates[i].agentID)
 	}
 
-	return &AgentExecutionPlan{
+	plan := &AgentExecutionPlan{
 		TaskID:         task.ID,
 		PrimaryAgentID: candidates[0].agentID,
 		FallbackChain:  fallback,
 		Score:          candidates[0].score,
-	}, nil
+	}
+
+	log.Printf("[SwarmRouter] Routed task %s to agent %s (score: %.2f, fallbacks: %d)\n",
+		task.ID, plan.PrimaryAgentID, plan.Score, len(fallback))
+
+	return plan, nil
 }
 
-func (r *SwarmRouter) GetDeadLetterQueue() []TaskDescriptor {
-	return r.deadLetterQueue
+func (r *SwarmRouter) GetDeadLetterQueue() ([]TaskDescriptor, error) {
+	if r == nil {
+		return nil, errors.New("router is nil")
+	}
+	return r.deadLetterQueue, nil
 }
