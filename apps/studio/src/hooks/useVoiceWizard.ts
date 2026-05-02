@@ -46,48 +46,6 @@ export function useVoiceWizard() {
     }
   }, [state]);
 
-  // وظيفة إخفاء البيانات الحساسة (PII Masking)
-  const maskPII = (text: string): string => {
-    return text
-      // إخفاء رسائل البريد الإلكتروني
-      .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[EMAIL]")
-      // إخفاء أرقام الهواتف (أنماط عامة)
-      .replace(/\+?\d{10,13}/g, "[PHONE]")
-      // إخفاء التواريخ
-      .replace(/\d{4}-\d{2}-\d{2}/g, "[DATE]")
-      .replace(/\d{2}\/\d{2}\/\d{4}/g, "[DATE]");
-  };
-
-  const processAudio = async (audioBlob: Blob) => {
-    try {
-      const formData = new FormData();
-      formData.append('file', audioBlob, 'audio.webm');
-
-      // استدعاء مسار الـ API الحقيقي
-      const res = await fetch('/api/voice-wizard/transcribe', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!res.ok) {
-        throw new Error('فشل الاتصال بالخادم');
-      }
-
-      const data = await res.json();
-
-      // تطبيق الإخفاء قبل تحديث الحالة
-      const sanitizedTranscript = maskPII(data.transcript);
-      setTranscript(sanitizedTranscript);
-
-      setState('done');
-
-    } catch (err) {
-      console.error('Error processing audio:', err);
-      setError('حدث خطأ أثناء معالجة الصوت.');
-      setState('idle');
-    }
-  };
-
   // دالة للتبديل بين التسجيل والإيقاف (تُربط بضغطة الكرة)
   const toggleRecording = useCallback(() => {
     if (state === 'idle' || state === 'done') {
