@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
         recommendation: getRecommendation(evaluationResults)
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

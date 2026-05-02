@@ -474,7 +474,7 @@ function ValidationItem({ title, status, label }: { title: string, status: 'succ
   );
 }
 
-function ResultCard({ label, value, icon, onCopy, copied }: any) {
+function ResultCard({ label, value, icon, onCopy, copied }: { label: string; value: string; icon: React.ElementType; onCopy: () => void; copied: boolean }) {
   return (
     <div className="card rounded-2xl p-5 border border-white/10 space-y-3">
       <div className="flex items-center gap-2 text-[var(--color-on-surface-variant)]">

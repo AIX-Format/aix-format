@@ -28,7 +28,7 @@ export async function GET() {
       verifiedAt: status?.timestamp ?? null,
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[kyc/status] Failed to fetch KYC status');
     return successResponse({
       userId: 'unknown',

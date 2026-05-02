@@ -45,7 +45,7 @@ export async function POST(
       text: botResponse,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[Telegram Webhook] Error:", error);
     return NextResponse.json({ ok: true }); // Telegram needs 200 OK to stop retries
   }

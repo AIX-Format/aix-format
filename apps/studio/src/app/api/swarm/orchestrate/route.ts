@@ -27,12 +27,12 @@ export async function POST(req: NextRequest) {
       estimatedTime: calculateEstimatedTime(orchestrationPlan),
       costEstimate: calculateCostEstimate(orchestrationPlan)
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
-function createOrchestrationPlan(agents: any[], task: string, strategy: string) {
+function createOrchestrationPlan(agents: Array<Record<string, unknown>>, task: string, strategy: string) {
   const plan = {
     id: `swarm_${Date.now()}`,
     strategy,
@@ -83,17 +83,17 @@ function createOrchestrationPlan(agents: any[], task: string, strategy: string) 
   return plan;
 }
 
-function calculateEstimatedTime(plan: any): number {
+function calculateEstimatedTime(plan: { steps: Array<{ estimatedDuration: number }> }): number {
   if (plan.strategy === 'sequential') {
-    return plan.steps.reduce((sum: number, step: any) => sum + step.estimatedDuration, 0);
+    return plan.steps.reduce((sum: number, step: { estimatedDuration: number }) => sum + step.estimatedDuration, 0);
   } else if (plan.strategy === 'parallel') {
-    return Math.max(...plan.steps.map((s: any) => s.estimatedDuration));
+    return Math.max(...plan.steps.map((s: { estimatedDuration: number }) => s.estimatedDuration));
   } else {
-    return plan.steps[0].estimatedDuration + Math.max(...plan.steps.slice(1).map((s: any) => s.estimatedDuration));
+    return plan.steps[0].estimatedDuration + Math.max(...plan.steps.slice(1).map((s: { estimatedDuration: number }) => s.estimatedDuration));
   }
 }
 
-function calculateCostEstimate(plan: any): number {
+function calculateCostEstimate(plan: { steps: Array<{ estimatedDuration: number }> }): number {
   const costPerAgent = 0.05;
   return plan.agents.length * costPerAgent;
 }

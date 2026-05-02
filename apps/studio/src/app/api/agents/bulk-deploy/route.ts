@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
       statusUrl: `/api/agents/bulk-deploy/${batchId}/status`,
     }, 202); // 202 Accepted
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[agents/bulk-deploy] Deployment failed:', error);
     return ERR.INTERNAL('Bulk deployment failed: ' + error.message);
   }
@@ -195,7 +195,7 @@ export async function GET(req: NextRequest) {
       createdAt: batch.createdAt,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[agents/bulk-deploy] Status check failed:', error);
     return ERR.INTERNAL('Failed to check batch status: ' + error.message);
   }
@@ -273,7 +273,7 @@ async function deployAgentHandler(job: any, updateProgress: (progress: number) =
       name: manifest.meta.name,
     };
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Handle rollback if enabled
     if (options.rollbackOnFailure) {
       await rollbackBatch(batchId);

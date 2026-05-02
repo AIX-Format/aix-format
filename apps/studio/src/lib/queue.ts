@@ -224,7 +224,7 @@ export class QueueManager {
       const result = await handler(job, updateProgress);
       await this.updateStatus(jobId, 'completed', result);
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       job.attempts++;
       
       if (job.attempts >= job.maxAttempts) {

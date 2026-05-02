@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
       summary: exportResult.summary,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[analytics/export-to-pi] Export failed:', error);
     return ERR.INTERNAL('Failed to export analytics to Pi: ' + error.message);
   }

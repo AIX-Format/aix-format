@@ -73,7 +73,7 @@ export async function POST(req: Request) {
     });
     
     return result.toDataStreamResponse();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[Voice Chat] Fatal Error:", error);
     // Graceful error response for UI handling
     return new Response(JSON.stringify({ 

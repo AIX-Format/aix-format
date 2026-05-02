@@ -22,7 +22,7 @@ export async function GET(
     }
 
     return successResponse(entry);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[agents/id] GET failed:", error.message);
     return ERR.INTERNAL('Failed to fetch agent');
   }
@@ -58,7 +58,7 @@ export async function PUT(
     await updateRegistryEntry(updatedEntry);
     return successResponse(updatedEntry);
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[agents/id] PUT failed:", error.message);
     return ERR.INTERNAL('Failed to update agent');
   }
@@ -82,7 +82,7 @@ export async function DELETE(
     await deleteRegistryEntry(id);
     return successResponse({ message: "Agent deleted", id });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[agents/id] DELETE failed:", error.message);
     return ERR.INTERNAL('Failed to delete agent');
   }

@@ -48,7 +48,7 @@ export default function AgentInteraction({ agentId }: { agentId: string }) {
         learned: data.learned 
       };
       setMessages(prev => [...prev, assistantMsg]);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.message);
     } finally {
       setIsInvoking(false);
@@ -70,7 +70,7 @@ export default function AgentInteraction({ agentId }: { agentId: string }) {
         toast.success(data.message);
         setHasFeedback(prev => ({ ...prev, [index]: true }));
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error('Failed to submit feedback');
     }
   };

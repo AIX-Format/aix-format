@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     const report = scanAgent(agentData);
     return successResponse(report);
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[scan] Scan failed:', error.message);
     return ERR.INTERNAL('Scan operation failed');
   }

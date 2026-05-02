@@ -110,7 +110,7 @@ export default function DeployModal({ agent, onClose, onDeployed }: Props) {
       });
       
       onDeployed(deployment);
-    } catch (err: any) {
+    } catch (error: unknown) {
       setError(err.message);
     } finally {
       setIsDeploying(false);

@@ -134,7 +134,7 @@ export async function POST(
       201
     );
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[marketplace/clone] Clone failed:', error);
     return ERR.INTERNAL('Failed to clone agent: ' + error.message);
   }

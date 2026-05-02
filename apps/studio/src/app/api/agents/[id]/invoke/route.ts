@@ -152,7 +152,7 @@ export async function POST(
       learned: isSuccess,
       subAgentCalled: subAgentResponse ? true : false
     });
-  } catch (err: any) {
+  } catch (error: unknown) {
     console.error("[Invoke Error]:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

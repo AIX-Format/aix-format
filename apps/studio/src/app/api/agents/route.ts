@@ -67,7 +67,7 @@ export async function POST(req: Request) {
       warnings: validation.warnings,
       manifestUrl: `/agents/${did}`
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Deploy API Error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
@@ -114,7 +114,7 @@ export async function GET(req: NextRequest) {
     );
 
     return NextResponse.json(manifests.filter(Boolean));
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Agents List API Error:', error);
     return NextResponse.json({ error: 'Failed to list agents' }, { status: 500 });
   }

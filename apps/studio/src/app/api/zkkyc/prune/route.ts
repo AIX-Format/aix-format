@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       timestamp: new Date().toISOString(),
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     // NEVER log error details (may contain identity data)
     console.error('[zkKYC Prune] Operation failed (details redacted)');
     return ERR.INTERNAL('Prune operation failed');

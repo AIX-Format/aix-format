@@ -71,11 +71,11 @@ function getDefaultVerificationKey() {
  * Request body interface
  */
 interface VerifyProofRequest {
-  proof: any;
+  proof: Record<string, unknown>;
   publicSignals: string[];
   nullifier: string;
   timestamp: number;
-  verificationKey?: any; // Optional override
+  verificationKey?: Record<string, unknown>; // Optional override
 }
 
 export async function POST(req: NextRequest) {
@@ -162,7 +162,7 @@ export async function POST(req: NextRequest) {
       timestamp: new Date().toISOString()
     }, 200);
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     // NEVER log error details (may contain sensitive proof data)
     console.error('[zkKYC Verify] Operation failed (details redacted)');
     return ERR.INTERNAL('Proof verification failed');

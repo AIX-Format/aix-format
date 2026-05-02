@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(result);
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[Gateway Pulse Swarm] Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

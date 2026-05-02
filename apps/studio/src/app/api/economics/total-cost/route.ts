@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
         roi: parseFloat((savings / compressionCost).toFixed(2))
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

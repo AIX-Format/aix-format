@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const hash = generateDNAFingerprint(body);
     return successResponse({ dna_hash: hash });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[dna/sign] DNA generation failed:', error.message);
     return ERR.INTERNAL('DNA fingerprint generation failed');
   }

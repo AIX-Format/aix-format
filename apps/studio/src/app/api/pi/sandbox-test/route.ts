@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
         return ERR.VALIDATION('Invalid action. Must be create, execute, or cleanup');
     }
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[pi/sandbox-test] Test failed:', error);
     return ERR.INTERNAL('Sandbox test failed: ' + error.message);
   }
@@ -230,7 +230,7 @@ async function executeKYCScenario(session: any, piClient: any) {
       },
       executionTime: 234,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       scenario: 'kyc',
       status: 'failed',
@@ -267,7 +267,7 @@ async function executePaymentScenario(session: any, piClient: any) {
       newBalance: session.testUser.piBalance,
       executionTime: 456,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       scenario: 'payment',
       status: 'failed',
@@ -299,7 +299,7 @@ async function executeMCPScenario(session: any) {
       result: mcpCall,
       executionTime: 89,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       scenario: 'mcp_call',
       status: 'failed',
@@ -327,7 +327,7 @@ async function executeVerificationScenario(session: any, piClient: any) {
       result: verification,
       executionTime: 123,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       scenario: 'verification',
       status: 'failed',
@@ -362,7 +362,7 @@ async function cleanupTestSession(testSessionId: string) {
       status: 'cleaned',
       message: 'Test session cleaned up successfully',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return ERR.INTERNAL('Cleanup failed: ' + error.message);
   }
 }

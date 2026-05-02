@@ -79,7 +79,7 @@ export default function DeployPage() {
 
       setState("done");
       toast.success("Agent deployed successfully!");
-    } catch (err: any) {
+    } catch (error: unknown) {
       setError(err.message ?? "Deployment failed");
       setState("error");
     }

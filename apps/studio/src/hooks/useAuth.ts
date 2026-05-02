@@ -52,7 +52,7 @@ export function useAuth() {
         setUser(mockUser);
         localStorage.setItem('aix_user', JSON.stringify(mockUser));
       }
-    } catch (err: any) {
+    } catch (error: unknown) {
       setError(err.message || 'Authentication failed');
     } finally {
       setLoading(false);

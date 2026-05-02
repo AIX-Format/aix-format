@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       level: isValid ? storedKyc?.level : 'none',
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     // NEVER log error details (may contain token data)
     console.error('[kyc/verify] Token verification failed (details redacted)');
     return ERR.INTERNAL('Token verification failed');

@@ -63,7 +63,7 @@ export async function POST(req: Request) {
       }
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Manifest Generation] Error:', error);
     return NextResponse.json(
       {

@@ -168,7 +168,7 @@ export async function POST(req: NextRequest) {
       message: 'Payment infrastructure setup complete',
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[pi/payment-setup] Setup failed:', error);
     return ERR.INTERNAL('Payment setup failed: ' + error.message);
   }

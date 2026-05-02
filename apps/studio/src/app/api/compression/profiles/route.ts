@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
     const profiles = await integration.getAllProfiles();
     return NextResponse.json({ success: true, profiles });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

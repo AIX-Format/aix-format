@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[economics/project-revenue] Calculation failed:', error);
     return ERR.INTERNAL('Failed to calculate revenue projections: ' + error.message);
   }

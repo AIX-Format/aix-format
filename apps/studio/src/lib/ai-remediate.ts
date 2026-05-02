@@ -372,7 +372,7 @@ Respond in JSON format:
           status: 'success',
           appliedPatch: suggestion.patch,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         results.push({
           vulnerabilityId: suggestion.vulnerabilityId,
           status: 'failed',

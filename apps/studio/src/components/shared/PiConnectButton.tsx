@@ -30,7 +30,7 @@ export const PiConnectButton: React.FC = () => {
       } else {
         throw new Error("Backend verification failed");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       setStatus("error");
       toast.error(error.message || "Pi connection failed. Are you in the Pi Browser?");

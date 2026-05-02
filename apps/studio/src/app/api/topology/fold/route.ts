@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
         cost: (message.length * (agents.length - 1) * 0.00002).toFixed(4)
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

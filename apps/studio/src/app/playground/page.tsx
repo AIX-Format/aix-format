@@ -89,7 +89,7 @@ export default function PlaygroundPage() {
   const [activeLang, setActiveLang] = useState('curl');
   const [copied, setCopied] = useState(false);
 
-  const handleEndpointSelect = (endpoint: any) => {
+  const handleEndpointSelect = (endpoint: typeof API_ENDPOINTS[number]) => {
     setSelectedEndpoint(endpoint);
     setRequestPayload(endpoint.defaultRequest ? JSON.stringify(endpoint.defaultRequest, null, 2) : "{}");
     setResponse(null);

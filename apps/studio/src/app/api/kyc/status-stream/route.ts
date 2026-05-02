@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
         let lastStatus: string | null = null;
 
         // Helper to send SSE message
-        const sendMessage = (event: string, data: any) => {
+        const sendMessage = (event: string, data: Record<string, unknown>) => {
           const message = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
           controller.enqueue(encoder.encode(message));
         };
@@ -137,7 +137,7 @@ export async function GET(req: NextRequest) {
       },
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[kyc/status-stream] Failed to create stream:', error);
     return ERR.INTERNAL('Failed to create status stream: ' + error.message);
   }

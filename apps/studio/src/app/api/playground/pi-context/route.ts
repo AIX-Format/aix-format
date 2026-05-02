@@ -163,7 +163,7 @@ export async function POST(req: NextRequest) {
       piContextInjected: true,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[playground/pi-context] Execution failed:', error);
     return ERR.INTERNAL('Failed to execute with Pi context: ' + error.message);
   }
@@ -174,7 +174,7 @@ export async function POST(req: NextRequest) {
  * This is a simplified simulation - actual implementation would invoke the agent
  */
 async function executeAgentWithPiContext(
-  agent: any,
+  agent: Record<string, unknown>,
   context: any
 ): Promise<any> {
   // In a real implementation, this would:

@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       if (report.score < 50) {
         throw new Error(`Security Risk: ABOM Score too low (${report.score}). Deployment blocked.`);
       }
-    } catch (scanError: any) {
+    } catch (scanError: unknown) {
        entry.deployment.status = 'failed';
        await updateRegistryEntry(entry);
        return NextResponse.json({ error: scanError.message }, { status: 403 });
@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
       status: 'deployed'
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Deployment failure:', error);
     if (body?.agentId) {
       const registry = await getRegistry();

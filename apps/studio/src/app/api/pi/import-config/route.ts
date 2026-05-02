@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     let piConfig;
     try {
       piConfig = await piClient.importConfig(appId);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[pi/import-config] Failed to fetch Pi config:', error);
       return ERR.NOT_CONFIGURED('Failed to fetch Pi app configuration: ' + error.message);
     }
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
       agentUpdated: !!agentId,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[pi/import-config] Import failed:', error);
     return ERR.INTERNAL('Failed to import Pi configuration: ' + error.message);
   }

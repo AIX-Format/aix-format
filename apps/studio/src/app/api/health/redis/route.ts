@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
       timestamp: new Date().toISOString()
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Redis Health Check Failed:', error);
     return NextResponse.json({ 
       status: 'degraded', 

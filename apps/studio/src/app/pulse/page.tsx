@@ -23,7 +23,7 @@ interface PulseEvent {
   agentId: string;
   agentName: string;
   message: string;
-  pet?: any;
+  pet?: Record<string, unknown>;
 }
 
 const TYPE_ICONS = {

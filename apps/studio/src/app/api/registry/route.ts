@@ -12,7 +12,7 @@ export async function GET() {
   try {
     const entries = await getRegistry();
     return successResponse(entries);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[registry] GET failed:", error.message);
     return ERR.INTERNAL('Failed to fetch registry');
   }
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     await updateRegistryEntry(entry);
     return successResponse(entry, 201);
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[registry] POST failed:", error.message);
     return ERR.INTERNAL('Failed to save registry entry');
   }
@@ -84,7 +84,7 @@ export async function DELETE(req: NextRequest) {
     await deleteRegistryEntry(did);
     return successResponse({ message: "Agent removed from registry", id: did });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[registry] DELETE failed:", error.message);
     return ERR.INTERNAL('Failed to delete registry entry');
   }

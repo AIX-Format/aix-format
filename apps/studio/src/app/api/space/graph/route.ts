@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json({ nodes, links: edges });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[Graph API] Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

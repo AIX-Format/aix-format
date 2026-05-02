@@ -156,7 +156,7 @@ export async function POST(req: NextRequest) {
       } : null,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[abom-scan/remediate] Remediation failed:', error);
     return ERR.INTERNAL('Remediation failed: ' + error.message);
   }

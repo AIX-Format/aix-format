@@ -148,7 +148,7 @@ export default function WikiBrainExplorer() {
 
           // Level 1 Categories
           const categories = tree.children || [];
-          categories.forEach((cat: any, i: number) => {
+          categories.forEach((cat: { children?: unknown[] }, i: number) => {
             const x = 100 + (i * 300);
             const y = 200;
             
@@ -194,7 +194,7 @@ export default function WikiBrainExplorer() {
             });
 
             // Level 2 Items
-            (cat.children || []).forEach((item: any, j: number) => {
+            (cat.children || []).forEach((item: unknown, j: number) => {
                const ix = x - 100 + (j % 3 * 120);
                const iy = y + 150 + (Math.floor(j / 3) * 120);
                

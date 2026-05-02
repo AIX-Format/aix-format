@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 
     return successResponse(result);
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     // NEVER log error details (may contain identity data)
     console.error('[kyc/sign] KYC signing failed (details redacted for security)');
     return ERR.INTERNAL('KYC signing failed');

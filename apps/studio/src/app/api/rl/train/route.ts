@@ -51,7 +51,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         converged: trainingResults.convergenceEpisode !== -1
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
