@@ -7,7 +7,7 @@ import { PiUser } from "@/lib/types";
 
 // ─── Stable class maps — defined outside component, never recreated ───────────
 const stepActive   = "border-[var(--color-primary)]/40 bg-[var(--color-primary)]/10";
-const stepInactive = "border-[var(--color-glass-border)] bg-[var(--color-surface)]";
+const stepInactive = "border-[var(var(--color-border))] bg-[var(--color-surface)]";
 
 export const AgenticKycSetup = memo(function AgenticKycSetup({ user }: { user?: PiUser }) {
   const [step, setStep] = useState(1);
@@ -51,7 +51,7 @@ export const AgenticKycSetup = memo(function AgenticKycSetup({ user }: { user?: 
   }, []);
 
   return (
-    <div className="bg-[rgba(20,20,20,0.62)] rounded-2xl border border-[var(--color-glass-border)] p-6 backdrop-blur-xl">
+    <div className="bg-[rgba(20,20,20,0.62)] rounded-2xl border border-[var(var(--color-border))] p-6 ">
       <div className="flex items-center gap-3 mb-6">
         <ShieldCheck className="w-8 h-8 text-[var(--color-primary)]" />
         <div>
@@ -130,7 +130,7 @@ export const AgenticKycSetup = memo(function AgenticKycSetup({ user }: { user?: 
           </div>
           <button
             onClick={resetKyc}
-            className="w-full py-2 rounded-lg border border-[var(--color-glass-border)] text-sm text-[var(--color-on-surface-variant)] hover:text-white hover:border-white/20 transition-all"
+            className="w-full py-2 rounded-lg border border-[var(var(--color-border))] text-sm text-[var(--color-on-surface-variant)] hover:text-white hover:border-white/20 transition-all"
           >
             Reset KYC
           </button>

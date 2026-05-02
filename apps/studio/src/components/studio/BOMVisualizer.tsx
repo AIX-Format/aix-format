@@ -30,7 +30,7 @@ const COLORS = {
 };
 
 const nodeStyles = {
-  container: "relative px-5 py-4 rounded-2xl border bg-indigo-950/40 backdrop-blur-xl shadow-2xl transition-all duration-300 group hover:scale-105",
+  container: "relative px-5 py-4 rounded-2xl border bg-indigo-950/40   transition-all duration-300 group hover:scale-105",
   label: "text-[10px] font-mono uppercase tracking-[0.2em] text-white/40 mb-2 group-hover:text-white/60 transition-colors",
   title: "text-sm font-bold flex items-center gap-2 text-white",
   handle: "w-2.5 h-2.5 !bg-indigo-400 !border-2 !border-indigo-950 hover:!scale-125 transition-transform",
@@ -193,7 +193,7 @@ export default function BOMVisualizer({ formData }: BOMVisualizerProps) {
         nodeTypes={nodeTypes}
         fitView
         colorMode="dark"
-        className="rounded-3xl border border-white/5 overflow-hidden shadow-inner"
+        className="rounded-3xl border border-white/5 overflow-hidden "
       >
         <Background 
           color="#4f46e5" 
@@ -202,7 +202,7 @@ export default function BOMVisualizer({ formData }: BOMVisualizerProps) {
           variant={BackgroundVariant.Dots}
           className="opacity-20"
         />
-        <Controls className="!bg-black/40 !border-white/10 !rounded-xl !p-1 backdrop-blur-md" />
+        <Controls className="! !border-white/10 !rounded-xl !p-1 " />
         <Panel position="top-left" className="m-4">
           <div className="flex flex-col gap-1">
             <h3 className="text-white font-display font-bold text-lg flex items-center gap-2">
@@ -216,7 +216,7 @@ export default function BOMVisualizer({ formData }: BOMVisualizerProps) {
         </Panel>
         
         <Panel position="bottom-right" className="m-4">
-          <div className="px-4 py-2 bg-black/40 backdrop-blur-md border border-white/10 rounded-xl flex gap-4">
+          <div className="px-4 py-2   border border-white/10 rounded-xl flex gap-4">
             {Object.entries(COLORS).map(([key, color]) => (
               <div key={key} className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />

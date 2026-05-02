@@ -8,7 +8,7 @@ export default function Loading() {
         <div className="absolute inset-0 rounded-full bg-[var(--color-primary)] opacity-20 blur-2xl animate-pulse" />
         
         {/* Spinner */}
-        <div className="relative glass-panel rounded-full p-4 border border-white/10">
+        <div className="relative card rounded-full p-4 border border-white/10">
           <Loader2 className="w-8 h-8 text-[var(--color-primary)] animate-spin" />
         </div>
       </div>

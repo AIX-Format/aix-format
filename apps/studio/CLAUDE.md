@@ -1,6 +1,6 @@
 # Axiom Studio Engineering
 
-**REFER TO**: [AXIOM_AGENTS.md](../../AXIOM_AGENTS.md) for core sovereign engineering standards.
+**REFER TO**: [AXIOM.md](../../AXIOM.md) for core sovereign engineering standards.
 
 ## Studio-Specific Patterns
 - Use `framer-motion` for all glassmorphism transitions.

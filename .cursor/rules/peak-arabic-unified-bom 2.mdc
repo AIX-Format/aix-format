@@ -8,7 +8,7 @@ globs:
   - "docs/**"
   - "CLAUDE.md"
   - "AGENT_GOVERNANCE.md"
-  - "AXIOM_AGENTS.md"
+  - "AXIOM.md"
 alwaysApply: false
 ---
 

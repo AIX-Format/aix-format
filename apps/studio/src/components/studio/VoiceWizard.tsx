@@ -36,9 +36,9 @@ export function VoiceWizard({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 "
     >
-      <Card className="relative w-full max-w-2xl overflow-hidden border-zinc-800 bg-zinc-950/90 shadow-2xl">
+      <Card className="relative w-full max-w-2xl overflow-hidden border-zinc-800 bg-zinc-950/90 ">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-zinc-800/50">
           <div className="flex items-center gap-3">
@@ -85,11 +85,11 @@ export function VoiceWizard({
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center transition-colors duration-500 shadow-xl ${
+                    className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center transition-colors duration-500  ${
                       isListening 
-                        ? "bg-red-500 text-white shadow-red-500/50" 
+                        ? "bg-red-500 text-white /50"
                         : isSpeaking
-                        ? "bg-blue-500 text-white shadow-blue-500/50"
+                        ? "bg-blue-500 text-white /50"
                         : "bg-zinc-900 text-zinc-400 border border-zinc-800"
                     }`}
                     onMouseDown={handleVoiceTurn}

@@ -118,12 +118,12 @@ export default function DeployModal({ agent, onClose, onDeployed }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80  p-4">
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-8 max-w-lg w-full shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)] relative overflow-hidden"
+        className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-8 max-w-lg w-full [0_30px_60px_-12px_rgba(0,0,0,0.5)] relative overflow-hidden"
       >
         {/* Ambient Glow */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none" />
@@ -293,7 +293,7 @@ export default function DeployModal({ agent, onClose, onDeployed }: Props) {
                     <button 
                       onClick={handleSign}
                       disabled={isSigning}
-                      className="flex-[2] py-4 bg-white text-black hover:bg-zinc-200 font-black rounded-2xl transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                      className="flex-[2] py-4 bg-white text-black hover:bg-zinc-200 font-black rounded-2xl transition-all flex items-center justify-center gap-2 [0_0_20px_rgba(255,255,255,0.2)]"
                     >
                       {isSigning ? (
                         <>
@@ -349,7 +349,7 @@ export default function DeployModal({ agent, onClose, onDeployed }: Props) {
                     <button 
                       onClick={handleDeploy}
                       disabled={isDeploying}
-                      className="flex-[2] py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl transition-all flex items-center justify-center gap-2 shadow-[0_20px_40px_-10px_rgba(79,70,229,0.4)]"
+                      className="flex-[2] py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl transition-all flex items-center justify-center gap-2 [0_20px_40px_-10px_rgba(79,70,229,0.4)]"
                     >
                       {isDeploying ? (
                         <>

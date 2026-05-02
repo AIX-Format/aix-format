@@ -76,15 +76,15 @@ export default function AgentInteraction({ agentId }: { agentId: string }) {
   };
 
   return (
-    <div className="flex flex-col h-[600px] glass-panel-heavy rounded-[2.5rem] border-white/5 bg-black/40 overflow-hidden">
+    <div className="flex flex-col h-[600px] card rounded-sm border-white/5  overflow-hidden">
       {/* Header */}
-      <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+      <div className="p-6 border-b border-white/5 flex items-center justify-between ">
         <div className="flex items-center gap-3">
           <MessageSquare className="text-primary" size={18} />
           <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">Live Interaction</h3>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
+          <div className="w-2 h-2 rounded-full bg-emerald-500 [0_0_8px_#10b981]" />
           <span className="text-[10px] font-black text-emerald-500 uppercase">Sovereign Link Active</span>
         </div>
       </div>
@@ -158,7 +158,7 @@ export default function AgentInteraction({ agentId }: { agentId: string }) {
       </div>
 
       {/* Input */}
-      <div className="p-6 bg-white/[0.02] border-t border-white/5">
+      <div className="p-6  border-t border-white/5">
         <div className="relative group">
           <input 
             type="text" 
@@ -166,7 +166,7 @@ export default function AgentInteraction({ agentId }: { agentId: string }) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleInvoke()}
             placeholder="Send instruction to agent..."
-            className="w-full bg-black/40 border border-white/5 rounded-2xl pl-6 pr-14 py-4 text-xs text-white focus:outline-none focus:border-primary/40 transition-all placeholder:text-zinc-700"
+            className="w-full  border border-white/5 rounded-2xl pl-6 pr-14 py-4 text-xs text-white focus:outline-none focus:border-primary/40 transition-all placeholder:text-zinc-700"
           />
           <button 
             onClick={handleInvoke}

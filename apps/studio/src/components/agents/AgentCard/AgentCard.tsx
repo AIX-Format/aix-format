@@ -319,7 +319,7 @@ export const AgentCard = memo(function AgentCard(props: AgentCardProps) {
   /* ── Loading skeleton ── */
   if (props.variant === 'loading') {
     return (
-      <div className="h-80 rounded-2xl bg-white/5 animate-pulse border border-(--color-glass-border)" />
+      <div className="h-80 rounded-2xl bg-white/5 animate-pulse border border-(var(--color-border))" />
     );
   }
 

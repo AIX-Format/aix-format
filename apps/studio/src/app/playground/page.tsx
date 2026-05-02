@@ -179,7 +179,7 @@ func main() {
 
            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               {/* Sidebar */}
-              <div className="lg:col-span-3 glass-panel-heavy rounded-[2rem] border-white/5 bg-white/[0.01] p-6 space-y-6">
+              <div className="lg:col-span-3 card rounded-[2rem] border-white/5 bg-white/[0.01] p-6 space-y-6">
                  <div className="relative group">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600" />
                     <input 
@@ -222,7 +222,7 @@ func main() {
               {/* Main Content */}
               <div className="lg:col-span-9 grid grid-cols-1 xl:grid-cols-2 gap-8">
                  {/* Request Section */}
-                 <div className="glass-panel-heavy rounded-[3rem] border-white/5 bg-[#0a0a0f]/80 p-8 space-y-8">
+                 <div className="card rounded-[3rem] border-white/5 bg-[#0a0a0f]/80 p-8 space-y-8">
                     <div className="space-y-4">
                        <h2 className="text-2xl font-black text-white italic uppercase tracking-tight">{selectedEndpoint.label}</h2>
                        <p className="text-xs text-zinc-500 leading-relaxed">{selectedEndpoint.description}</p>
@@ -287,7 +287,7 @@ func main() {
                  </div>
 
                  {/* Code Samples Section */}
-                 <div className="glass-panel-heavy rounded-[3rem] border-white/5 bg-[#0a0a0f]/40 overflow-hidden flex flex-col h-full">
+                 <div className="card rounded-[3rem] border-white/5 bg-[#0a0a0f]/40 overflow-hidden flex flex-col h-full">
                     <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
                        <div className="flex gap-6">
                           {['curl', 'javascript', 'python', 'go'].map(lang => (

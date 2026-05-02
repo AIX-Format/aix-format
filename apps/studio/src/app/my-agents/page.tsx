@@ -65,7 +65,7 @@ export default function MyAgentsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center justify-center 
-                      py-32 gap-6 text-center px-4 glass-panel rounded-[2.5rem] border-dashed"
+                      py-32 gap-6 text-center px-4 card rounded-[2.5rem] border-dashed"
           >
             <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center text-4xl mb-2">
               🤖

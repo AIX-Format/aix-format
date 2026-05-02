@@ -13,7 +13,7 @@ export function SovereignStatusBar() {
   }, []);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-glass-border)] bg-[rgba(6,8,18,0.8)] backdrop-blur-xl px-4 py-2">
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(var(--color-border))] bg-[rgba(6,8,18,0.8)]  px-4 py-2">
       {/* Add bottom padding so content above isn't hidden behind this bar */}
       <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between text-xs text-gray-300 gap-2">
         <span className="flex items-center gap-2">

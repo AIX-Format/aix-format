@@ -45,7 +45,7 @@ export default function PricingPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * index }}
-              className={`glass-panel-heavy rounded-[2rem] p-8 border border-white/5 flex flex-col gap-8 relative overflow-hidden ${plan.id === 'pro' ? 'border-[var(--color-primary)]/30 ring-1 ring-[var(--color-primary)]/20' : ''}`}
+              className={`card rounded-[2rem] p-8 border border-white/5 flex flex-col gap-8 relative overflow-hidden ${plan.id === 'pro' ? 'border-[var(--color-primary)]/30 ring-1 ring-[var(--color-primary)]/20' : ''}`}
             >
               {plan.id === 'pro' && (
                 <div className="absolute top-0 right-0 bg-[var(--color-primary)] text-black text-[10px] font-black px-4 py-1 rounded-bl-xl uppercase tracking-widest">
@@ -92,7 +92,7 @@ export default function PricingPage() {
           ))}
         </div>
 
-        <div className="glass-panel rounded-3xl p-8 border border-white/5 w-full max-w-4xl flex flex-col md:flex-row items-center justify-between gap-8 bg-gradient-to-r from-white/[0.02] to-transparent">
+        <div className="card rounded-3xl p-8 border border-white/5 w-full max-w-4xl flex flex-col md:flex-row items-center justify-between gap-8 bg-gradient-to-r from-white/[0.02] to-transparent">
           <div className="flex flex-col gap-2">
             <h4 className="text-xl font-bold text-white">Need a custom solution?</h4>
             <p className="text-sm text-gray-400">Contact our enterprise team for volume licensing and custom protocol integrations.</p>

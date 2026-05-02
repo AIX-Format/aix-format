@@ -87,7 +87,7 @@ export default function LiveValidator({
     : "unknown";
 
   return (
-    <div className="rounded-2xl border border-[var(--color-glass-border)] bg-[rgba(12,16,28,0.5)] p-5 backdrop-blur-xl">
+    <div className="rounded-2xl border border-[var(var(--color-border))] bg-[rgba(12,16,28,0.5)] p-5 ">
       <h3 className="text-white font-semibold text-lg mb-2">Live Validator</h3>
       <p className="text-xs text-[var(--color-on-surface-variant)] mb-4">
         Drop a .aix file to inspect SHA-256 DNA, required fields, and signature status.
@@ -105,7 +105,7 @@ export default function LiveValidator({
         className={`rounded-xl border-2 border-dashed p-6 text-center transition ${
           dragging
             ? "border-cyan-400 bg-cyan-500/10"
-            : "border-[var(--color-glass-border)] hover:border-white/20"
+            : "border-[var(var(--color-border))] hover:border-white/20"
         }`}
       >
         <UploadCloud className="w-7 h-7 mx-auto text-cyan-300 mb-2" />

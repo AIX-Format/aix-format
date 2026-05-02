@@ -122,12 +122,12 @@ export function Navbar() {
       <nav className={cn(
         "max-w-7xl mx-auto h-16 rounded-2xl flex items-center justify-between px-6 transition-all duration-500 border",
         isScrolled 
-          ? "bg-surface-1/80 backdrop-blur-xl border-white/10 shadow-2xl shadow-black/50" 
+          ? "bg-surface-1/80  border-white/10  /50"
           : "bg-transparent border-transparent"
       )}>
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center group-hover:rotate-12 transition-transform duration-500 shadow-lg shadow-primary/20">
+          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center group-hover:rotate-12 transition-transform duration-500  /20">
             <Typography variant="h4" className="text-primary-dark italic leading-none m-0">A</Typography>
           </div>
           <div className="flex flex-col leading-none">
@@ -169,7 +169,7 @@ export function Navbar() {
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
                       className="absolute left-0 top-full pt-2 w-48 z-[60]"
                     >
-                      <div className="bg-surface-2/95 backdrop-blur-xl border border-white/10 rounded-xl p-1.5 shadow-2xl">
+                      <div className="bg-surface-2/95  border border-white/10 rounded-xl p-1.5 ">
                         {cat.links.map(link => (
                           <Link 
                             key={link.href}
@@ -216,7 +216,7 @@ export function Navbar() {
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 top-full mt-2 w-48 bg-surface-3 border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50 p-1"
+                    className="absolute right-0 top-full mt-2 w-48 bg-surface-3 border border-white/10 rounded-xl overflow-hidden  z-50 p-1"
                   >
                     <button className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold uppercase italic text-foreground/60 hover:bg-white/5 hover:text-white transition-colors">
                       <Shield className="w-4 h-4" /> Account Security
@@ -255,7 +255,7 @@ export function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-surface-2 border border-white/10 rounded-2xl mt-2 overflow-hidden shadow-2xl"
+            className="md:hidden bg-surface-2 border border-white/10 rounded-2xl mt-2 overflow-hidden "
           >
             <div className="p-4 flex flex-col gap-2">
               {navLinks.map(link => (

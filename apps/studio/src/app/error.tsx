@@ -21,7 +21,7 @@ export default function Error({
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="glass-panel-heavy p-8 rounded-3xl border border-red-500/20 max-w-md w-full"
+        className="card p-8 rounded-3xl border border-red-500/20 max-w-md w-full"
       >
         <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
           <AlertCircle className="w-8 h-8 text-red-400" />

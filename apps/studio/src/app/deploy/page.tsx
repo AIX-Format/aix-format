@@ -145,7 +145,7 @@ export default function DeployPage() {
                 </Link>
               </div>
 
-              <div className="glass-panel rounded-3xl overflow-hidden border border-white/10 max-h-[400px] overflow-y-auto">
+              <div className="card rounded-3xl overflow-hidden border border-white/10 max-h-[400px] overflow-y-auto">
                 <table className="w-full text-left border-collapse">
                   <thead className="sticky top-0 bg-[#0e0e12] z-10 border-b border-white/10">
                     <tr className="text-[10px] uppercase tracking-widest text-[var(--color-on-surface-variant)]">
@@ -234,7 +234,7 @@ export default function DeployPage() {
                 <div 
                   onClick={() => setDeployTarget('vercel')}
                   className={cn(
-                    "glass-panel rounded-3xl p-8 border-2 cursor-pointer transition-all",
+                    "card rounded-3xl p-8 border-2 cursor-pointer transition-all",
                     deployTarget === 'vercel' ? "border-[var(--color-primary)] bg-[var(--color-primary-dim)]" : "border-white/5 hover:border-white/10"
                   )}
                 >
@@ -251,7 +251,7 @@ export default function DeployPage() {
                 <div 
                   onClick={() => setDeployTarget('custom')}
                   className={cn(
-                    "glass-panel rounded-3xl p-8 border-2 cursor-pointer transition-all",
+                    "card rounded-3xl p-8 border-2 cursor-pointer transition-all",
                     deployTarget === 'custom' ? "border-[var(--color-primary)] bg-[var(--color-primary-dim)]" : "border-white/5 hover:border-white/10"
                   )}
                 >
@@ -266,7 +266,7 @@ export default function DeployPage() {
                 </div>
               </div>
 
-              <div className="glass-panel rounded-3xl p-8 border border-white/10 space-y-6">
+              <div className="card rounded-3xl p-8 border border-white/10 space-y-6">
                 {deployTarget === 'vercel' ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
@@ -330,7 +330,7 @@ export default function DeployPage() {
               exit={{ opacity: 0, x: -20 }}
               className="space-y-8"
             >
-              <div className="glass-panel rounded-3xl p-8 border border-white/10">
+              <div className="card rounded-3xl p-8 border border-white/10">
                 <div className="flex items-center gap-4 mb-8">
                   <div className="w-16 h-16 rounded-2xl bg-[var(--color-primary-dim)] flex items-center justify-center">
                     <Shield className="w-8 h-8 text-[var(--color-primary)]" />
@@ -473,7 +473,7 @@ function ValidationItem({ title, status, label }: { title: string, status: 'succ
 
 function ResultCard({ label, value, icon, onCopy, copied }: any) {
   return (
-    <div className="glass-panel rounded-2xl p-5 border border-white/10 space-y-3">
+    <div className="card rounded-2xl p-5 border border-white/10 space-y-3">
       <div className="flex items-center gap-2 text-[var(--color-on-surface-variant)]">
         {icon}
         <span className="text-xs font-semibold uppercase tracking-wider">{label}</span>

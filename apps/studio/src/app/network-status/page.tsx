@@ -100,7 +100,7 @@ export default function NetworkStatusPage() {
           {metrics.map((m, i) => (
             <motion.div key={m.label}
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
-              className="glass-panel rounded-xl p-4 border border-white/5"
+              className="card rounded-xl p-4 border border-white/5"
             >
               <div className={`flex items-center gap-2 mb-2 ${m.color}`}>{m.icon}<span className="text-xs">{m.label}</span></div>
               <p className="text-2xl font-bold text-white">{m.value}</p>
@@ -115,7 +115,7 @@ export default function NetworkStatusPage() {
           {services.map((svc, i) => (
             <motion.div key={svc.name}
               initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}
-              className="glass-panel rounded-xl px-5 py-4 border border-white/5 flex items-center gap-4 flex-wrap"
+              className="card rounded-xl px-5 py-4 border border-white/5 flex items-center gap-4 flex-wrap"
             >
               <StatusIcon status={svc.status} />
               <div className="flex-1 min-w-0">
@@ -135,7 +135,7 @@ export default function NetworkStatusPage() {
 
         {/* Incident Log */}
         <h2 className="text-lg font-bold text-white mt-10 mb-4">Recent Incidents</h2>
-        <div className="glass-panel rounded-xl border border-white/5 divide-y divide-white/5">
+        <div className="card rounded-xl border border-white/5 divide-y divide-white/5">
           <div className="px-5 py-4">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 px-2 py-0.5 rounded-full">Investigating</span>

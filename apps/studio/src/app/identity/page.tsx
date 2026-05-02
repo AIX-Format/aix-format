@@ -72,7 +72,7 @@ export default function IdentityManagerPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
            {/* DID Card */}
-           <div className="lg:col-span-8 glass-panel-heavy p-10 rounded-[3rem] border-white/5 bg-black/40 relative overflow-hidden">
+           <div className="lg:col-span-8 card p-10 rounded-[3rem] border-white/5 bg-black/40 relative overflow-hidden">
               <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
                  <Fingerprint size={200} className="text-primary" />
               </div>
@@ -110,7 +110,7 @@ export default function IdentityManagerPage() {
            </div>
 
            {/* KYC Tiers */}
-           <div className="lg:col-span-4 glass-panel-heavy p-8 rounded-[3rem] border-white/5 bg-black/40 space-y-8">
+           <div className="lg:col-span-4 card p-8 rounded-[3rem] border-white/5 bg-black/40 space-y-8">
               <div className="flex items-center justify-between">
                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-3">
                     <ShieldCheck className="text-emerald-400" size={18} />
@@ -151,7 +151,7 @@ export default function IdentityManagerPage() {
 
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
              {/* Pi Network Integration */}
-             <div className="glass-panel-heavy p-8 rounded-[2.5rem] border-[#8A2BE2]/20 bg-black/40 space-y-6">
+             <div className="card p-8 rounded-[2.5rem] border-[#8A2BE2]/20 bg-black/40 space-y-6">
                 <div className="flex items-center gap-3 text-[#8A2BE2]">
                    <Globe size={18} />
                    <h3 className="text-xs font-black uppercase tracking-[0.2em]">Pi Network</h3>
@@ -176,7 +176,7 @@ export default function IdentityManagerPage() {
              </div>
 
             {/* Signing Keys */}
-            <div className="glass-panel-heavy p-8 rounded-[2.5rem] border-white/5 bg-black/40 space-y-6">
+            <div className="card p-8 rounded-[2.5rem] border-white/5 bg-black/40 space-y-6">
                <div className="flex items-center gap-3 text-primary">
                   <Key size={18} />
                   <h3 className="text-xs font-black uppercase tracking-[0.2em]">Signing Keys</h3>
@@ -191,7 +191,7 @@ export default function IdentityManagerPage() {
             </div>
 
             {/* ABOM scanner */}
-            <div className="glass-panel-heavy p-8 rounded-[2.5rem] border-white/5 bg-black/40 space-y-6">
+            <div className="card p-8 rounded-[2.5rem] border-white/5 bg-black/40 space-y-6">
                <div className="flex items-center gap-3 text-purple-mcp">
                   <ShieldAlert size={18} />
                   <h3 className="text-xs font-black uppercase tracking-[0.2em]">ABOM Scanner</h3>
@@ -201,7 +201,7 @@ export default function IdentityManagerPage() {
             </div>
 
             {/* History */}
-            <div className="glass-panel-heavy p-8 rounded-[2.5rem] border-white/5 bg-black/40 space-y-6">
+            <div className="card p-8 rounded-[2.5rem] border-white/5 bg-black/40 space-y-6">
                <div className="flex items-center gap-3 text-zinc-400">
                   <History size={18} />
                   <h3 className="text-xs font-black uppercase tracking-[0.2em]">Trust History</h3>

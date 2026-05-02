@@ -16,7 +16,7 @@ export const MCPCard: React.FC<MCPCardProps> = ({ item, onClick }) => {
       layout
       whileHover={{ scale: 1.02 }}
       onClick={onClick}
-      className="p-5 rounded-2xl border border-white/10 bg-[#0f111a] hover:border-emerald-500/50 transition-all cursor-pointer group shadow-xl"
+      className="p-5 rounded-2xl border border-white/10 bg-[#0f111a] hover:border-emerald-500/50 transition-all cursor-pointer group "
     >
       <div className="flex items-center justify-between mb-6">
         <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">

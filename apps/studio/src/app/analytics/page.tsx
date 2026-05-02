@@ -140,7 +140,7 @@ export default function AnalyticsHubPage() {
                    { label: 'Weekly Gross', val: stats.revenue.week, trend: stats.revenue.weekTrend, icon: <BarChart3 className="text-primary" /> },
                    { label: 'Monthly Volume', val: stats.revenue.month, trend: stats.revenue.monthTrend, icon: <History className="text-purple-mcp" /> }
                  ].map((s, i) => (
-                   <div key={i} className="glass-panel-heavy p-8 rounded-[2.5rem] border-white/5 bg-white/[0.01] flex flex-col gap-6">
+                   <div key={i} className="card p-8 rounded-[2.5rem] border-white/5 bg-white/[0.01] flex flex-col gap-6">
                       <div className="flex items-center justify-between">
                          <div className="p-3 rounded-2xl bg-white/5 text-zinc-400">{s.icon}</div>
                          <div className={cn(
@@ -161,7 +161,7 @@ export default function AnalyticsHubPage() {
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                  {/* Top Agents */}
-                 <div className="lg:col-span-8 glass-panel-heavy p-8 rounded-[3rem] border-white/5 bg-black/40 space-y-8">
+                 <div className="lg:col-span-8 card p-8 rounded-[3rem] border-white/5 bg-black/40 space-y-8">
                     <div className="flex items-center justify-between">
                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">Top Performing Agents</h3>
                        <button className="text-[9px] font-black text-primary uppercase hover:underline">View All</button>
@@ -184,7 +184,7 @@ export default function AnalyticsHubPage() {
 
                  {/* MCP Revenue & Payout */}
                  <div className="lg:col-span-4 space-y-8">
-                    <div className="glass-panel-heavy p-8 rounded-[3rem] border-white/5 bg-black/40 space-y-6">
+                    <div className="card p-8 rounded-[3rem] border-white/5 bg-black/40 space-y-6">
                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">Revenue by MCP</h3>
                        <div className="space-y-4">
                           {stats.revenue.mcpRevenue.map((mcp, i) => (
@@ -196,7 +196,7 @@ export default function AnalyticsHubPage() {
                        </div>
                     </div>
 
-                    <div className="glass-panel-heavy p-8 rounded-[3rem] border-emerald-500/10 bg-emerald-500/[0.02] space-y-4">
+                    <div className="card p-8 rounded-[3rem] border-emerald-500/10 bg-emerald-500/[0.02] space-y-4">
                        <div className="flex items-center gap-3 text-emerald-400">
                           <Wallet size={18} />
                           <h3 className="text-xs font-black uppercase tracking-[0.2em]">Payout Status</h3>
@@ -228,7 +228,7 @@ export default function AnalyticsHubPage() {
                 { label: 'Token Usage', val: stats.performance.tokenUsage, trend: stats.performance.tokenTrend, icon: <Cpu className="text-primary" />, trendColor: 'text-primary' },
                 { label: 'Cost / Call', val: stats.performance.costPerCall, trend: stats.performance.costTrend, icon: <Zap className="text-amber-400" />, trendColor: 'text-zinc-500' }
               ].map((s, i) => (
-                <div key={i} className="glass-panel-heavy p-8 rounded-[2.5rem] border-white/5 bg-white/[0.01] flex flex-col gap-6">
+                <div key={i} className="card p-8 rounded-[2.5rem] border-white/5 bg-white/[0.01] flex flex-col gap-6">
                    <div className="flex items-center justify-between">
                       <div className="p-3 rounded-2xl bg-white/5">{s.icon}</div>
                       <div className={cn("text-[9px] font-black", s.trendColor)}>{s.trend}</div>
@@ -251,7 +251,7 @@ export default function AnalyticsHubPage() {
               className="space-y-10"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <div className="glass-panel-heavy p-8 rounded-[2.5rem] border-white/5 bg-white/[0.01] flex flex-col gap-6">
+                 <div className="card p-8 rounded-[2.5rem] border-white/5 bg-white/[0.01] flex flex-col gap-6">
                     <div className="flex items-center justify-between">
                        <div className="p-3 rounded-2xl bg-white/5 text-primary"><Users size={20} /></div>
                        <div className="text-emerald-400 text-[10px] font-black">{stats.users.userTrend} New Today</div>
@@ -261,7 +261,7 @@ export default function AnalyticsHubPage() {
                        <div className="text-4xl font-black text-white italic tracking-tighter">{stats.users.activeUsers}</div>
                     </div>
                  </div>
-                 <div className="glass-panel-heavy p-8 rounded-[2.5rem] border-white/5 bg-white/[0.01] flex flex-col gap-6">
+                 <div className="card p-8 rounded-[2.5rem] border-white/5 bg-white/[0.01] flex flex-col gap-6">
                     <div className="flex items-center justify-between">
                        <div className="p-3 rounded-2xl bg-white/5 text-purple-mcp"><ShieldCheck size={20} /></div>
                        <div className="text-emerald-400 text-[10px] font-black">{stats.users.retentionTrend} vs prev week</div>
@@ -273,7 +273,7 @@ export default function AnalyticsHubPage() {
                  </div>
               </div>
 
-              <div className="glass-panel-heavy p-8 rounded-[3rem] border-white/5 bg-black/40 space-y-8">
+              <div className="card p-8 rounded-[3rem] border-white/5 bg-black/40 space-y-8">
                  <div className="flex items-center justify-between">
                     <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-3">
                        <Globe className="text-primary" size={18} />
