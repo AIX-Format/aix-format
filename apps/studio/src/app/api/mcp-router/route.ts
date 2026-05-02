@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { kv, NS } from "@/lib/redis";
+import { KEYS } from "@/lib/redis-keys";
 import { scanAgent } from "@/lib/abom-scanner";
 import { getRegistry } from "@/lib/registry";
 import { calculatePrice, isQuotaExceeded, PI_SCALE, DEFAULT_PRICING } from "@/lib/pricing";
