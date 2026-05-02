@@ -28,7 +28,9 @@
     "schema:sync:check": "ts-node scripts/schema-type-sync.ts",
     "schema:sync:fix": "npm run generate:types:unified && npm run schema:sync:check",
     "dead-code:scan": "bash scripts/dead-code-scan.sh",
-    "dead-code:report": "cat .generated/dead-code-report.md"
+    "dead-code:report": "cat .generated/dead-code-report.md",
+    "health-score": "ts-node scripts/health-score.ts",
+    "health-score:report": "cat .generated/health-score.json"
   },
   "keywords": [
     "ai",

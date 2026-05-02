@@ -59,6 +59,12 @@ jobs:
         env:
           CI: true
 
+      # ── Health Score Check ──────────────────────────────────────────────
+      - name: Codebase Health Score
+        run: npm run health-score
+        env:
+          CI: true
+
       # ── Build ───────────────────────────────────────────────────────────
       - name: Build Next.js (Turbopack)
         working-directory: apps/studio

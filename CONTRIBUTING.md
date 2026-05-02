@@ -34,7 +34,8 @@ npm run studio:dev
 1.  **Build Validation**: `cd apps/studio && npm run build` (must pass).
 2.  **Type Check**: `npx tsc --noEmit` (must pass).
 3.  **Schema-Type Sync**: `npm run schema:sync:check` (must pass).
-4.  **Route Scan**: `node --loader ts-node/esm scripts/validate-routes.ts`.
+4.  **Health Score**: `npm run health-score` (must be ≥70/100).
+5.  **Route Scan**: `node --loader ts-node/esm scripts/validate-routes.ts`.
 
 ### Commit format:
 We use [Conventional Commits](https://www.conventionalcommits.org/):
@@ -109,13 +110,51 @@ npm run schema:sync:fix
 | Required vs Optional | Schema `required` array must match TypeScript `?` optional markers |
 | Enum mismatch | Schema `enum` values must match TypeScript union types exactly |
 
-### Pre-commit Hook (Optional)
-Enable local validation before every commit:
+### Pre-commit & Pre-push Hooks
+Enable local validation:
 ```bash
 chmod +x .husky/pre-commit
+chmod +x .husky/pre-push
 ```
 
-This will run `npm run schema:sync:check` automatically. Skip with `git commit --no-verify` if needed.
+- **Pre-commit**: Runs `npm run schema:sync:check` automatically
+- **Pre-push**: Runs `npm run health-score` automatically
+
+Skip with `git commit --no-verify` or `git push --no-verify` if needed.
+
+## 📊 Health Score System
+
+### Overview
+AIX uses a **geometric mean health score** (Nash 1950) to prevent gaming individual metrics. All metrics must improve together - you cannot inflate one while degrading others.
+
+### Core Metrics
+1. **API Routes Coverage**: Ratio of tested routes to total routes
+2. **Type Safety**: Binary score (1 if zero `any` types, 0 otherwise)
+3. **Schema Sync**: Validation of examples against schemas
+4. **Redis Key Naming**: Audit score for namespace pattern compliance
+5. **Circular Dependencies**: Binary score (1 if zero circular imports)
+6. **Test Coverage**: Ratio of test files to source files
+
+### Autonomous Improvement Protocol
+The system automatically:
+1. Measures baseline score and records in `openmemory.md`
+2. Identifies lowest-scoring metric as next task
+3. Validates improvements (reverts if score decreases)
+4. Updates memory with changes and root causes
+
+### Commands
+```bash
+# Check current health score
+npm run health-score
+
+# View detailed report
+npm run health-score:report
+```
+
+### Requirements
+- **Minimum Score**: 70/100 to pass CI
+- **Improvement Rule**: Never merge a PR that degrades any metric
+- **Memory Updates**: All score changes must be documented in `openmemory.md`
 
 ---
 
