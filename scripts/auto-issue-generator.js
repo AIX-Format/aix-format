@@ -106,6 +106,44 @@ const ISSUE_TEMPLATES = {
       'Review `vitest.config.ts` for coverage configuration',
       'Aim for 80%+ coverage on core business logic'
     ]
+  },
+  missingZodValidation: {
+    title: '🛡️ Missing Zod Validation in API Routes',
+    emoji: '🛡️',
+    getProblem: (value) => `API route validation coverage is at ${(value * 100).toFixed(1)}%, below the 70% threshold. Some routes lack input validation with Zod schemas.`,
+    getSuggestions: () => [
+      'Search for API routes without Zod: `grep -r "export async function POST\\|export async function GET" apps/studio/src/app/api/ | grep -v "z.object"`',
+      'Add Zod schema validation to all POST/PUT/PATCH routes',
+      'Example: `const schema = z.object({ userId: z.string(), amount: z.number() }); const body = schema.parse(await req.json());`',
+      'Install zod if not present: `npm install zod`',
+      'Review existing validated routes in `apps/studio/src/app/api/` for patterns'
+    ]
+  },
+  unsafeEnvAccess: {
+    title: '⚠️ Unsafe Environment Variable Access',
+    emoji: '⚠️',
+    getProblem: (value) => `Environment variable safety is at ${(value * 100).toFixed(1)}%, below the 70% threshold. Code uses \`process.env.X!\` without fallbacks, risking production crashes.`,
+    getSuggestions: () => [
+      'Search for unsafe env access: `grep -r "process\\.env\\.[A-Z_]*!" packages/ apps/`',
+      'Replace `process.env.X!` with `requireEnv("X")` helper function',
+      'Add fallback values: `const key = process.env.API_KEY || throw new Error("API_KEY required");`',
+      'Use environment validation library like `envalid` or `zod`',
+      'Create `.env.example` with all required variables documented',
+      'Add startup validation that checks all required env vars before server starts'
+    ]
+  },
+  stripeWebhookSecurity: {
+    title: '🔐 Stripe Webhook Security Missing',
+    emoji: '🔐',
+    getProblem: (value) => `Stripe webhook security is at ${(value * 100).toFixed(1)}%, below the 70% threshold. Webhooks may lack signature verification, allowing fake payment events.`,
+    getSuggestions: () => [
+      'Search for Stripe webhooks: `grep -r "stripe.*webhook\\|/api/stripe/webhook" apps/`',
+      'Verify all webhooks use `stripe.webhooks.constructEvent(rawBody, signature, secret)`',
+      'NEVER use `req.json()` for webhooks - use `req.text()` to preserve raw body',
+      'Add `STRIPE_WEBHOOK_SECRET` to environment variables',
+      'Test webhooks locally with Stripe CLI: `stripe listen --forward-to localhost:3000/api/stripe/webhook`',
+      'Log all webhook signature verification failures for security monitoring'
+    ]
   }
 };
 
