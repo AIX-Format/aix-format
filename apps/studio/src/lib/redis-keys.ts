@@ -15,7 +15,7 @@ export const KEYS = {
   piAuth:       (userId: string) => `pi:auth:${userId}`,
   
   // KYC & Identity keys
-  kycStatus:    (userId: string) => `kyc:${userId}`,
+  kycStatus:    (userId: string) => `kyc:status:${userId}`,
   zkKycProof:   (userId: string) => `zkkyc:${userId}`,
   dnaProfile:   (userId: string) => `dna:${userId}`,
   
