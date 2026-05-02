@@ -105,6 +105,7 @@ export interface IdentityLayer {
   expiresAt?: ISODateTime;
   publicKey?: PublicKey;
   signature?: Signature;
+  dna_hash?: string;
 }
 
 export interface Economics {

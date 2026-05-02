@@ -64,7 +64,8 @@ export interface AgentRecord {
   deployment?: DeploymentRecord;
   pet?: PetConfig;
   color?: string;
-  status?: 'online' | 'offline' | 'busy';
+  status?: 'online' | 'offline' | 'busy' | 'compromised';
+  tamperDetails?: string;
   successRate?: number;
   tasksCompleted?: number;
   manifest?: Manifest;

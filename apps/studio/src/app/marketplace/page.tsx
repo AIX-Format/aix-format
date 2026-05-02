@@ -23,7 +23,7 @@ import { PluginCard } from '../../components/marketplace/PluginCard';
 import { APICard } from '../../components/marketplace/APICard';
 import { AgentDetailModal } from '../../components/marketplace/AgentDetailModal';
 import { KYABadge } from '../../components/marketplace/KYABadge';
-import FadeIn from '../../components/animations/FadeIn';
+import { FadeIn } from '../../components/animations/FadeIn';
 
 const CATEGORIES = [
   { id: 'all', label: 'All Items', icon: LayoutGrid },
@@ -70,7 +70,7 @@ export default function MarketplacePage() {
       <AgentDetailModal item={selectedItem} onClose={() => setSelectedItem(null)} />
       {/* Header Section */}
       <header className="mb-12">
-        <FadeIn>
+        <div>
           <div className="flex items-center gap-2 text-xs font-bold text-indigo-500 uppercase tracking-[0.2em] mb-4">
             <span className="w-8 h-[1px] bg-indigo-500" />
             Adopt Your AI Companion
@@ -81,7 +81,7 @@ export default function MarketplacePage() {
           <p className="text-xl text-white/40 max-w-2xl mb-10 font-medium">
             Browse through our verified collection of AI pets. Each pet comes with a unique set of skills, memory, and personality, ready to be adopted into your fleet.
           </p>
-        </FadeIn>
+        </div>
 
         <div className="flex flex-col md:flex-row gap-6 items-center justify-between bg-white/5 p-6 rounded-3xl border border-white/10 backdrop-blur-xl">
           <SearchBar value={search} onChange={setSearch} isLoading={isLoading} />

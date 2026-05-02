@@ -1277,6 +1277,10 @@
               "description": "JSON canonicalization scheme used before signing."
             }
           }
+        },
+        "dna_hash": {
+          "type": "string",
+          "description": "Cryptographic fingerprint (SHA3-256 + ed25519 signature) ensuring identity authenticity"
         }
       }
     },

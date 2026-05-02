@@ -7,6 +7,7 @@ import { MarketplaceItem } from '../../lib/marketplace-api';
 import { KYABadge } from './KYABadge';
 import { TrustScore } from './TrustScore';
 import { RatingStars } from './RatingStars';
+import { DNABadge } from '../studio/DNABadge';
 
 interface AgentCardProps {
   item: MarketplaceItem;
@@ -31,7 +32,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ item, view = 'grid', onCli
           <img
             src={item.author.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${item.id}`}
             alt={item.name}
-            className="w-16 h-16 rounded-xl object-cover bg-black/40"
+            className="w-16 h-16 rounded-xl object-cover "
           />
           {item.verified && (
             <div className="absolute -top-1 -right-1 bg-blue-500 rounded-full p-0.5">
@@ -54,6 +55,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ item, view = 'grid', onCli
           <div className="flex items-center gap-3 mb-2">
             <span className="text-sm text-white/60">by {item.author.name}</span>
             <KYABadge tier={item.kyaTier} size="sm" />
+            <DNABadge status={item.status === 'compromised' ? 'compromised' : (item.dnaHash ? 'verified' : 'unverified')} hash={item.dnaHash} />
             <RatingStars rating={item.rating} count={item.reviewCount} />
           </div>
 
@@ -75,7 +77,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ item, view = 'grid', onCli
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       whileHover={{ y: -8, transition: { duration: 0.2 } }}
-      className="group relative flex flex-col h-full rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.2)] transition-all cursor-pointer"
+      className="group relative flex flex-col h-full rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:border-blue-500/50 hover:[0_0_30px_rgba(59,130,246,0.2)] transition-all cursor-pointer"
       onClick={onClick}
     >
       {/* Card Header/Visual */}
@@ -88,6 +90,9 @@ export const AgentCard: React.FC<AgentCardProps> = ({ item, view = 'grid', onCli
         />
         <div className="absolute top-3 left-3 z-20">
           <KYABadge tier={item.kyaTier} />
+        </div>
+        <div className="absolute top-10 left-3 z-20">
+          <DNABadge status={item.status === 'compromised' ? 'compromised' : (item.dnaHash ? 'verified' : 'unverified')} hash={item.dnaHash} />
         </div>
         <div className="absolute top-3 right-3 z-20">
           <TrustScore score={item.trustScore} />

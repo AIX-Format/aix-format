@@ -54,8 +54,8 @@ const QuantumTopology = memo(function QuantumTopology() {
       <svg className="w-full h-full">
         <defs>
           <linearGradient id="line-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.5" />
-            <stop offset="100%" stopColor="var(--color-secondary)" stopOpacity="0.5" />
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#888888" stopOpacity="0.5" />
           </linearGradient>
         </defs>
         {NODES.map((n1, i) =>
@@ -79,7 +79,7 @@ const QuantumTopology = memo(function QuantumTopology() {
             key={`n-${node.id}`}
             cx={`${node.x}%`} cy={`${node.y}%`}
             r="2"
-            fill="var(--color-primary)"
+            fill="#ffffff"
           />
         ))}
       </svg>
@@ -123,7 +123,7 @@ export const KycSignatureModal = memo(function KycSignatureModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        // FIX: moved backdrop-blur here as a CSS class so it's GPU-composited
+        // moved backdrop-blur here as a CSS class so it's GPU-composited
         // instead of triggering layout on every re-render
         <div
           role="dialog"
@@ -138,7 +138,7 @@ export const KycSignatureModal = memo(function KycSignatureModal({
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl"
+            className="relative w-full max-w-lg overflow-hidden rounded-none border border-[var(--color-border)] bg-[var(--color-surface)] "
           >
             <QuantumTopology />
 
@@ -154,8 +154,8 @@ export const KycSignatureModal = memo(function KycSignatureModal({
 
               {/* Icon */}
               <div className="w-20 h-20 mb-6 relative">
-                <div className="absolute inset-0 bg-indigo-500/20 rounded-full animate-ping" />
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center border border-indigo-400/30">
+                <div className="absolute inset-0 bg-white/10 rounded-full " />
+                <div className="absolute inset-0 bg-black rounded-full flex items-center justify-center border border-white/20">
                   <ShieldCheck className="w-10 h-10 text-white" />
                 </div>
               </div>
@@ -170,10 +170,10 @@ export const KycSignatureModal = memo(function KycSignatureModal({
               {/* Info rows */}
               <div className="w-full space-y-4 mb-8 text-left">
                 {([
-                  { icon: Network, color: "text-indigo-400", title: "Sovereign Deployment", desc: "Agent will be deployed to the Pi M2M network." },
-                  { icon: Lock,    color: "text-purple-400", title: "Cryptographic Proof",  desc: "Your Pi UID will cryptographically own this AI." },
+                  { icon: Network, color: "text-white", title: "Sovereign Deployment", desc: "Agent will be deployed to the Pi M2M network." },
+                  { icon: Lock,    color: "text-white", title: "Cryptographic Proof",  desc: "Your Pi UID will cryptographically own this AI." },
                 ] as const).map(({ icon: Icon, color, title, desc }) => (
-                  <div key={title} className="flex items-center gap-3 p-4 rounded-xl bg-[rgba(20,20,30,0.5)] border border-[var(--color-border)]">
+                  <div key={title} className="flex items-center gap-3 p-4 rounded-none bg-white/5 border border-[var(--color-border)]">
                     <Icon className={cn("w-5 h-5 flex-shrink-0", color)} />
                     <div>
                       <span className="text-sm font-medium text-white block">{title}</span>
@@ -189,14 +189,14 @@ export const KycSignatureModal = memo(function KycSignatureModal({
                 disabled={isSigning}
                 aria-busy={isSigning}
                 className={cn(
-                  "w-full relative group overflow-hidden rounded-xl p-[1px] transition-all duration-300",
+                  "w-full relative group overflow-hidden rounded-none p-[1px] transition-all duration-300",
                   isSigning
                     ? "opacity-70 cursor-not-allowed pointer-events-none"
-                    : "hover:shadow-[0_0_30px_rgba(99,102,241,0.4)]"
+                    : "hover:[0_0_30px_rgba(99,102,241,0.4)]"
                 )}
               >
-                <span className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 rounded-xl opacity-70 group-hover:opacity-100 transition-opacity" />
-                <div className="relative flex items-center justify-center gap-3 bg-[#0c0c14] px-8 py-4 rounded-xl group-hover:bg-opacity-0 transition-colors">
+                <span className="absolute inset-0 bg-gradient-to-r from-white via-gray-400 to-white rounded-none opacity-70 group-hover:opacity-100 transition-opacity" />
+                <div className="relative flex items-center justify-center gap-3 bg-black px-8 py-4 rounded-none group-hover:bg-opacity-0 transition-colors">
                   {isSigning ? (
                     <>
                       <Loader2 className="w-6 h-6 text-white animate-spin" />

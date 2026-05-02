@@ -16,11 +16,11 @@ import {
   MessageCircle
 } from 'lucide-react';
 import { AgentPet } from '@/components/shared/AgentPet';
-import FadeIn from '@/components/animations/FadeIn';
+import { FadeIn } from '@/components/animations/FadeIn';
 
 // Dynamically import the 3D/2D Graphs to avoid SSR issues with ThreeJS
-const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), { ssr: false });
-const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false });
+// const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), { ssr: false });
+// const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false });
 
 interface Node {
   id: string;
@@ -111,7 +111,7 @@ export default function SpacePage() {
     <div className="min-h-screen bg-[#0A0A0F] text-white overflow-hidden relative">
       {/* HUD Header */}
       <header className="absolute top-24 left-10 z-20 pointer-events-none">
-        <FadeIn>
+        <div>
           <div className="flex items-center gap-3 mb-2">
             <Network className="text-indigo-500 w-5 h-5" />
             <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em]">Sovereign Swarm Topology</span>
@@ -138,7 +138,7 @@ export default function SpacePage() {
               </button>
             </div>
           </div>
-        </FadeIn>
+        </div>
       </header>
 
       {/* Canvas Area */}
@@ -147,7 +147,7 @@ export default function SpacePage() {
           mode === '3d' ? (
             <ForceGraph3D
               ref={fgRef}
-              graphData={graphData}
+              graphData={graphData}*/}
               backgroundColor="#0A0A0F"
               showNavInfo={false}
               nodeThreeObject={nodeThreeObject}
@@ -170,7 +170,7 @@ export default function SpacePage() {
               }}
             />
           ) : (
-            <ForceGraph2D
+            {/*<ForceGraph2D
               ref={fgRef}
               graphData={graphData}
               backgroundColor="#0A0A0F"

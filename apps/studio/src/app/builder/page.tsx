@@ -342,6 +342,23 @@ The agent is anchored via **AxiomID** at **${formData.identity_layer.id}**.`;
         const manifest = JSON.parse(JSON.stringify(formData));
         manifest.security.checksum.value = liveChecksum;
 
+        // Generate DNA Fingerprint
+        try {
+          const res = await fetch('/api/dna/sign', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(manifest),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.dna_hash) {
+              manifest.identity_layer.dna_hash = data.dna_hash;
+            }
+          }
+        } catch (err) {
+          console.error("Failed to generate DNA fingerprint", err);
+        }
+
         const response = await fetch('/api/agents', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -470,7 +487,7 @@ The agent is anchored via **AxiomID** at **${formData.identity_layer.id}**.`;
               </p>
             </div>
 
-            <div className="glass-panel-heavy p-8 rounded-[3rem] border-white/10 bg-black/40 backdrop-blur-2xl space-y-6">
+            <div className="card p-8 rounded-[3rem] border-white/10 bg-black/40 backdrop-blur-2xl space-y-6">
               <textarea
                 value={userIntent}
                 onChange={(e) => setUserIntent(e.target.value)}
@@ -614,7 +631,7 @@ The agent is anchored via **AxiomID** at **${formData.identity_layer.id}**.`;
         <section className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
           {/* Form Side */}
           <div className="xl:col-span-7 flex flex-col gap-6">
-            <div className="glass-panel-heavy p-8 rounded-[2rem] border-white/[0.08] bg-[#0a0a0f]/80 backdrop-blur-xl relative overflow-hidden">
+            <div className="card p-8 rounded-[2rem] border-white/[0.08] bg-[#0a0a0f]/80 backdrop-blur-xl relative overflow-hidden">
               <AnimatePresence mode="wait">
                 {currentStep === 1 && (
                   <motion.div
@@ -977,7 +994,7 @@ The agent is anchored via **AxiomID** at **${formData.identity_layer.id}**.`;
                        {/* MCP Servers */}
                        <div className="space-y-4">
                           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8888a0] ml-1">MCP Servers</label>
-                          <div className="glass-panel-heavy rounded-2xl border-white/5 bg-black/40 overflow-hidden divide-y divide-white/5">
+                          <div className="card rounded-2xl border-white/5 bg-black/40 overflow-hidden divide-y divide-white/5">
                              {[
                                { name: "Yahoo Finance API", tools: 5 },
                                { name: "Bloomberg Terminal", tools: 12 },
@@ -1008,7 +1025,7 @@ The agent is anchored via **AxiomID** at **${formData.identity_layer.id}**.`;
                        {/* Skills */}
                        <div className="space-y-4">
                           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8888a0] ml-1">Available Skills</label>
-                          <div className="glass-panel-heavy rounded-2xl border-white/5 bg-black/40 overflow-hidden divide-y divide-white/5">
+                          <div className="card rounded-2xl border-white/5 bg-black/40 overflow-hidden divide-y divide-white/5">
                              {[
                                { name: "Web Scraping", desc: "Extract data from any URL" },
                                { name: "Sentiment Analysis", desc: "Detect emotional tone in text" },
@@ -1072,7 +1089,7 @@ The agent is anchored via **AxiomID** at **${formData.identity_layer.id}**.`;
                           <Badge variant="success" className="text-[8px] uppercase">Highly Reliable</Badge>
                        </div>
                        
-                       <div className="glass-panel-heavy rounded-[2.5rem] border-white/5 bg-black/40 overflow-hidden divide-y divide-white/5">
+                       <div className="card rounded-[2.5rem] border-white/5 bg-black/40 overflow-hidden divide-y divide-white/5">
                           {[
                             { label: 'Identity', value: 'Pi KYC Tier 2', status: '✓', details: 'KYC verified via AxiomID Auth', icon: <UserCheck className="w-4 h-4" />, color: 'text-emerald-400' },
                             { label: 'Code', value: 'SHA-256 Signed', status: '✓', details: 'Checksum: 0x88f...2a1', icon: <Lock className="w-4 h-4" />, color: 'text-emerald-400' },
@@ -1622,7 +1639,7 @@ The agent is anchored via **AxiomID** at **${formData.identity_layer.id}**.`;
 
             {/* Content & Validation */}
             <div className="flex-1 flex flex-col gap-4 overflow-hidden">
-              <div className="flex-1 glass-panel-heavy rounded-[2rem] overflow-hidden border-white/[0.08] relative group flex flex-col">
+              <div className="flex-1 card rounded-[2rem] overflow-hidden border-white/[0.08] relative group flex flex-col">
                 <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                   <button 
                     onClick={handleCopy}
@@ -1684,7 +1701,7 @@ The agent is anchored via **AxiomID** at **${formData.identity_layer.id}**.`;
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative w-full max-w-xl glass-panel-heavy rounded-[3rem] border-white/10 p-12 text-center space-y-8 overflow-hidden"
+              className="relative w-full max-w-xl card rounded-[3rem] border-white/10 p-12 text-center space-y-8 overflow-hidden"
             >
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#00dbe9] to-[#6366f1]" />
 

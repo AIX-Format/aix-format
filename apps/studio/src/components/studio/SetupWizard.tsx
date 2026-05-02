@@ -111,7 +111,7 @@ export function SetupWizard() {
 
   return (
     <>
-      <aside className="w-full lg:w-[450px] flex-shrink-0 glass-panel rounded-3xl p-6 flex flex-col h-[calc(100vh-120px)] sticky top-24 overflow-hidden relative">
+      <aside className="w-full lg:w-[450px] flex-shrink-0 card rounded-sm p-6 flex flex-col h-[calc(100vh-120px)] sticky top-24 overflow-hidden relative">
         {/* Progress bar */}
         <div className="absolute top-0 left-0 w-full h-1 bg-[var(--color-surface-container-high)]">
           <motion.div
@@ -142,7 +142,7 @@ export function SetupWizard() {
                   </p>
                 </div>
               </div>
-              <button onClick={goNext} className="w-full py-4 rounded-xl bg-gradient-primary text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 shadow-[0_0_20px_rgba(0,219,233,0.2)] mt-auto">
+              <button onClick={goNext} className="w-full py-4 rounded-xl bg-gradient-primary text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 [0_0_20px_rgba(0,219,233,0.2)] mt-auto">
                 Let's Begin <ChevronRight className="w-5 h-5" />
               </button>
             </motion.div>
@@ -158,7 +158,7 @@ export function SetupWizard() {
                 <h3 className="text-lg font-bold text-white mb-1">Define Agent DNA</h3>
                 <p className="text-[var(--color-on-surface-variant)] text-xs">Tell us what your agent does, or upload an existing .aix file.</p>
               </div>
-              <div className="mb-6 py-6 bg-[var(--color-surface-container-low)] rounded-2xl border border-[var(--color-glass-border)]">
+              <div className="mb-6 py-6 bg-[var(--color-surface-container-low)] rounded-2xl border border-[var(var(--color-border))]">
                 <VoiceOrb onTranscript={handleVoiceCommand} isProcessing={isProcessingVoice} />
                 {voiceCommand && !isProcessingVoice && (
                   <div className="mt-4 px-6 text-center">
@@ -167,14 +167,14 @@ export function SetupWizard() {
                 )}
               </div>
               <div className="flex items-center gap-4 mb-6">
-                <div className="h-[1px] flex-1 bg-[var(--color-glass-border)]" />
+                <div className="h-[1px] flex-1 bg-[var(var(--color-border))]" />
                 <span className="text-xs font-medium text-[var(--color-on-surface-variant)] uppercase">OR UPLOAD</span>
-                <div className="h-[1px] flex-1 bg-[var(--color-glass-border)]" />
+                <div className="h-[1px] flex-1 bg-[var(var(--color-border))]" />
               </div>
               <div
                 className={cn(
                   "flex-1 relative rounded-2xl border-2 border-dashed flex flex-col items-center justify-center transition-colors duration-200 p-6 text-center cursor-pointer",
-                  dragActive ? "border-[var(--color-primary)] bg-[rgba(0,219,233,0.05)]" : "border-[var(--color-glass-border)] hover:border-[var(--color-on-surface-variant)]"
+                  dragActive ? "border-[var(--color-primary)] bg-[rgba(0,219,233,0.05)]" : "border-[var(var(--color-border))] hover:border-[var(--color-on-surface-variant)]"
                 )}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
@@ -215,7 +215,7 @@ export function SetupWizard() {
                   </p>
                 </div>
               </div>
-              <button onClick={openKycModal} className="w-full py-4 rounded-xl bg-gradient-primary text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 shadow-[0_0_20px_rgba(0,219,233,0.2)]">
+              <button onClick={openKycModal} className="w-full py-4 rounded-xl bg-gradient-primary text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 [0_0_20px_rgba(0,219,233,0.2)]">
                 Sign via Pi KYC
               </button>
             </motion.div>

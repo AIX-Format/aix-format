@@ -146,7 +146,7 @@ export default function SkillsCatalogPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.1 }}
-                    className="group glass-panel-heavy p-6 rounded-[2.5rem] border-white/5 hover:border-primary/40 hover:bg-white/[0.03] transition-all flex flex-col gap-6"
+                    className="group card p-6 rounded-[2.5rem] border-white/5 hover:border-primary/40 hover:bg-white/[0.03] transition-all flex flex-col gap-6"
                   >
                      <div className="space-y-4">
                         <div className="flex items-center justify-between">
@@ -200,7 +200,7 @@ export default function SkillsCatalogPage() {
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative w-full max-w-2xl glass-panel-heavy rounded-[3rem] border-white/10 p-10 space-y-6 overflow-hidden bg-[#050507]"
+              className="relative w-full max-w-2xl card rounded-[3rem] border-white/10 p-10 space-y-6 overflow-hidden bg-[#050507]"
             >
                <div className="flex items-center justify-between">
                   <div className="space-y-1">

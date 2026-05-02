@@ -5,7 +5,7 @@ import {
   PulseRequest 
 } from "./handlers";
 import { GatewayProcess, AIXManifest } from "@aix-types";
-import { AgentEventBus } from "../patterns";
+
 
 export class PulseOrchestrator {
   private chain: SecurityHandler;

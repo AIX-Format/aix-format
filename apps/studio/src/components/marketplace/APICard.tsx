@@ -16,7 +16,7 @@ export const APICard: React.FC<APICardProps> = ({ item, onClick }) => {
       layout
       whileHover={{ y: -5 }}
       onClick={onClick}
-      className="p-5 rounded-2xl border border-white/10 bg-black/40 hover:border-blue-400/50 transition-all cursor-pointer group"
+      className="p-5 rounded-2xl border border-white/10  hover:border-blue-400/50 transition-all cursor-pointer group"
     >
       <div className="flex items-center gap-4 mb-6">
         <div className="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">

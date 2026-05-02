@@ -171,7 +171,7 @@ export default function MCPRegistryPage() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  className="group glass-panel-heavy p-8 rounded-[3rem] border-white/5 bg-white/[0.01] hover:bg-white/[0.03] hover:border-purple-mcp/30 transition-all flex flex-col gap-6"
+                  className="group card p-8 rounded-[3rem] border-white/5 bg-white/[0.01] hover:bg-white/[0.03] hover:border-purple-mcp/30 transition-all flex flex-col gap-6"
                 >
                   <div className="flex items-start justify-between">
                      <div className="p-4 rounded-2xl bg-black/40 border border-white/10 text-purple-mcp">

@@ -71,7 +71,7 @@ export default function ScanPage() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Input Section */}
           <div className="lg:col-span-3 flex flex-col gap-6">
-            <div className="glass-panel-heavy rounded-3xl p-6 border border-white/5 flex flex-col gap-4">
+            <div className="card rounded-3xl p-6 border border-white/5 flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-gray-300">Agent Manifest (YAML/JSON)</label>
                 <button
@@ -109,7 +109,7 @@ export default function ScanPage() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="h-full glass-panel-heavy rounded-3xl p-8 border border-white/5 flex flex-col items-center justify-center text-center gap-4 text-gray-500"
+                  className="h-full card rounded-3xl p-8 border border-white/5 flex flex-col items-center justify-center text-center gap-4 text-gray-500"
                 >
                   <div className="p-4 rounded-full bg-white/5">
                     <FileText className="w-12 h-12 opacity-20" />
@@ -122,7 +122,7 @@ export default function ScanPage() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="glass-panel-heavy rounded-3xl p-6 border border-red-500/20 bg-red-500/5 flex flex-col gap-2"
+                  className="card rounded-3xl p-6 border border-red-500/20 bg-red-500/5 flex flex-col gap-2"
                 >
                   <div className="flex items-center gap-2 text-red-400 font-bold">
                     <AlertTriangle className="w-5 h-5" />
@@ -140,7 +140,7 @@ export default function ScanPage() {
                   className="flex flex-col gap-6"
                 >
                   {/* Score Card */}
-                  <div className="glass-panel-heavy rounded-3xl p-8 border border-white/10 bg-gradient-to-br from-white/[0.04] to-transparent flex flex-col items-center gap-2 relative overflow-hidden">
+                  <div className="card rounded-3xl p-8 border border-white/10 bg-gradient-to-br from-white/[0.04] to-transparent flex flex-col items-center gap-2 relative overflow-hidden">
                     <div className="absolute -top-10 -right-10 w-32 h-32 bg-[var(--color-primary)] opacity-[0.03] blur-3xl rounded-full" />
                     <div className="relative">
                       <svg className="w-32 h-32 transform -rotate-90">
@@ -181,7 +181,7 @@ export default function ScanPage() {
 
                   {/* Compliance List */}
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="glass-panel rounded-2xl p-4 border border-white/5 bg-white/[0.02] flex flex-col gap-1">
+                    <div className="card rounded-2xl p-4 border border-white/5 bg-white/[0.02] flex flex-col gap-1">
                       <span className="text-[9px] uppercase text-gray-500 font-bold tracking-widest">EU CRA Compliance</span>
                       <div className="flex items-center gap-2">
                         {report.compliance.eu_cra ? <CheckCircle className="w-4 h-4 text-[#39FF14]" /> : <AlertTriangle className="w-4 h-4 text-gray-600" />}
@@ -190,7 +190,7 @@ export default function ScanPage() {
                         </span>
                       </div>
                     </div>
-                    <div className="glass-panel rounded-2xl p-4 border border-white/5 bg-white/[0.02] flex flex-col gap-1">
+                    <div className="card rounded-2xl p-4 border border-white/5 bg-white/[0.02] flex flex-col gap-1">
                       <span className="text-[9px] uppercase text-gray-500 font-bold tracking-widest">NIST AI RMF</span>
                       <div className="flex items-center gap-2">
                         {report.compliance.nist_ai_rmf ? <CheckCircle className="w-4 h-4 text-[#39FF14]" /> : <AlertTriangle className="w-4 h-4 text-gray-600" />}
@@ -214,13 +214,13 @@ export default function ScanPage() {
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: i * 0.1 }}
-                          className="glass-panel rounded-2xl p-4 border border-white/5 bg-white/[0.02] flex gap-3 hover:bg-white/[0.04] transition-colors"
+                          className="card rounded-2xl p-4 border border-white/5 bg-white/[0.02] flex gap-3 hover:bg-white/[0.04] transition-colors"
                         >
                           <div className="mt-0.5 flex-shrink-0">{getSeverityIcon(risk.severity)}</div>
                           <p className="text-xs text-gray-300 leading-relaxed">{risk.message}</p>
                         </motion.div>
                       )) : (
-                        <div className="glass-panel rounded-2xl p-4 border border-[#39FF14]/20 bg-[#39FF14]/5 flex gap-3 items-center">
+                        <div className="card rounded-2xl p-4 border border-[#39FF14]/20 bg-[#39FF14]/5 flex gap-3 items-center">
                           <CheckCircle className="w-5 h-5 text-[#39FF14]" />
                           <p className="text-xs text-[#39FF14] font-bold uppercase tracking-wide">No security risks identified.</p>
                         </div>

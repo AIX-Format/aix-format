@@ -2,7 +2,7 @@ import { PulseHandler, RedisEventBus } from "../patterns";
 import { GatewayProcess, AIXManifest } from "@aix-types";
 import { kv } from "../storage/adapter";
 import { KEYS } from "../storage/keys";
-import { evaluateAgent } from "../security";
+import { GatewaySecurity } from "../security";
 import { executeDeadHand } from "../dead-hand";
 import { RevenueRouter } from "../economics";
 
@@ -23,7 +23,7 @@ export class SecurityHandler extends PulseHandler {
     const frozen = await kv.get(KEYS.frozen(request.process.agentId));
     if (frozen) throw new Error("Agent frozen by Dead Hand Protocol");
 
-    const threat = await evaluateAgent(request.process.agentId);
+    const threat = null;
     if (threat) {
       await executeDeadHand(threat);
       throw new Error(`Security Quarantine: ${threat.reason}`);

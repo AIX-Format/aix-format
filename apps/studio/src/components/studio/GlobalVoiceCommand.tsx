@@ -182,7 +182,7 @@ export function GlobalVoiceCommand({
               className="fixed top-[10vh] left-1/2 -translate-x-1/2 z-[99]
                          w-full max-w-xl mx-4"
             >
-              <div className="glass-panel-heavy rounded-3xl border border-white/10
+              <div className="card rounded-3xl border border-white/10
                               shadow-[0_32px_80px_rgba(0,0,0,0.6)] overflow-hidden">
 
                 {/* ── Header ─────────────────────────────────────────── */}

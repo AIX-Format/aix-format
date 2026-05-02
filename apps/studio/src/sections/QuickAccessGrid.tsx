@@ -47,7 +47,7 @@ export const QuickAccessGrid = () => {
               transition={{ delay: i * 0.1 }}
             >
               <Link href={card.link} className="group block h-full">
-                <div className="glass-panel-heavy p-10 rounded-[3rem] border-white/5 bg-white/[0.01] hover:bg-white/[0.03] hover:border-white/10 transition-all h-full flex flex-col gap-8 relative overflow-hidden">
+                <div className="card p-10 rounded-[3rem] border-white/5 bg-white/[0.01] hover:bg-white/[0.03] hover:border-white/10 transition-all h-full flex flex-col gap-8 relative overflow-hidden">
                   <div className="p-5 rounded-2xl bg-black/40 border border-white/10 w-fit group-hover:scale-110 transition-transform">
                     {card.icon}
                   </div>
