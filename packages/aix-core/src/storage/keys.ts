@@ -1,5 +1,5 @@
 /**
- * AIX Storage Keys & TTL Configuration (v1.3.3)
+ * AIX Storage Keys & TTL Configuration (v1.3.4)
  * Centralized registry for all Redis namespaces and their expiry policies.
  */
 
@@ -22,7 +22,7 @@ export const NS = {
   WIZARD_SESSION: 'aix:wizard:session', // aix:wizard:session:{sessionId}
   
   // Agent Intelligence & Learning (Hermes Layers)
-  MEMORY_SESSION: 'aix:mem:sess',   // Layer 1: Session (24h)
+  MEMORY_SESSION: 'aix:mem:sess',    // Layer 1: Session (24h)
   MEMORY_SKILL: 'aix:mem:skill',     // Layer 2: Learned Skills (Permanent)
   MEMORY_CONTEXT: 'aix:mem:ctx',     // Layer 3: Task Context (Per task)
   MEMORY_EPISODIC: 'aix:mem:epi',    // Layer 4: Long-term Patterns (Permanent)
@@ -32,6 +32,9 @@ export const NS = {
   
   // Dead Hand Protocol (Autonomous Safety)
   DEAD_HAND: 'aix:deadhand',        // Status, heartbeats, incidents
+
+  // Nervous System Bus
+  PULSE: 'aix:pulse',               // aix:pulse:global (ring-buffer, 100 events)
   
   SKILLS: 'aix:skills',         
   INVOKE: 'aix:invoke',
@@ -40,47 +43,47 @@ export const NS = {
 
 /** Helper functions for key generation to ensure consistency */
 export const KEYS = {
-  registry: (agentId: string) => `agent:${agentId}`,
-  analytics: (agentId: string) => `agent:${agentId}:analytics`,
-  identity: (userId: string) => `user:${userId}:identity`,
-  economics: (agentId: string) => `agent:${agentId}:economics`,
-  session: (uid: string) => `aix:sessions:${uid}`,
-  mcpQuota: (tenantId: string) => `aix:mcp:quota:${tenantId}`,
+  registry:  (agentId: string)  => `agent:${agentId}`,
+  analytics: (agentId: string)  => `agent:${agentId}:analytics`,
+  identity:  (userId: string)   => `user:${userId}:identity`,
+  economics: (agentId: string)  => `agent:${agentId}:economics`,
+  session:   (uid: string)      => `aix:sessions:${uid}`,
+  mcpQuota:  (tenantId: string) => `aix:mcp:quota:${tenantId}`,
   wizardSession: (sessionId: string) => `wizard:session:${sessionId}`,
   
   // Intelligence Layers
-  memory: (agentId: string) => `agent:${agentId}:memory`,
-  memSession: (agentId: string, sid: string) => `agent:${agentId}:mem:sess:${sid}`,
-  memSkill: (agentId: string) => `agent:${agentId}:mem:skill`,
-  memContext: (agentId: string, taskId: string) => `agent:${agentId}:mem:ctx:${taskId}`,
-  memEpisodic: (agentId: string) => `agent:${agentId}:mem:epi`,
+  memory:      (agentId: string)             => `agent:${agentId}:memory`,
+  memSession:  (agentId: string, sid: string) => `agent:${agentId}:mem:sess:${sid}`,
+  memSkill:    (agentId: string)             => `agent:${agentId}:mem:skill`,
+  memContext:  (agentId: string, taskId: string) => `agent:${agentId}:mem:ctx:${taskId}`,
+  memEpisodic: (agentId: string)             => `agent:${agentId}:mem:epi`,
   
   // Gateway Logic
   gateway: (processId: string) => `aix:gateway:${processId}`,
   
   // Dead Hand Protocol
   heartbeat: (agentId: string) => `agent:${agentId}:heartbeat`,
-  status: (agentId: string) => `agent:${agentId}:status`,
-  frozen: (agentId: string) => `agent:${agentId}:frozen`,
-  incident: (agentId: string) => `agent:${agentId}:incident`,
-  stats: (agentId: string) => `agent:${agentId}:stats`,
+  status:    (agentId: string) => `agent:${agentId}:status`,
+  frozen:    (agentId: string) => `agent:${agentId}:frozen`,
+  incident:  (agentId: string) => `agent:${agentId}:incident`,
+  stats:     (agentId: string) => `agent:${agentId}:stats`,
   
-  skill: (agentId: string) => `agent:${agentId}:skills`, 
-  invoke: (traceId: string) => `agent:${traceId}:invoke`,
+  skill:  (agentId: string)  => `agent:${agentId}:skills`, 
+  invoke: (traceId: string)  => `agent:${traceId}:invoke`,
   
   // Ghost Agent Pattern
   shadow: (processId: string) => `aix:shadow:${processId}`,
-  ghost: (agentId: string) => `agent:${agentId}:ghost`
+  ghost:  (agentId: string)   => `agent:${agentId}:ghost`
 };
 
 export const TTL = {
   SESSIONS: 60 * 60 * 24,       // 24 Hours
-  REGISTRY: 0,                 // Permanent
-  ABOM: 60 * 60 * 24 * 30,     // 30 Days
-  MCP: 60,                     // 60 Seconds
-  METRICS: 60 * 60 * 24 * 90,  // 90 Days
-  SCAN: 60 * 60 * 24 * 7,      // 7 Days
-  HEALTH: 300,                  // 5 Minutes
+  REGISTRY: 0,                  // Permanent
+  ABOM: 60 * 60 * 24 * 30,      // 30 Days
+  MCP: 60,                      // 60 Seconds
+  METRICS: 60 * 60 * 24 * 90,   // 90 Days
+  SCAN: 60 * 60 * 24 * 7,       // 7 Days
+  HEALTH: 300,                   // 5 Minutes
   
   // Intelligence TTLs
   MEM_SESSION: 60 * 60 * 24,    // 24 Hours
@@ -91,12 +94,15 @@ export const TTL = {
   GATEWAY: 60 * 60 * 2,         // 2 Hours
   
   // Dead Hand
-  HEARTBEAT: 90,                // 90 Seconds (Dead Hand window)
-  INCIDENT: 60 * 60 * 24 * 30,  // 30 Days (Forensic window)
+  HEARTBEAT: 90,                // 90 Seconds (Dead Hand trigger window)
+  INCIDENT: 60 * 60 * 24 * 30, // 30 Days (Forensic window)
   
-  MEMORY: 60 * 60 * 24 * 30,    // 30 Days
-  SKILLS: 0,                    // Permanent
-  INVOKE: 60 * 60,               // 1 Hour
+  // MCP Quota (was missing — caused compile error in mcp-gateway)
+  QUOTA_WINDOW: 60,             // 60 Seconds per rate-limit window
+
+  MEMORY: 60 * 60 * 24 * 30,   // 30 Days
+  SKILLS: 0,                   // Permanent
+  INVOKE: 60 * 60,              // 1 Hour
   SHADOW: 60 * 60 * 24         // 24 Hours
 } as const;
 
