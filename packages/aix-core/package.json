@@ -17,6 +17,7 @@
     "./package.json": "./package.json"
   },
   "keywords": ["redis", "storage", "aix", "session"],
+  "sideEffects": false,
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc",
