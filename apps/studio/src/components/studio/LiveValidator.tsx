@@ -1,63 +1,90 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { UploadCloud, ShieldCheck, ShieldX, CheckCircle2, AlertTriangle } from "lucide-react";
-import { parseYamlSafe, sha256Hex } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import { UploadCloud, CheckCircle2, ShieldCheck, ShieldX, AlertTriangle } from "lucide-react";
+import { parseYamlLight } from "@/lib/utils";
 
-const REQUIRED_AIX_KEYS = ["meta", "persona", "security", "identity_layer"] as const;
+// Minimal SHA-256 for the browser.
+async function sha256Hex(text: string) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
 
-type ValidationResult = {
-  valid: boolean;
-  missing: string[];
-  hasSignature: boolean;
-  fieldCount: number;
-};
+interface AIXSecurity {
+  signature?: {
+    value?: string;
+    algorithm?: string;
+  };
+}
 
-function validateAix(parsed: Record<string, unknown>): ValidationResult {
-  const missing = REQUIRED_AIX_KEYS.filter((k) => !(k in parsed));
-  const security = parsed.security as Record<string, unknown> | undefined;
-  const sig = security?.signature as Record<string, unknown> | undefined;
-  const hasSignature = Boolean(sig?.value);
-  const fieldCount = Object.keys(parsed).length;
-  return { valid: missing.length === 0, missing, hasSignature, fieldCount };
+// Minimal static checker
+function validateAix(parsed: Record<string, unknown> | null) {
+  if (!parsed || typeof parsed !== "object") return { valid: false, missing: ["<not an object>"] };
+  const reqs = ["meta", "persona", "security", "identity_layer"];
+  const missing = reqs.filter((r) => !(r in parsed));
+
+  const security = parsed.security as AIXSecurity | undefined;
+  const hasSig = Boolean(security?.signature?.value && security?.signature?.algorithm);
+
+  return {
+    valid: missing.length === 0,
+    missing,
+    fieldCount: Object.keys(parsed).length,
+    hasSignature: hasSig,
+  };
+}
+
+interface LiveValidatorProps {
+  content?: string;
+  fileName?: string;
 }
 
 export default function LiveValidator({ 
   content: propContent, 
   fileName: propFileName 
-}: { 
-  content?: string; 
-  fileName?: string;
-}) {
+}: LiveValidatorProps) {
   const [dragging, setDragging] = useState(false);
-  const [hash, setHash] = useState<string>("");
-  const [validation, setValidation] = useState<ValidationResult | null>(null);
-  const [fileName, setFileName] = useState<string>(propFileName || "");
-  const [error, setError] = useState<string>("");
+  const [fileName, setFileName] = useState("");
+  const [hash, setHash] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [validation, setValidation] = useState<{
+    valid: boolean;
+    missing: string[];
+    fieldCount?: number;
+    hasSignature?: boolean;
+  } | null>(null);
 
-  const statusLabel = useMemo(() => {
-    if (!validation) return "Awaiting AIX DNA";
-    if (!validation.valid) return `Missing protocol fields: ${validation.missing.join(", ")}`;
-    return validation.hasSignature
-      ? "Identity Verified: Sovereign Trust Active"
-      : "Step 6: Sign with Pi KYC to activate trust";
-  }, [validation]);
+  type SigState = "missing" | "valid-structure" | "unknown";
+  const [sigState, setSigState] = useState<SigState>("unknown");
+
+  let statusLabel = "Waiting for payload...";
+  if (sigState === "missing") statusLabel = "Identity missing — Unsigned";
+  if (sigState === "valid-structure") statusLabel = "Identity detected — Signed";
 
   const processContent = async (content: string, name: string) => {
-    setError("");
     setFileName(name);
+    setError(null);
+    setValidation(null);
+    setHash("");
+
     try {
       let parsed: Record<string, unknown>;
 
       if (name.endsWith(".json") || content.trim().startsWith("{")) {
         parsed = JSON.parse(content) as Record<string, unknown>;
       } else {
-        parsed = parseYamlSafe(content);
+        parsed = parseYamlLight(content);
       }
 
       const computedHash = await sha256Hex(content.replace(/\r\n/g, "\n"));
       setHash(computedHash);
 
+      const security = parsed.security as AIXSecurity | undefined;
+      const hasSig = Boolean(security?.signature?.value && security?.signature?.algorithm);
+      setSigState(hasSig ? "valid-structure" : "missing");
       setValidation(validateAix(parsed));
     } catch (e: unknown) {
       setError(
@@ -80,14 +107,8 @@ export default function LiveValidator({
     await processContent(content, file.name);
   };
 
-  const sigState = validation?.hasSignature
-    ? "valid-structure"
-    : validation
-    ? "missing"
-    : "unknown";
-
   return (
-    <div className="rounded-2xl border border-[var(var(--color-border))] bg-[rgba(12,16,28,0.5)] p-5 ">
+    <div className="rounded-2xl border border-[var(--color-glass-border)] bg-[rgba(12,16,28,0.5)] p-5 ">
       <h3 className="text-white font-semibold text-lg mb-2">Live Validator</h3>
       <p className="text-xs text-[var(--color-on-surface-variant)] mb-4">
         Drop a .aix file to inspect SHA-256 DNA, required fields, and signature status.
@@ -105,7 +126,7 @@ export default function LiveValidator({
         className={`rounded-xl border-2 border-dashed p-6 text-center transition ${
           dragging
             ? "border-cyan-400 bg-cyan-500/10"
-            : "border-[var(var(--color-border))] hover:border-white/20"
+            : "border-[var(--color-glass-border)] hover:border-white/20"
         }`}
       >
         <UploadCloud className="w-7 h-7 mx-auto text-cyan-300 mb-2" />
@@ -176,3 +197,5 @@ export default function LiveValidator({
     </div>
   );
 }
+
+function.displayName = 'function';

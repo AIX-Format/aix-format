@@ -99,7 +99,7 @@ export default function AgentDetailClient({ id }: { id: string }) {
       setAgent(updatedAgent);
       
       toast.success(data.message || 'Agent published to MCP discovery');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       toast.error(error.message || 'Failed to publish agent to MCP registry');
     } finally {
@@ -127,7 +127,7 @@ export default function AgentDetailClient({ id }: { id: string }) {
       setAgent(updatedAgent);
       
       toast.success(data.message || 'Agent removed from MCP discovery');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       toast.error(error.message || 'Failed to unregister agent from MCP registry');
     } finally {
@@ -398,3 +398,5 @@ export default function AgentDetailClient({ id }: { id: string }) {
     </div>
   );
 }
+
+function.displayName = 'function';

@@ -53,3 +53,5 @@ export default function Error({
     </div>
   );
 }
+
+function.displayName = 'function';

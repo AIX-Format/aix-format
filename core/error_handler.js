@@ -1,19 +1,19 @@
 /**
  * AIX Error Handler - Production-Grade Retry & Circuit Breaker
  * Created by Mohamed H Abdelaziz - AMRIKYY AI Solutions 2026
- * 
+ *
  * Implements production-grade error handling including:
  * - Retry logic with exponential/linear/constant backoff
  * - Circuit breaker pattern (Hystrix-style)
  * - RFC 7807 error formatting
- * 
+ *
  * Research backing:
  * - Netflix Hystrix (2012): Circuit breaker pattern for microservices
  * - AWS Well-Architected Framework: Exponential backoff with jitter
  * - Google SRE Book: Error budgets and graceful degradation
- * 
+ *
  * Copyright © 2026 Mohamed H Abdelaziz / AMRIKYY AI Solutions
- * Licensed under MIT License - See LICENSE.md
+ * Licensed under Apache-2.0 License - See LICENSE.md
  */
 
 
@@ -164,38 +164,5 @@ export class TimeoutError extends Error {
 
 
 
-export class TokenBucket {
-  constructor(capacity, refillRate) {
-    this.capacity = capacity;
-    this.tokens = capacity;
-    this.refillRate = refillRate;  // tokens per second
-    this.lastRefill = Date.now();
-  }
-
-  tryConsume(tokens = 1) {
-    this.refill();
-
-    if (this.tokens >= tokens) {
-      this.tokens -= tokens;
-      return true;
-    }
-
-    return false;
-  }
-
-  refill() {
-    const now = Date.now();
-    const elapsed = (now - this.lastRefill) / 1000;
-    const tokensToAdd = elapsed * this.refillRate;
-
-    this.tokens = Math.min(this.capacity, this.tokens + tokensToAdd);
-    this.lastRefill = now;
-  }
-
-  getWaitTime() {
-    if (this.tokens >= 1) return 0;
-
-    const tokensNeeded = 1 - this.tokens;
-    return (tokensNeeded / this.refillRate) * 1000;
-  }
-}
+// TokenBucket removed per ADR-002: Rate-limiting is out-of-scope for core/
+// Use core/rate-limit-adapter.ts (AIXTokenBucket) for rate-limiting functionality

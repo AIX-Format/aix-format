@@ -1,4 +1,5 @@
-import { kv, KEYS } from './index';
+import { kv } from './storage/adapter';
+import { KEYS } from './storage/keys';
 
 /**
  * AIX Channel Orchestration (v1.3.4)
@@ -28,7 +29,6 @@ export class ChannelManager {
    * Provisions a new Telegram bot via the AIX Manager Bot (Pattern: Managed Bots API 9.6).
    */
   static async setupTelegram(agentId: string, manifest: any): Promise<ChannelConfig['telegram']> {
-    console.log(`[Channels] Auto-provisioning Telegram bot for agent ${agentId}`);
     
     // Simulate Telegram Managed Bots API Call
     // In production, this would call: https://api.telegram.org/bot<MANAGER_TOKEN>/createManagedBot
@@ -42,7 +42,7 @@ export class ChannelManager {
     };
 
     // Save to agent's channel specific store
-    await kv.set(`agent:${agentId}:channels:telegram`, config);
+    await kv.set(KEYS.agentChannelsTelegram(agentId), config);
     
     // Update agent registry with channel flag
     const current = await kv.get<any>(KEYS.registry(agentId));
@@ -60,7 +60,6 @@ export class ChannelManager {
    * Provisions a WhatsApp sub-number via the AIX Verified Business account.
    */
   static async setupWhatsApp(agentId: string): Promise<ChannelConfig['whatsapp']> {
-    console.log(`[Channels] Allocating WhatsApp sub-number for agent ${agentId}`);
     
     const config: NonNullable<ChannelConfig['whatsapp']> = {
       phoneNumber: `+1555${Math.floor(1000000 + Math.random() * 9000000)}`,
@@ -68,7 +67,7 @@ export class ChannelManager {
       setupAt: Date.now()
     };
 
-    await kv.set(`agent:${agentId}:channels:whatsapp`, config);
+    await kv.set(KEYS.agentChannelsWhatsapp(agentId), config);
     return config;
   }
 
@@ -85,8 +84,8 @@ export class ChannelManager {
    * Retrieves all active channels for an agent.
    */
   static async getChannels(agentId: string): Promise<ChannelConfig> {
-    const telegram = await kv.get<ChannelConfig['telegram']>(`agent:${agentId}:channels:telegram`);
-    const whatsapp = await kv.get<ChannelConfig['whatsapp']>(`agent:${agentId}:channels:whatsapp`);
+    const telegram = await kv.get<ChannelConfig['telegram']>(KEYS.agentChannelsTelegram(agentId));
+    const whatsapp = await kv.get<ChannelConfig['whatsapp']>(KEYS.agentChannelsWhatsapp(agentId));
     
     return {
       telegram: telegram || undefined,

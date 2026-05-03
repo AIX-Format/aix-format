@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
         'Content-Type': 'application/schema+json'
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Spec API Error:', error);
     return NextResponse.json({ error: 'Failed to load schema' }, { status: 500 });
   }

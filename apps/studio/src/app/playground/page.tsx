@@ -4,10 +4,10 @@ import { useState, useMemo } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import { Badge, Typography } from '@/components/shared';
-import { 
-  Play, 
-  Send, 
-  Code2, 
+import {
+  Play,
+  Send,
+  Code2,
   Terminal as TerminalIcon,
   Cpu,
   History,
@@ -24,6 +24,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { cn } from '@/lib/utils';
 
 const API_ENDPOINTS = [
@@ -88,7 +89,7 @@ export default function PlaygroundPage() {
   const [activeLang, setActiveLang] = useState('curl');
   const [copied, setCopied] = useState(false);
 
-  const handleEndpointSelect = (endpoint: any) => {
+  const handleEndpointSelect = (endpoint: typeof API_ENDPOINTS[number]) => {
     setSelectedEndpoint(endpoint);
     setRequestPayload(endpoint.defaultRequest ? JSON.stringify(endpoint.defaultRequest, null, 2) : "{}");
     setResponse(null);
@@ -150,6 +151,7 @@ func main() {
   }, [selectedEndpoint, requestPayload]);
 
   return (
+    <ErrorBoundary>
     <div className="min-h-screen bg-background">
       <Navbar />
 
@@ -306,7 +308,7 @@ func main() {
                        <button 
                          className="p-2 rounded-lg bg-white/5 text-zinc-500 hover:text-white transition-colors"
                          onClick={() => {
-                            navigator.clipboard.writeText((codeSamples as any)[activeLang]);
+                            navigator.clipboard.writeText((codeSamples as unknown)[activeLang]);
                             setCopied(true);
                             setTimeout(() => setCopied(false), 2000);
                          }}
@@ -315,7 +317,7 @@ func main() {
                        </button>
                     </div>
                     <div className="flex-1 p-8 font-mono text-[11px] overflow-auto custom-scrollbar bg-black/40 text-zinc-500">
-                       <pre className="whitespace-pre leading-relaxed">{(codeSamples as any)[activeLang]}</pre>
+                       <pre className="whitespace-pre leading-relaxed">{(codeSamples as unknown)[activeLang]}</pre>
                     </div>
                  </div>
               </div>
@@ -325,5 +327,8 @@ func main() {
 
       <SovereignStatusBar />
     </div>
+    </ErrorBoundary>
   );
 }
+
+function.displayName = 'function';

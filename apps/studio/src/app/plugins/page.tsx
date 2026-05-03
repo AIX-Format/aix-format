@@ -231,3 +231,5 @@ export default function PluginDirectoryPage() {
     </div>
   );
 }
+
+function.displayName = 'function';

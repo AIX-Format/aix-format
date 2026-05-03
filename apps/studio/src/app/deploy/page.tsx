@@ -3,8 +3,8 @@ import { APP_VERSION } from "@/lib/version";
 
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Cpu, Shield, Zap, Globe, ArrowRight, ArrowLeft, 
+import {
+  Cpu, Shield, Zap, Globe, ArrowRight, ArrowLeft,
   CheckCircle2, AlertCircle, Loader2, Copy, ExternalLink,
   ChevronRight, Search, Server, Cloud
 } from "lucide-react";
@@ -13,6 +13,7 @@ import { useLocalAgents } from "@/hooks/useLocalAgents";
 import { useRegistry } from "@/hooks/useRegistry";
 import { useDeployment } from "@/hooks/useDeployment";
 import { RegistryEntry, AgentRecord, DeployRequest } from "@/lib/types";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { cn } from "@/lib/utils";
 
 type WizardStep = 1 | 2 | 3 | 4;
@@ -37,7 +38,7 @@ export default function DeployPage() {
     // Add local agents that aren't in registry yet
     localAgents.forEach(la => {
       if (!combined.find(ra => ra.did === la.did)) {
-        combined.push(la as any); // Type cast for simplicity in selection list
+        combined.push(la as unknown); // Type cast for simplicity in selection list
       }
     });
     return combined.filter(a => 
@@ -65,14 +66,14 @@ export default function DeployPage() {
     if (!selectedAgent) return;
     
     const request: DeployRequest = {
-      agentId: (selectedAgent as any).did || (selectedAgent as any).id,
+      agentId: (selectedAgent as unknown).did || (selectedAgent as unknown).id,
       target: deployTarget,
       config: {
         token: vercelToken,
         projectName: vercelProject,
         endpointUrl: customEndpoint
       },
-      yaml: (selectedAgent as any).yaml
+      yaml: (selectedAgent as unknown).yaml
     };
 
     try {
@@ -91,6 +92,7 @@ export default function DeployPage() {
   ];
 
   return (
+    <ErrorBoundary>
     <main className="min-h-screen pt-24 pb-16 px-6 max-w-5xl mx-auto">
       {/* Header & Stepper */}
       <div className="mb-12 text-center">
@@ -158,7 +160,7 @@ export default function DeployPage() {
                   <tbody className="divide-y divide-white/[0.06]">
                     {allAgents.map((agent) => {
                       const isSelected = selectedAgent?.name === agent.name;
-                      const did = (agent as any).did || (agent as any).id;
+                      const did = (agent as unknown).did || (agent as unknown).id;
                       return (
                         <tr 
                           key={did} 
@@ -192,14 +194,14 @@ export default function DeployPage() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2 text-xs">
-                              <div className={cn("w-1.5 h-1.5 rounded-full", (agent as any).deployment ? "bg-green-400" : "bg-white/20")} />
-                              <span className={cn((agent as any).deployment ? "text-green-400" : "text-[var(--color-on-surface-variant)]")}>
-                                {(agent as any).deployment ? "Deployed" : "Local"}
+                              <div className={cn("w-1.5 h-1.5 rounded-full", (agent as unknown).deployment ? "bg-green-400" : "bg-white/20")} />
+                              <span className={cn((agent as unknown).deployment ? "text-green-400" : "text-[var(--color-on-surface-variant)]")}>
+                                {(agent as unknown).deployment ? "Deployed" : "Local"}
                               </span>
                             </div>
                           </td>
                           <td className="px-6 py-4 text-[10px] text-[var(--color-on-surface-faint)] font-mono uppercase">
-                            {(agent as any).did ? "Registry" : "Local Draft"}
+                            {(agent as unknown).did ? "Registry" : "Local Draft"}
                           </td>
                         </tr>
                       );
@@ -354,8 +356,8 @@ export default function DeployPage() {
                   />
                   <ValidationItem 
                     title="DID Format" 
-                    status={(selectedAgent as any).did ? 'success' : 'error'} 
-                    label={(selectedAgent as any).did ? 'did:axiom verified' : 'DID Missing'} 
+                    status={(selectedAgent as unknown).did ? 'success' : 'error'} 
+                    label={(selectedAgent as unknown).did ? 'did:axiom verified' : 'DID Missing'} 
                   />
                   <ValidationItem 
                     title="YAML Syntax" 
@@ -438,7 +440,7 @@ export default function DeployPage() {
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
-                <Link href={`/agents/${(selectedAgent as any).did || ""}`} className="btn btn-ghost w-full sm:w-auto">
+                <Link href={`/agents/${(selectedAgent as unknown).did || ""}`} className="btn btn-ghost w-full sm:w-auto">
                   View in Registry
                 </Link>
                 <button onClick={() => setStep(1)} className="btn btn-primary w-full sm:w-auto">
@@ -451,6 +453,7 @@ export default function DeployPage() {
         </AnimatePresence>
       </div>
     </main>
+    </ErrorBoundary>
   );
 }
 
@@ -471,7 +474,7 @@ function ValidationItem({ title, status, label }: { title: string, status: 'succ
   );
 }
 
-function ResultCard({ label, value, icon, onCopy, copied }: any) {
+function ResultCard({ label, value, icon, onCopy, copied }: { label: string; value: string; icon: React.ElementType; onCopy: () => void; copied: boolean }) {
   return (
     <div className="card rounded-2xl p-5 border border-white/10 space-y-3">
       <div className="flex items-center gap-2 text-[var(--color-on-surface-variant)]">
@@ -500,3 +503,5 @@ function ResultCard({ label, value, icon, onCopy, copied }: any) {
     </div>
   );
 }
+
+function.displayName = 'function';

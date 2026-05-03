@@ -1,3 +1,4 @@
+import Image from 'next/image';
 'use client';
 
 import React from 'react';
@@ -44,7 +45,7 @@ export const SkillCard: React.FC<SkillCardProps> = ({ item, onClick }) => {
 
       <div className="flex items-center justify-between pt-4 border-t border-white/5">
         <div className="flex items-center gap-3">
-          <img src={item.author.avatar} className="w-5 h-5 rounded-full" alt="" />
+          <Image width={0} height={0} src={item.author.avatar} className="w-5 h-5 rounded-full" alt="" />
           <span className="text-xs text-white/40">{item.author.name}</span>
         </div>
         <div className="flex items-center gap-1.5 text-[10px] font-bold text-white/60">

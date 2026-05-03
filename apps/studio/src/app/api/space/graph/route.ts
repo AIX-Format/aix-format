@@ -17,14 +17,14 @@ export async function GET(req: NextRequest) {
     
     const nodes = await Promise.all(agents.map(async a => {
       const freq = await kv.get<number>(`agent:${a.did}:freq`) || 0;
-      const status = (a as any).status || 'idle';
+      const status = (a as unknown).status || 'idle';
       
       return {
         id: a.did,
         name: a.name,
         role: a.role,
         status,
-        pet: (a as any).pet,
+        pet: (a as unknown).pet,
         val: 5 + (freq * 2), // Size scales with frequency
         color: status === 'active' ? '#10B981' : status === 'flagged' ? '#EF4444' : '#F59E0B'
       };
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json({ nodes, links: edges });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[Graph API] Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import { Badge, Typography } from '@/components/shared';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -26,7 +27,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-export default function AnalyticsHubPage() {
+function AnalyticsHubContent() {
   const [activeTab, setActiveTab] = useState<'revenue' | 'performance' | 'users'>('revenue');
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -75,7 +76,7 @@ export default function AnalyticsHubPage() {
               { region: "Europe", value: "31%" }
             ]
           }
-        });
+        }, []);
       } catch (err) {
         console.error('Failed to load analytics:', err);
       } finally {
@@ -110,7 +111,7 @@ export default function AnalyticsHubPage() {
              {['revenue', 'performance', 'users'].map((tab) => (
                <button
                  key={tab}
-                 onClick={() => setActiveTab(tab as any)}
+                 onClick={() => setActiveTab(tab as unknown)}
                  className={cn(
                    "px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
                    activeTab === tab 
@@ -309,3 +310,13 @@ export default function AnalyticsHubPage() {
     </div>
   );
 }
+
+export default function AnalyticsHubPage() {
+  return (
+    <ErrorBoundary boundaryName="AnalyticsHubPage">
+      <AnalyticsHubContent />
+    </ErrorBoundary>
+  );
+}
+
+function.displayName = 'function';

@@ -49,15 +49,26 @@ graph TD
 
 ## 🛠️ Quick Start
 
-This repository uses npm workspaces (`apps/studio` and `core/`).
+This repository uses **pnpm workspaces** for efficient monorepo management.
 
 ### Prerequisites
 - Node.js >= 18.0.0
+- pnpm >= 9.0.0 (install with `npm install -g pnpm`)
 - Pi Browser (for full authentication testing)
+
+### Installation
+```bash
+# Install dependencies
+pnpm install
+```
 
 ### Run Studio Development Server
 ```bash
-npm run dev --prefix apps/studio
+# From root directory
+pnpm --filter studio dev
+
+# Or from apps/studio directory
+cd apps/studio && pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.

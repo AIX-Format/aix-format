@@ -22,11 +22,11 @@ import { Box, Shield, Cpu, Cloud, Database, Network } from 'lucide-react';
  * Sovereign Aether Design Tokens
  */
 const COLORS = {
-  agent: '#22d3ee', // Cyan 400
-  saas: '#6366f1',  // Indigo 500
-  ai: '#a855f7',    // Purple 500
-  abom: '#f59e0b',  // Amber 500
-  infra: '#10b981', // Emerald 500
+  agent: 'var(--color-primary)',
+  saas: 'var(--color-purple-mcp)',
+  ai: 'var(--color-warning)',
+  abom: 'var(--color-danger)',
+  infra: 'var(--color-success)',
 };
 
 const nodeStyles = {
@@ -43,7 +43,7 @@ const CustomNodeWrapper = ({ children, color }: { children: React.ReactNode, col
     initial={{ scale: 0.8, opacity: 0 }}
     animate={{ scale: 1, opacity: 1 }}
     transition={{ duration: 0.5, ease: "easeOut" }}
-    style={{ borderColor: `${color}40`, boxShadow: `0 0 20px ${color}15` }}
+    style={{ borderLeft: `3px solid ${color}` }}
     className={nodeStyles.container}
   >
     {children}
@@ -52,10 +52,9 @@ const CustomNodeWrapper = ({ children, color }: { children: React.ReactNode, col
 
 const AgentNode = ({ data }: any) => (
   <CustomNodeWrapper color={COLORS.agent}>
-    <div className="absolute inset-0 bg-cyan-500/5 rounded-2xl animate-pulse" />
     <div className={nodeStyles.label}>Sovereign Core</div>
     <div className={nodeStyles.title}>
-      <Shield className="w-5 h-5 text-cyan-400" />
+      <Shield className="w-4 h-4 text-primary" />
       {data.label}
     </div>
     <Handle type="source" position={Position.Bottom} className={nodeStyles.handle} />
@@ -66,7 +65,7 @@ const SaaSNode = ({ data }: any) => (
   <CustomNodeWrapper color={COLORS.saas}>
     <div className={nodeStyles.label}>M2M Interface</div>
     <div className={nodeStyles.title}>
-      <Cloud className="w-4 h-4 text-indigo-400" />
+      <Cloud className="w-4 h-4 text-purple-mcp" />
       {data.label}
     </div>
     <Handle type="target" position={Position.Top} className={nodeStyles.handle} />
@@ -77,7 +76,7 @@ const AINode = ({ data }: any) => (
   <CustomNodeWrapper color={COLORS.ai}>
     <div className={nodeStyles.label}>Cognitive Engine</div>
     <div className={nodeStyles.title}>
-      <Cpu className="w-4 h-4 text-purple-400" />
+      <Cpu className="w-4 h-4 text-warning" />
       {data.label}
     </div>
     <Handle type="target" position={Position.Top} className={nodeStyles.handle} />
@@ -88,7 +87,7 @@ const ABOMNode = ({ data }: any) => (
   <CustomNodeWrapper color={COLORS.abom}>
     <div className={nodeStyles.label}>Recursive BOM</div>
     <div className={nodeStyles.title}>
-      <Box className="w-4 h-4 text-amber-400" />
+      <Box className="w-4 h-4 text-danger" />
       {data.label}
     </div>
     <Handle type="target" position={Position.Top} className={nodeStyles.handle} />
@@ -100,7 +99,7 @@ const InfraNode = ({ data }: any) => (
   <CustomNodeWrapper color={COLORS.infra}>
     <div className={nodeStyles.label}>Hardware Layer</div>
     <div className={nodeStyles.title}>
-      <Database className="w-4 h-4 text-emerald-400" />
+      <Database className="w-4 h-4 text-success" />
       {data.label}
     </div>
     <Handle type="target" position={Position.Top} className={nodeStyles.handle} />
@@ -119,7 +118,7 @@ interface BOMVisualizerProps {
   formData: Manifest;
 }
 
-export default function BOMVisualizer({ formData }: BOMVisualizerProps) {
+function BOMVisualizer({ formData }: BOMVisualizerProps) {
   const { initialNodes, initialEdges } = useMemo(() => {
     const nodes: any[] = [];
     const edges: any[] = [];
@@ -133,10 +132,10 @@ export default function BOMVisualizer({ formData }: BOMVisualizerProps) {
     });
 
     const categories = [
-      { key: 'saas', items: formData.abom?.saas_services || [], color: COLORS.saas },
-      { key: 'ai_models', items: [], color: COLORS.ai, type: 'ai' },
-      { key: 'aboms', items: [], color: COLORS.abom, type: 'abom' },
-      { key: 'infrastructure', items: [], color: COLORS.infra, type: 'infra' },
+      { key: 'saas', items: formData.abom?.saas_services || [], color: 'var(--color-purple-mcp)' },
+      { key: 'ai_models', items: [], color: 'var(--color-warning)', type: 'ai' },
+      { key: 'aboms', items: [], color: 'var(--color-danger)', type: 'abom' },
+      { key: 'infrastructure', items: [], color: 'var(--color-success)', type: 'infra' },
     ];
 
     let currentX = 0;
@@ -160,7 +159,7 @@ export default function BOMVisualizer({ formData }: BOMVisualizerProps) {
           source: rootId,
           target: id,
           animated: true,
-          style: { stroke: cat.color, strokeWidth: 2, opacity: 0.4 },
+          style: { stroke: cat.color, strokeWidth: 1, opacity: 0.3 },
           type: 'default',
         });
         
@@ -180,10 +179,7 @@ export default function BOMVisualizer({ formData }: BOMVisualizerProps) {
   );
 
   return (
-    <div className="w-full h-full min-h-[650px] relative group">
-      {/* Decorative Grid Effect */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-500/5 via-transparent to-transparent pointer-events-none" />
-      
+    <div className="w-full h-full min-h-[650px] relative group card">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -196,20 +192,20 @@ export default function BOMVisualizer({ formData }: BOMVisualizerProps) {
         className="rounded-3xl border border-white/5 overflow-hidden "
       >
         <Background 
-          color="#4f46e5" 
+          color="var(--color-border)" 
           gap={30} 
-          size={1.5} 
+          size={1} 
           variant={BackgroundVariant.Dots}
-          className="opacity-20"
+          className="opacity-40"
         />
         <Controls className="! !border-white/10 !rounded-xl !p-1 " />
         <Panel position="top-left" className="m-4">
           <div className="flex flex-col gap-1">
-            <h3 className="text-white font-display font-bold text-lg flex items-center gap-2">
-              <Network className="w-5 h-5 text-indigo-400" />
+            <h3 className="text-white font-black text-sm flex items-center gap-2 uppercase tracking-widest">
+              <Network className="w-4 h-4 text-primary" />
               Sovereign ABOM Graph
             </h3>
-            <p className="text-white/40 text-[10px] font-mono tracking-tighter uppercase">
+            <p className="text-zinc-600 text-[9px] font-black tracking-tighter uppercase">
               Real-time Supply Chain Analysis • AIX v1.3.0
             </p>
           </div>
@@ -219,8 +215,8 @@ export default function BOMVisualizer({ formData }: BOMVisualizerProps) {
           <div className="px-4 py-2   border border-white/10 rounded-xl flex gap-4">
             {Object.entries(COLORS).map(([key, color]) => (
               <div key={key} className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-                <span className="text-[9px] uppercase font-bold text-white/40">{key}</span>
+                <div className="w-1.5 h-1.5 rounded-none" style={{ backgroundColor: color }} />
+                <span className="text-[9px] uppercase font-black text-zinc-500 tracking-wider">{key}</span>
               </div>
             ))}
           </div>
@@ -235,4 +231,8 @@ const BackgroundVariant = {
   Dots: 'dots',
   Lines: 'lines',
   Cross: 'cross',
-} as any;
+} as unknown;
+
+export default React.memo(BOMVisualizer);
+
+BOMVisualizer.displayName = 'BOMVisualizer';

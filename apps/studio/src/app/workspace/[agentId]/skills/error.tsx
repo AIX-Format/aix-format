@@ -1,10 +1,11 @@
+import React from 'react';
 "use client";
 
 import { AlertCircle, RefreshCcw, Home } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
-export default function Error({
+function Error({
   error,
   reset,
 }: {
@@ -45,3 +46,7 @@ export default function Error({
     </div>
   );
 }
+
+export default React.memo(Error);
+
+Error.displayName = 'Error';

@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { getLearnedProcedures, recordSuccessfulProcedure } from '@aix-core/storage';
 import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
+import { z } from 'zod';
 
 /**
  * AIX Sovereign Invocation Engine (AgenticKit + Hermes + Symphony A2A)
@@ -18,12 +19,31 @@ async function internalInvoke(agentId: string, message: string, context: any, se
   return res.json();
 }
 
+// Zod validation schema
+const InvokeSchema = z.object({
+  message: z.string().min(1, 'Message is required').max(10000, 'Message too long'),
+  context: z.record(z.any()).optional().default({}),
+  sessionId: z.string().optional(),
+  skipCritic: z.boolean().optional().default(false)
+});
+
 export async function POST(
   req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const { message, context, sessionId, skipCritic = false } = await req.json();
+    // Validate request body with Zod
+    const rawBody = await req.json();
+    const validationResult = InvokeSchema.safeParse(rawBody);
+    
+    if (!validationResult.success) {
+      return NextResponse.json({
+        error: 'Invalid request body',
+        details: validationResult.error.issues
+      }, { status: 400 });
+    }
+    
+    const { message, context, sessionId, skipCritic } = validationResult.data;
     const agentId = params.id;
 
     // 1. Fetch Agent Manifest
@@ -86,8 +106,7 @@ export async function POST(
       if (match) {
         const subAgentId = match[1];
         const subMessage = match[2].trim();
-        
-        console.log(`[Symphony] ${agentId} calling sub-agent ${subAgentId}`);
+
         const subResult = await internalInvoke(subAgentId, subMessage, context, sessionId);
         
         if (subResult.success) {
@@ -152,7 +171,8 @@ export async function POST(
       learned: isSuccess,
       subAgentCalled: subAgentResponse ? true : false
     });
-  } catch (err: any) {
+  } catch (error: unknown) {
+    const err = error as Error;
     console.error("[Invoke Error]:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import { Badge, Typography } from '@/components/shared';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { 
   Box, 
   Search, 
@@ -83,7 +84,7 @@ const MCP_SERVERS = [
   }
 ];
 
-export default function MCPRegistryPage() {
+function MCPRegistryContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [verifiedOnly, setVerifiedOnly] = useState(true);
@@ -246,3 +247,13 @@ export default function MCPRegistryPage() {
     </div>
   );
 }
+
+export default function MCPRegistryPage() {
+  return (
+    <ErrorBoundary boundaryName="MCPRegistryPage">
+      <MCPRegistryContent />
+    </ErrorBoundary>
+  );
+}
+
+function.displayName = 'function';
