@@ -110,7 +110,7 @@ export async function POST(
       publishedAt: new Date().toISOString(),
       yaml: JSON.stringify(clonedAgent),
       risk_score: 0,
-    } as unknown);
+    } as any);
 
     // 9. Track clone relationship in Redis
     const cloneTrackingKey = `clone:${agentId}:clones`;

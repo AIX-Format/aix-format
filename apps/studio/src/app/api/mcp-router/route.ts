@@ -52,12 +52,12 @@ export async function POST(req: NextRequest) {
     // Default to a neutral score if agent not found or YAML missing
     let riskScore = 50; 
     try {
-      if (agent && (agent as unknown).yaml) {
-        const report = scanAgent(JSON.parse((agent as unknown).yaml));
+      if (agent && (agent as any).yaml) {
+        const report = scanAgent(JSON.parse((agent as any).yaml));
         riskScore = report.score;
       }
     } catch (e) {
-
+      console.warn(`[MCP Router] Failed to scan agent ${agentDid}, using default risk.`);
     }
 
     // 3. Price calculation via Unified Engine

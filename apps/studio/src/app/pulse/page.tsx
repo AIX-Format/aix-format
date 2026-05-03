@@ -53,7 +53,7 @@ export default function PulsePage() {
           // Merge new events, filter out duplicates, sort by timestamp
           const newEvents = data.events.filter((ne: PulseEvent) => !prev.some(pe => pe.id === ne.id));
           return [...newEvents, ...prev].slice(0, 50);
-        }, []);
+        });
       }
     };
 
@@ -197,5 +197,3 @@ export default function PulsePage() {
     </div>
   );
 }
-
-function.displayName = 'function';

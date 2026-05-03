@@ -1,13 +1,3 @@
 packages:
-<<<<<<< HEAD
-  - 'apps/*'
-  - 'packages/*'
-
-onlyBuiltDependencies:
-  - esbuild
-
-# Made with Bob
-=======
   - 'packages/*'
   - 'apps/*'
->>>>>>> 6932819 (chore(deps): sync shared dependency versions across workspace)

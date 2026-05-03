@@ -1,7 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { PiKycAdapter } from "@core/pi_kyc_adapter";
-import { requireAuth, successResponse, ERR } from '@/lib/api-helpers';
-import { z } from 'zod';
+import { requireAuth, successResponse, ERR, parseBody } from '@/lib/api-helpers';
 
 /**
  * POST /api/kyc/sign
@@ -11,34 +10,28 @@ import { z } from 'zod';
  * PRIVACY: Never logs sensitive identity data
  */
 
-// Zod validation schema for KYC signing
-const KYCSignSchema = z.object({
-  user: z.object({
-    uid: z.string().min(1, 'User UID is required')
-  }),
-  accessToken: z.string().min(1, 'Access token is required'),
-  signature: z.string().min(1, 'Signature is required'),
-  publicKey: z.string().min(1, 'Public key is required')
-});
+interface KYCSignRequest {
+  user: { uid: string };
+  accessToken: string;
+  signature: string;
+  publicKey: string;
+}
 
 export async function POST(req: NextRequest) {
   try {
     // Auth check - KYC endpoints require authentication
-    const { error: authError } = await requireAuth();
+    const { session, error: authError } = await requireAuth();
     if (authError) return authError;
 
-    // Parse and validate request body with Zod
-    const rawBody = await req.json();
-    const validationResult = KYCSignSchema.safeParse(rawBody);
-    
-    if (!validationResult.success) {
-      return NextResponse.json({
-        error: 'Invalid KYC request',
-        details: validationResult.error.issues
-      }, { status: 400 });
+    // Parse and validate request body
+    const { body, error: parseError } = await parseBody<KYCSignRequest>(req);
+    if (parseError) return parseError;
+
+    // Validate required fields
+    if (!body.user?.uid || !body.accessToken ||
+        !body.signature || !body.publicKey) {
+      return ERR.VALIDATION('Missing required KYC fields: user.uid, accessToken, signature, publicKey');
     }
-    
-    const body = validationResult.data;
 
     // Generate KYC identity
     const result = PiKycAdapter.generateIdentity(body);

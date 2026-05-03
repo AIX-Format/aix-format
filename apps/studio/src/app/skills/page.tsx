@@ -243,5 +243,3 @@ export default function SkillsCatalogPage() {
     </ErrorBoundary>
   );
 }
-
-function.displayName = 'function';

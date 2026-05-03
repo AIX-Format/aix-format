@@ -53,7 +53,7 @@ export default function IdentityPage() {
       if (typeof window !== "undefined" && window.Pi) {
         window.Pi.init({ version: "2.0", sandbox: process.env.NODE_ENV !== "production" });
         const authResult = await window.Pi.authenticate(["username", "payments"], (payment: unknown) => {
-
+          console.warn("Incomplete payment found:", payment);
         });
         setPiUser(authResult.user);
       } else {
@@ -275,5 +275,3 @@ export default function IdentityPage() {
     </ErrorBoundary>
   );
 }
-
-function.displayName = 'function';

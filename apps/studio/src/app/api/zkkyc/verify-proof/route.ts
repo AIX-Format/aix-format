@@ -154,6 +154,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Success - proof is valid and nullifier has been registered
+    console.log('[zkKYC] Proof verified successfully, nullifier:', result.nullifier);
 
     return successResponse({
       verified: true,

@@ -178,5 +178,3 @@ export default function PetPage() {
     </ErrorBoundary>
   );
 }
-
-function.displayName = 'function';

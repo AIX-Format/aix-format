@@ -328,5 +328,3 @@ export default function SettingsPage() {
     </ErrorBoundary>
   );
 }
-
-function.displayName = 'function';

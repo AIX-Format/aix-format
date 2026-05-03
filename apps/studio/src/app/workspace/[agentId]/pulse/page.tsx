@@ -72,7 +72,7 @@ export default function PulsePage() {
         setEvents(prev => {
           if (prev.length > 0 && Date.now() - new Date(prev[0].timestamp).getTime() < 5000) return prev;
           return [mockEvent(agentId), ...prev].slice(0, 100);
-        }, []);
+        });
       }, 3000);
     } catch (err) {
       console.error("[Pulse] SSE init failed:", err);
@@ -86,7 +86,7 @@ export default function PulsePage() {
 
   // Auto-scroll to top (newest events)
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" }, []);
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [events.length]);
 
   return (
@@ -191,5 +191,3 @@ export default function PulsePage() {
   );
 }
 
-
-function.displayName = 'function';

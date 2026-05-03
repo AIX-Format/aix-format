@@ -3,8 +3,9 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, X, Loader2, Volume2, Sparkles, CheckCircle2 } from "lucide-react";
 import { useVoiceWizard } from "@/hooks/useVoiceWizard";
-
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 /**
  * AIX Voice Setup Wizard UI

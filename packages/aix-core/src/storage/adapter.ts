@@ -44,6 +44,7 @@ class UpstashRedisAdapter implements StorageAdapter {
     const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
     if (!url || !token) {
+      console.warn('[Storage] Missing Upstash Redis credentials. All storage operations will be bypassed.');
       this.client = new Redis({ url: 'http://localhost', token: 'mock' });
       this.isConnected = false;
     } else {
@@ -67,6 +68,7 @@ class UpstashRedisAdapter implements StorageAdapter {
       } catch (error) {
         attempt++;
         if (attempt > retries) {
+          console.error(`[Storage] ${label} failed permanently for key: ${key.split(':')[0]}:*** | Attempts: ${attempt} | Error:`, (error as Error).message);
           return null;
         }
         await new Promise(resolve => setTimeout(resolve, 100 * attempt));
@@ -100,6 +102,7 @@ class UpstashRedisAdapter implements StorageAdapter {
       this.checkConnection();
       await this.client.del(...(Array.isArray(key) ? key : [key]));
     } catch (error) {
+      console.error(`[Storage] DEL failed for ${key}:`, error);
     }
   }
 
@@ -108,6 +111,7 @@ class UpstashRedisAdapter implements StorageAdapter {
       this.checkConnection();
       return await this.client.incr(key);
     } catch (error) {
+      console.error(`[Storage] INCR failed for ${key}:`, error);
       throw error;
     }
   }
@@ -117,6 +121,7 @@ class UpstashRedisAdapter implements StorageAdapter {
       this.checkConnection();
       return await this.client.decr(key);
     } catch (error) {
+      console.error(`[Storage] DECR failed for ${key}:`, error);
       throw error;
     }
   }
@@ -126,6 +131,7 @@ class UpstashRedisAdapter implements StorageAdapter {
       this.checkConnection();
       await this.client.expire(key, seconds);
     } catch (error) {
+      console.error(`[Storage] EXPIRE failed for ${key}:`, error);
     }
   }
 
@@ -135,6 +141,7 @@ class UpstashRedisAdapter implements StorageAdapter {
       const count = await this.client.exists(key);
       return count > 0;
     } catch (error) {
+      console.error(`[Storage] EXISTS failed for ${key}:`, error);
       return false;
     }
   }
@@ -160,12 +167,12 @@ class UpstashRedisAdapter implements StorageAdapter {
   }
 
   async smembers<T>(key: string): Promise<T[]> {
-    return (await this.withRetry(() => this.client.smembers(key), 'SMEMBERS', key)) as unknown as T[] || [];
+    return ((await this.withRetry(() => this.client.smembers<any>(key), 'SMEMBERS', key)) as unknown as T[]) || [];
   }
 
   async mget<T>(...keys: string[]): Promise<(T | null)[]> {
     if (keys.length === 0) return [];
-    return (await this.withRetry(() => this.client.mget(...keys), 'MGET', keys[0])) as unknown as (T | null)[] || keys.map(() => null);
+    return ((await this.withRetry(() => this.client.mget<any>(...keys), 'MGET', keys[0])) as unknown as (T | null)[]) || keys.map(() => null);
   }
 }
 

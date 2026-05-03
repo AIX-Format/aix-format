@@ -46,8 +46,8 @@ export default function DeployModal({ agent, onClose, onDeployed }: Props) {
   const { address, isConnected } = useAccount();
   const { saveAgent } = useLocalAgents();
 
-  const handleNext = () => setStep((s) => (s + 1) as unknown);
-  const handleBack = () => setStep((s) => (s - 1) as unknown);
+  const handleNext = () => setStep((s) => (s + 1) as any);
+  const handleBack = () => setStep((s) => (s - 1) as any);
 
   const handleSign = async () => {
     if (!isConnected) {
@@ -407,5 +407,3 @@ export default function DeployModal({ agent, onClose, onDeployed }: Props) {
     </div>
   );
 }
-
-function.displayName = 'function';

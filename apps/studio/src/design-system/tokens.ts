@@ -190,7 +190,7 @@ export function getToken(path: string): string {
   for (const part of parts) {
     value = value[part];
     if (value === undefined) {
-
+      console.warn(`Token not found: ${path}`);
       return '';
     }
   }

@@ -8,8 +8,7 @@
   "bin": {
     "aix-validate": "./bin/aix-validate.js",
     "aix-convert": "./bin/aix-convert.js",
-    "aix-regulator-export": "./bin/aix-regulator-export.js",
-    "aix-plugins": "./bin/aix-plugins.js"
+    "aix-regulator-export": "./bin/aix-regulator-export.js"
   },
   "scripts": {
     "test": "vitest run",
@@ -32,10 +31,9 @@
     "dead-code:report": "cat .generated/dead-code-report.md",
     "health-score": "ts-node scripts/health-score.ts",
     "health-score:report": "cat .generated/health-score.json",
-    "health:check": "ts-node scripts/self-heal.ts",
+    "health:check": "npm run health-score && node scripts/health-trend.js",
     "health:fix": "node scripts/auto-issue-generator.js",
-    "health:full": "npm run health:check && npm run health:fix",
-    "health:report": "cat .generated/HEALTH_REPORT.md"
+    "health:full": "npm run health:check && npm run health:fix"
   },
   "keywords": [
     "ai",
@@ -113,12 +111,7 @@
     "zod": "^4.4.1"
   },
   "devDependencies": {
-<<<<<<< HEAD
-    "@next/bundle-analyzer": "^16.2.4",
-    "@playwright/test": "^1.50.0",
-=======
     "@playwright/test": "^1.59.1",
->>>>>>> 6932819 (chore(deps): sync shared dependency versions across workspace)
     "@tailwindcss/postcss": "^4.2.4",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.10.5",
@@ -132,6 +125,5 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
     "vitest": "^3.2.4"
-  },
-  "packageManager": "pnpm@10.23.0+sha512.21c4e5698002ade97e4efe8b8b4a89a8de3c85a37919f957e7a0f30f38fbc5bbdd05980ffe29179b2fb6e6e691242e098d945d1601772cad0fef5fb6411e2a4b"
+  }
 }

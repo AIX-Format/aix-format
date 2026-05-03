@@ -1,5 +1,7 @@
 import { NextRequest } from 'next/server';
 import { successResponse, requireAuth, ERR } from '@/lib/api-helpers';
+import { kv } from '@/lib/redis';
+import { KEYS } from '@/lib/redis-keys';
 
 /**
  * POST /api/zkkyc/prune
@@ -24,6 +26,8 @@ export async function POST(req: NextRequest) {
     let prunedCount = 0;
     // TODO: Implement actual pruning logic
     // Example: Scan for keys matching zkkyc:* pattern and check expiry
+
+    console.log('[zkKYC Prune] Operation completed, records pruned:', prunedCount);
 
     return successResponse({
       pruned: prunedCount,

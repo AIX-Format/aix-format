@@ -124,10 +124,10 @@ export async function POST(req: NextRequest) {
 
     // 12. Add verification results to report
     if (verificationScan) {
-      (report as unknown)['verification'] = {
+      (report as any)['verification'] = {
         rescanned: true,
         newRiskScore: verificationScan.risk_score,
-        remainingVulnerabilities: (verificationScan as unknown).issues?.length || 0,
+        remainingVulnerabilities: (verificationScan as any).issues?.length || 0,
         improvement: parsedResults.riskScore - verificationScan.risk_score,
       };
     }
@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
       verification: verificationScan ? {
         newRiskScore: verificationScan.risk_score,
         improvement: parsedResults.riskScore - verificationScan.risk_score,
-        resolved: parsedResults.vulnerabilities.length - ((verificationScan as unknown).issues?.length || 0),
+        resolved: parsedResults.vulnerabilities.length - ((verificationScan as any).issues?.length || 0),
       } : null,
     });
 

@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       } else {
         agentData = yaml.load(content);
       }
-    } catch (e: unknown) {
+    } catch (e: any) {
       return ERR.VALIDATION(`Failed to parse manifest: ${e.message}`);
     }
 

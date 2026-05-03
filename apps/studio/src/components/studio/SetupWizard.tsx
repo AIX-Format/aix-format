@@ -94,7 +94,7 @@ export function SetupWizard() {
         setFile(updated);
       }
     } catch (err) {
-
+      console.warn("API unavailable, demo fallback:", err);
     } finally {
       setIsSigning(false);
       setIsKycModalOpen(false);

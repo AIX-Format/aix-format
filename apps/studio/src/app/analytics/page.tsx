@@ -76,7 +76,7 @@ function AnalyticsHubContent() {
               { region: "Europe", value: "31%" }
             ]
           }
-        }, []);
+        });
       } catch (err) {
         console.error('Failed to load analytics:', err);
       } finally {
@@ -111,7 +111,7 @@ function AnalyticsHubContent() {
              {['revenue', 'performance', 'users'].map((tab) => (
                <button
                  key={tab}
-                 onClick={() => setActiveTab(tab as unknown)}
+                 onClick={() => setActiveTab(tab as any)}
                  className={cn(
                    "px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
                    activeTab === tab 
@@ -318,5 +318,3 @@ export default function AnalyticsHubPage() {
     </ErrorBoundary>
   );
 }
-
-function.displayName = 'function';

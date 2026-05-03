@@ -30,7 +30,7 @@ export function IntelligenceStream() {
       setEvents(prev => {
         const next = MOCK_EVENTS[Math.floor(Math.random() * MOCK_EVENTS.length)];
         return [next, ...prev.slice(0, 5)];
-      }, []);
+      });
     }, 3500);
 
     return () => clearInterval(interval);

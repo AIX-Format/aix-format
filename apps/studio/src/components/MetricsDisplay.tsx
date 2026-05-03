@@ -32,7 +32,7 @@ export function MetricsDisplay() {
           body: JSON.stringify({
             state: { memory: 1000, context: 500 },
             taskType: 'general'
-          }, [])
+          })
         });
         
         if (response.ok) {

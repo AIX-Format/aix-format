@@ -255,5 +255,3 @@ export default function MCPRegistryPage() {
     </ErrorBoundary>
   );
 }
-
-function.displayName = 'function';

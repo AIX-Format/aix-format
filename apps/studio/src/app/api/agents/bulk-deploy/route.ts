@@ -298,6 +298,7 @@ async function rollbackBatch(batchId: string) {
     // Clear batch agents list
     await kv.del(batchAgentsKey);
 
+    console.log(`[bulk-deploy] Rolled back ${deployedAgents.length} agents for batch ${batchId}`);
   } catch (error) {
     console.error('[bulk-deploy] Rollback failed:', error);
   }

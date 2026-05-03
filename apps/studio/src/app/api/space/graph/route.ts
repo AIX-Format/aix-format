@@ -17,14 +17,14 @@ export async function GET(req: NextRequest) {
     
     const nodes = await Promise.all(agents.map(async a => {
       const freq = await kv.get<number>(`agent:${a.did}:freq`) || 0;
-      const status = (a as unknown).status || 'idle';
+      const status = (a as any).status || 'idle';
       
       return {
         id: a.did,
         name: a.name,
         role: a.role,
         status,
-        pet: (a as unknown).pet,
+        pet: (a as any).pet,
         val: 5 + (freq * 2), // Size scales with frequency
         color: status === 'active' ? '#10B981' : status === 'flagged' ? '#EF4444' : '#F59E0B'
       };

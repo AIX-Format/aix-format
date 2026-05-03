@@ -123,7 +123,7 @@ export async function GET(req: NextRequest) {
 
       cancel() {
         // Cleanup when stream is cancelled
-
+        console.log('[kyc/status-stream] Stream cancelled by client');
       },
     });
 
