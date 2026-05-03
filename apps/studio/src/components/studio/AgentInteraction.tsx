@@ -183,3 +183,5 @@ export default function AgentInteraction({ agentId }: { agentId: string }) {
     </div>
   );
 }
+
+function.displayName = 'function';

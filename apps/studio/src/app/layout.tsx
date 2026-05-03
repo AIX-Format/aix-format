@@ -1,3 +1,4 @@
+import React from 'react';
 import type { Metadata } from "next";
 import { Manrope, Inter, JetBrains_Mono, Oswald, Poppins } from "next/font/google";
 import "./globals.css";
@@ -49,7 +50,7 @@ export const metadata: Metadata = {
 };
 
 // ROLE: layout
-export default function RootLayout({
+function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -87,3 +88,7 @@ export default function RootLayout({
     </html>
   );
 }
+
+export default React.memo(RootLayout);
+
+RootLayout.displayName = 'RootLayout';

@@ -54,7 +54,7 @@ const CategoryNode = ({ data }: NodeProps) => {
     facts: 'shadow-[0_0_20px_rgba(168,85,247,0.3)]',
     skills: 'shadow-[0_0_20px_rgba(16,185,129,0.3)]',
     connections: 'shadow-[0_0_20px_rgba(249,115,22,0.3)]'
-  } as any;
+  } as unknown;
 
   return (
     <div className={`px-4 py-3 rounded-xl border-2 flex items-center gap-3 min-w-[140px] ${data.color} bg-black/40 backdrop-blur-xl transition-all hover:scale-105 ${glowStyles[data.id] || ''}`}>
@@ -144,7 +144,7 @@ export default function WikiBrainExplorer() {
             type: 'root',
             position: { x: 500, y: 0 },
             data: { name: agent?.name, pet: agent?.pet }
-          });
+          }, []);
 
           // Level 1 Categories
           const categories = tree.children || [];
@@ -157,21 +157,21 @@ export default function WikiBrainExplorer() {
               facts: 'border-purple-500/30 text-purple-400',
               skills: 'border-emerald-500/30 text-emerald-400',
               connections: 'border-orange-500/30 text-orange-400'
-            } as any;
+            } as unknown;
 
             const icons = {
               sessions: <Clock size={16} />,
               facts: <Database size={16} />,
               skills: <Zap size={16} />,
               connections: <Network size={16} />
-            } as any;
+            } as unknown;
 
             const iconBgs = {
               sessions: 'bg-blue-500/20 text-blue-400',
               facts: 'bg-purple-500/20 text-purple-400',
               skills: 'bg-emerald-500/20 text-emerald-400',
               connections: 'bg-orange-500/20 text-orange-400'
-            } as any;
+            } as unknown;
 
             newNodes.push({
               id: cat.id,
@@ -402,3 +402,5 @@ export default function WikiBrainExplorer() {
     </div>
   );
 }
+
+function.displayName = 'function';

@@ -113,3 +113,5 @@ export default function MyAgentsPage() {
     </ErrorBoundary>
   );
 }
+
+function.displayName = 'function';

@@ -55,7 +55,7 @@ export async function POST(req: Request) {
         publishedAt: new Date().toISOString(),
         yaml: JSON.stringify(manifest),
         risk_score: validation.risk_score
-      } as any);
+      } as unknown);
     }
 
     return NextResponse.json({

@@ -1,8 +1,9 @@
+import React from 'react';
 "use client";
 
 import { Sparkles } from "lucide-react";
 
-export default function Loading() {
+function Loading() {
   return (
     <div className="p-6 space-y-8 animate-pulse">
       <div className="space-y-2">
@@ -36,3 +37,7 @@ export default function Loading() {
     </div>
   );
 }
+
+export default React.memo(Loading);
+
+Loading.displayName = 'Loading';

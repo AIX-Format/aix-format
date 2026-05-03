@@ -173,3 +173,5 @@ export default function MarketplacePage() {
     </ErrorBoundary>
   );
 }
+
+function.displayName = 'function';

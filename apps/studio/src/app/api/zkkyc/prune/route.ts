@@ -24,9 +24,7 @@ export async function POST(req: NextRequest) {
     let prunedCount = 0;
     // TODO: Implement actual pruning logic
     // Example: Scan for keys matching zkkyc:* pattern and check expiry
-    
-    console.log('[zkKYC Prune] Operation completed, records pruned:', prunedCount);
-    
+
     return successResponse({
       pruned: prunedCount,
       timestamp: new Date().toISOString(),

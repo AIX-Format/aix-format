@@ -57,13 +57,7 @@ export async function recordFoldTrace(record: FoldTraceRecord): Promise<void> {
     
     // 4. Update bonding curve
     await updateBondingCurve(record.agentId, record.cost.amount);
-    
-    console.log('[FoldTrace] Revenue settled:', {
-      agentId: record.agentId,
-      amount: record.cost.amount,
-      currency: record.cost.currency
-    });
-    
+
   } catch (error) {
     console.error('[FoldTrace Settlement Error]', error);
     throw error;
@@ -78,12 +72,7 @@ export async function recordFoldTrace(record: FoldTraceRecord): Promise<void> {
 async function storeFoldTrace(record: FoldTraceRecord): Promise<void> {
   // TODO: Implement database storage
   // For now, log only (not production-ready)
-  
-  console.log('[FoldTrace] Stored:', {
-    agentId: record.agentId,
-    operation: record.operation,
-    amount: record.cost.amount,
-    timestamp: new Date(record.timestamp).toISOString()
+
   });
   
   // In production, store in database:
@@ -242,14 +231,7 @@ async function transferFunds(
 ): Promise<void> {
   // TODO: Implement actual fund transfer
   // This depends on payment method (Pi/Stripe/Crypto)
-  
-  console.log('[Transfer]', {
-    to: address,
-    amount,
-    currency,
-    type
-  });
-  
+
   // In production, implement based on currency:
   // if (currency === 'PI') {
   //   await transferPi(address, amount);
@@ -278,13 +260,7 @@ async function updateBondingCurve(agentId: string, revenue: number): Promise<voi
     
     // Update agent token price in database
     await updateAgentTokenPrice(agentId, newPrice);
-    
-    console.log('[Bonding Curve] Updated:', {
-      agentId,
-      revenue,
-      newPrice
-    });
-    
+
   } catch (error) {
     console.error('[Bonding Curve Update Error]', error);
     // Don't throw - bonding curve update is not critical
@@ -299,12 +275,7 @@ async function updateBondingCurve(agentId: string, revenue: number): Promise<voi
  */
 async function updateAgentTokenPrice(agentId: string, price: number): Promise<void> {
   // TODO: Implement database update
-  
-  console.log('[Token Price] Updated:', {
-    agentId,
-    price
-  });
-  
+
   // In production:
   // await db.agent.update({
   //   where: { id: agentId },
@@ -324,9 +295,7 @@ export async function getAgentFoldTrace(
   limit: number = 100
 ): Promise<FoldTraceRecord[]> {
   // TODO: Implement database query
-  
-  console.log('[FoldTrace] Fetching history:', { agentId, limit });
-  
+
   return [];
   
   // In production:
@@ -346,9 +315,7 @@ export async function getAgentFoldTrace(
  */
 export async function getAgentTotalRevenue(agentId: string): Promise<number> {
   // TODO: Implement database aggregation
-  
-  console.log('[FoldTrace] Calculating total revenue:', { agentId });
-  
+
   return 0;
   
   // In production:

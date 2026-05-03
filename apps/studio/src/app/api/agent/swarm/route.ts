@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
     const result = await aix.swarm(agents, { pattern, dryRun, aggregator });
     return NextResponse.json(result);
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

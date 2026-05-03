@@ -1,3 +1,4 @@
+import React from 'react';
 "use client";
 
 import { motion } from "framer-motion";
@@ -7,7 +8,7 @@ import { Check, Zap, Shield, Crown } from "lucide-react";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { PLANS } from "@/lib/plans";
 
-export default function PricingPage() {
+function PricingPage() {
   return (
     <ErrorBoundary>
     <div className="min-h-screen bg-[rgba(5,5,7,1)] font-[family-name:var(--font-manrope)] pb-20">
@@ -110,3 +111,7 @@ export default function PricingPage() {
     </ErrorBoundary>
   );
 }
+
+export default React.memo(PricingPage);
+
+PricingPage.displayName = 'PricingPage';

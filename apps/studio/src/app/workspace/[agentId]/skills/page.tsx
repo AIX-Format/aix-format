@@ -1,3 +1,4 @@
+import React from 'react';
 "use client";
 
 import { useParams } from "next/navigation";
@@ -56,7 +57,7 @@ function SkillBar({ level, color }: { level: number; color: string }) {
   );
 }
 
-export default function SkillsPage() {
+function SkillsPage() {
   const { agentId } = useParams<{ agentId: string }>();
   const { getAgent } = useLocalAgents();
   const agent = getAgent(agentId);
@@ -179,3 +180,7 @@ export default function SkillsPage() {
     </ErrorBoundary>
   );
 }
+
+export default React.memo(SkillsPage);
+
+SkillsPage.displayName = 'SkillsPage';

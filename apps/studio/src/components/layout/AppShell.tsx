@@ -721,3 +721,5 @@ function CommandPalette({ open, onClose }: { open: boolean; onClose: () => void 
 }
 
 export default AppShell;
+
+AppShell.displayName = 'AppShell';

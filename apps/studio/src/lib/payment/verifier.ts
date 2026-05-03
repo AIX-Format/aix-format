@@ -240,9 +240,7 @@ async function verifyCryptoPayment(proof: PaymentProof): Promise<boolean> {
     // 3. Verify transaction is confirmed
     // 4. Verify recipient address
     // 5. Verify amount
-    
-    console.warn('[Crypto Payment] Verification not yet implemented');
-    
+
     // For now, accept if signature is present
     // In production, this MUST verify on-chain
     return proof.signature.length > 0;
@@ -293,14 +291,7 @@ async function markPaymentUsed(
   try {
     // TODO: Implement database storage
     // For now, log only (not production-ready)
-    
-    console.log('[Payment Used]', {
-      transactionId,
-      agentId,
-      type: proof.type,
-      amount: proof.amount,
-      currency: proof.currency,
-      timestamp: new Date().toISOString()
+
     });
     
     // In production, store in database:

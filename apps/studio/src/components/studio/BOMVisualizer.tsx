@@ -231,6 +231,8 @@ const BackgroundVariant = {
   Dots: 'dots',
   Lines: 'lines',
   Cross: 'cross',
-} as any;
+} as unknown;
 
 export default React.memo(BOMVisualizer);
+
+BOMVisualizer.displayName = 'BOMVisualizer';

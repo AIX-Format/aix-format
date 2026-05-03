@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     
     // 1. Check for API Key (Sovereign Pattern 2: Fallback)
     if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-      console.warn("[Voice Chat] Google API Key missing. Falling back to local/manual prompt.");
+
       return new Response(JSON.stringify({ 
         error: "Voice Intelligence Offline",
         fallback: true,

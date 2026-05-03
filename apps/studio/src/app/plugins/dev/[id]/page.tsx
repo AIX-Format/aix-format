@@ -192,3 +192,5 @@ export default function DeveloperProfilePage() {
     </div>
   );
 }
+
+function.displayName = 'function';

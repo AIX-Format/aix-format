@@ -9,8 +9,6 @@ export class PulseGhost {
   static async activate(process: GatewayProcess, config: GhostConfig): Promise<GatewayProcess> {
     if (!config.enabled) return process;
 
-    console.log(`[Ghost] Activating stealth mode for process ${process.id}`);
-
     // Out-of-the-box: Identity Obfuscation
     // We return a copy of the process with a "masked" identity for this turn's context.
     const maskedProcess = {
@@ -31,8 +29,7 @@ export class PulseGhost {
       thought,
       timestamp: Date.now()
     }, { ex: 60 * 60 * 24 }); // 24h TTL
-    
-    console.log(`[Ghost] Shadow memory persistent for ${processId}`);
+
   }
 
   /**

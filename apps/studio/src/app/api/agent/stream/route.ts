@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
         for await (const event of aix.stream(agentId, task)) {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'ERROR', message: err.message })}\n\n`));
       } finally {
         controller.close();

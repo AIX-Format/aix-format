@@ -197,3 +197,5 @@ export default function PulsePage() {
     </div>
   );
 }
+
+function.displayName = 'function';

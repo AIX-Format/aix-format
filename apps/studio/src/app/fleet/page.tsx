@@ -202,3 +202,5 @@ export default function MissionControlPage() {
     </ErrorBoundary>
   );
 }
+
+function.displayName = 'function';

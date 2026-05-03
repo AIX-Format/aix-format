@@ -253,3 +253,5 @@ export default function DeployPage() {
     </ErrorBoundary>
   );
 }
+
+function.displayName = 'function';

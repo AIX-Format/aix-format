@@ -47,7 +47,7 @@ export function Navbar() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true }, []);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -59,7 +59,7 @@ export function Navbar() {
         // Authenticate the user, and get permission to request payments from them
         const scopes = ['payments', 'username'];
         function onIncompletePaymentFound(payment: any) {
-            console.log("Incomplete payment", payment);
+
         }
 
         // This causes hydration mismatch, so wait till we figure it out.

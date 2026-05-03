@@ -761,3 +761,5 @@ function ToolCallBlock({
     </button>
   );
 }
+
+function.displayName = 'function';

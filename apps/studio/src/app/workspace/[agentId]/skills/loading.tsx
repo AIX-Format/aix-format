@@ -1,6 +1,7 @@
+import React from 'react';
 "use client";
 
-export default function Loading() {
+function Loading() {
   return (
     <div className="p-6 space-y-6 animate-pulse">
       <div className="space-y-2">
@@ -36,3 +37,7 @@ export default function Loading() {
     </div>
   );
 }
+
+export default React.memo(Loading);
+
+Loading.displayName = 'Loading';

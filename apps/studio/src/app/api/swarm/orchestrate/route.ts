@@ -38,7 +38,7 @@ function createOrchestrationPlan(agents: Array<Record<string, unknown>>, task: s
     strategy,
     task,
     agents: agents.map(a => a.id),
-    steps: [] as any[]
+    steps: [] as unknown[]
   };
 
   if (strategy === 'sequential') {

@@ -45,3 +45,5 @@ export default function WikiBrainPage() {
     </ErrorBoundary>
   );
 }
+
+function.displayName = 'function';

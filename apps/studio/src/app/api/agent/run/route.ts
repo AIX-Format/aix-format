@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
     const result = await aix(agentId, task, { tools: tools ?? {} });
     return NextResponse.json(result);
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

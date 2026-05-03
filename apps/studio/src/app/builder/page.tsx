@@ -60,7 +60,7 @@ function AgentBuilderContent() {
       instructions: "",
       tone: "formal",
     },
-    skills: [] as any[],
+    skills: [] as unknown[],
     security: {
       governance: {
         owner: "did:axiom:axiomid.app:user-dev",
@@ -561,3 +561,5 @@ export default function AgentBuilderPage() {
     </ErrorBoundary>
   );
 }
+
+function.displayName = 'function';

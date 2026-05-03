@@ -186,3 +186,5 @@ function ColorSwatch({ name, color }: { name: string; color: string }) {
 }
 
 export default React.memo(DesignSystemPage);
+
+DesignSystemPage.displayName = 'DesignSystemPage';

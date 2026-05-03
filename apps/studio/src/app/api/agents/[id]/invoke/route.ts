@@ -106,8 +106,7 @@ export async function POST(
       if (match) {
         const subAgentId = match[1];
         const subMessage = match[2].trim();
-        
-        console.log(`[Symphony] ${agentId} calling sub-agent ${subAgentId}`);
+
         const subResult = await internalInvoke(subAgentId, subMessage, context, sessionId);
         
         if (subResult.success) {

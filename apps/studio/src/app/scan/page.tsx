@@ -250,3 +250,5 @@ export default function ScanPage() {
     </div>
   );
 }
+
+function.displayName = 'function';

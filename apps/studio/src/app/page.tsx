@@ -1,3 +1,4 @@
+import React from 'react';
 "use client";
 
 import { motion } from "framer-motion";
@@ -87,10 +88,14 @@ function HomeContent() {
   );
 }
 
-export default function Home() {
+function Home() {
   return (
     <ErrorBoundary boundaryName="HomePage">
       <HomeContent />
     </ErrorBoundary>
   );
 }
+
+export default React.memo(Home);
+
+Home.displayName = 'Home';

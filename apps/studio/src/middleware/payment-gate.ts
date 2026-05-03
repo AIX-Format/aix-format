@@ -252,12 +252,7 @@ export async function recordPaymentAttempt(
 ): Promise<void> {
   try {
     // TODO: Implement analytics recording
-    console.log('[Payment Attempt]', {
-      agentId,
-      operation,
-      cost,
-      success,
-      timestamp: new Date().toISOString()
+
     });
   } catch (error) {
     console.error('[Record Payment Error]', error);

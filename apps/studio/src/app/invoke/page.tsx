@@ -1,11 +1,13 @@
-import AgentInvokePanel from '@/components/studio/AgentInvokePanel';
+import React from 'react';
+import dynamic from 'next/dynamic';
+const AgentInvokePanel = dynamic(() => import('@/components/studio/AgentInvokePanel'), { ssr: false });;
 
 export const metadata = {
   title: 'Agent Invoke · AIX Studio',
   description: 'Surgical, monochromatic invocation panel for AIX agents.',
 };
 
-export default function InvokePage() {
+function InvokePage() {
   return (
     <main
       className="flex min-h-screen items-center justify-center p-8"
@@ -17,3 +19,7 @@ export default function InvokePage() {
     </main>
   );
 }
+
+export default React.memo(InvokePage);
+
+InvokePage.displayName = 'InvokePage';

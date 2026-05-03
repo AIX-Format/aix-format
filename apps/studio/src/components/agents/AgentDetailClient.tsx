@@ -398,3 +398,5 @@ export default function AgentDetailClient({ id }: { id: string }) {
     </div>
   );
 }
+
+function.displayName = 'function';

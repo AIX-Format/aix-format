@@ -197,3 +197,5 @@ export default function LiveValidator({
     </div>
   );
 }
+
+function.displayName = 'function';

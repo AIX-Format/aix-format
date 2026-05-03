@@ -364,7 +364,7 @@ Respond in JSON format:
         if (!dryRun) {
           // In a real implementation, this would apply the patch to the file
           // For now, we'll just simulate success
-          console.log(`[AIRemediator] Would apply patch to ${suggestion.patch.file}`);
+
         }
 
         results.push({

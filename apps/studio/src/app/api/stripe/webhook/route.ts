@@ -45,15 +45,7 @@ export async function POST(req: NextRequest) {
         const userId = paymentIntent.metadata?.userId;
         const planId = paymentIntent.metadata?.planId;
         const credits = paymentIntent.metadata?.credits ? parseInt(paymentIntent.metadata.credits) : 0;
-        
-        console.log('[Stripe] Payment succeeded:', {
-          paymentId: paymentIntent.id,
-          userId,
-          amount: paymentIntent.amount,
-          planId,
-          credits
-        });
-        
+
         if (userId) {
           // Update user credits in Redis
           const userKey = `user:${userId}:credits`;
@@ -128,14 +120,7 @@ export async function POST(req: NextRequest) {
         const subscription = event.data.object as Stripe.Subscription;
         const userId = subscription.metadata?.userId;
         const planId = subscription.items.data[0]?.price.id;
-        
-        console.log('[Stripe] Subscription updated:', {
-          subscriptionId: subscription.id,
-          userId,
-          status: subscription.status,
-          planId
-        });
-        
+
         if (userId && planId) {
           // Update user subscription in Redis
           const subKey = `user:${userId}:subscription`;
@@ -167,12 +152,7 @@ export async function POST(req: NextRequest) {
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
         const userId = subscription.metadata?.userId;
-        
-        console.log('[Stripe] Subscription cancelled:', {
-          subscriptionId: subscription.id,
-          userId
-        });
-        
+
         if (userId) {
           // Remove subscription from Redis
           const subKey = `user:${userId}:subscription`;
@@ -209,14 +189,7 @@ export async function POST(req: NextRequest) {
         const session = event.data.object as Stripe.Checkout.Session;
         const userId = session.metadata?.userId;
         const planId = session.metadata?.planId;
-        
-        console.log('[Stripe] Checkout completed:', {
-          sessionId: session.id,
-          userId,
-          planId,
-          paymentStatus: session.payment_status
-        });
-        
+
         if (userId && session.payment_status === 'paid') {
           // Store checkout session
           const sessionKey = `checkout:${session.id}`;
@@ -241,7 +214,7 @@ export async function POST(req: NextRequest) {
       }
       
       default:
-        console.log(`[Stripe] Unhandled event type: ${event.type}`);
+
         monitoring.logEvent({
           level: 'info',
           category: 'system',

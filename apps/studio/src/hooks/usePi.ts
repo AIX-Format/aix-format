@@ -79,7 +79,7 @@ export function usePi({
       const authResult = await window.Pi.authenticate(
         scopes,
         (payment) => {
-          console.log("Incomplete payment found:", payment);
+
         }
       );
 
