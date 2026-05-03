@@ -28,6 +28,11 @@ export * from './curiosity-engine';
 export * from './expectation-engine';
 export * from './failure-learning';
 
+// Decentralization Engines (v1.5.0)
+export * from './resonance-engine';
+export * from './p2p-router';
+export * from './trust-chain';
+
 export default kv;
 
 
