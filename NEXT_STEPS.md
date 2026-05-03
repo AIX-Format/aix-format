@@ -140,9 +140,9 @@ NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=da5be88025eba75c383463a8030f4de4
 NEXT_PUBLIC_REOWN_PROJECT_ID=da5be88025eba75c383463a8030f4de4
 
 # Voice Services (Required for Voice Wizard)
-GROQ_API_KEY=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
-GOOGLE_GENERATIVE_AI_API_KEY=AIzaSyB963IJcZ33_tVBQ2xvqyJ7wzt9Zt_BtpE
-XAI_API_KEY=xai-MGBbQh6AiTr2RRulsh4TBBXmIz5UcLD3MOws8pnJnkAXkP9v0SULyyQ5LLSjlxLLiKKo0LMUDXpJmYfb
+GROQ_API_KEY=your_groq_api_key_here
+GOOGLE_GENERATIVE_AI_API_KEY=your_google_api_key_here
+XAI_API_KEY=your_xai_api_key_here
 
 # Security (Change in production!)
 AIX_UID_HASH_SALT=dev-salt-change-in-production
