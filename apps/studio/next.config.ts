@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Fix monorepo tracing root - pointing to workspace root
   outputFileTracingRoot: path.join(process.cwd(), "../../"),
-  transpilePackages: ["@aix-core/storage", "aix-format"], 
+  transpilePackages: ["@aix-format/aix-zkkyc", "@aix-format/mcp-gateway"],
   
   env: {
     NEXT_PUBLIC_APP_VERSION: packageJson.version,
