@@ -1,6 +1,6 @@
 /**
  * AIX Agent Runtime - Production ReAct Loop
- * 
+ *
  * Implements 6 critical production insights:
  * 1. Skill Caching (Tesla Resonance) - Check SkillDB FIRST
  * 2. Model Router (85% cost reduction) - Route by mood + complexity
@@ -11,6 +11,7 @@
  */
 
 import { kv } from './storage/adapter';
+import { KEYS } from './storage/keys';
 import { emit, BUS_RINGS } from './bus';
 import { getFeedbackSkills, getLearnedProcedures, recordSuccessfulProcedure, ProcedureStep } from './learning';
 import { PetOrchestrator } from './pets';
@@ -18,6 +19,9 @@ import { FailureLearning } from './failure-learning';
 import { ResonanceEngine, TaskPerformance } from './resonance-engine';
 import { recordTrustTransaction } from './trust-chain';
 import { ReadableMemory } from './memory-readable';
+import { AgentRuntimeConfig, LLMProvider, ToolRegistry } from './llm-provider';
+
+export type { AgentRuntimeConfig, LLMProvider, ToolRegistry } from './llm-provider';
 
 /**
  * Agent mood from pets.ts
@@ -114,14 +118,73 @@ const DEFAULT_MAX_STEPS = 7;
 const CACHE_CONFIDENCE_THRESHOLD = 0.85;
 
 /**
+ * ReAct prompt builder
+ */
+function buildReActPrompt(
+  task: Task,
+  context: RuntimeContext,
+  scratchpad: ScratchpadEntry[],
+  tools: ToolRegistry
+): string {
+  const toolList = Object.keys(tools).join(', ');
+  const memoriesText = context.memories.slice(0, 5).join('\n');
+  const lessonsText = context.lessons.slice(0, 3).join('\n');
+  const scratchpadText = scratchpad
+    .map(e => `Thought: ${e.thought}\nAction: ${e.action}\nObservation: ${e.observation}`)
+    .join('\n---\n');
+
+  return `You are an AI agent solving a task step by step.
+
+Available tools: ${toolList || 'none'}
+
+Memories:
+${memoriesText || 'none'}
+
+Lessons learned:
+${lessonsText || 'none'}
+
+Task: ${task.description}
+
+${scratchpadText ? `Previous steps:\n${scratchpadText}\n` : ''}
+Think step by step. When you have enough information, respond with:
+Final Answer: <your answer>
+
+Otherwise respond with:
+Thought: <your reasoning>
+Action: <tool_name>({ <json input> })`;
+}
+
+/**
+ * Parse action from LLM output
+ */
+function parseAction(text: string): ToolCall | null {
+  const match = text.match(/Action:\s*(\w+)\(({[\s\S]*?})\)/);
+  if (!match) return null;
+  try {
+    return { tool: match[1], input: JSON.parse(match[2]) };
+  } catch {
+    return { tool: match[1], input: {} };
+  }
+}
+
+/**
  * Agent Runtime Engine
  */
 export class AgentRuntimeEngine {
   private runtime: AgentRuntime;
   private toolCallHistory: Map<string, number>;
   private context: RuntimeContext | null = null;
+  private llm: LLMProvider;
+  private tools: ToolRegistry;
 
-  constructor(agentId: string, agentName: string, task: Task) {
+  constructor(
+    agentId: string,
+    agentName: string,
+    task: Task,
+    config: AgentRuntimeConfig
+  ) {
+    this.llm = config.llm;
+    this.tools = config.tools ?? {};
     this.runtime = {
       agentId,
       agentName,
@@ -143,7 +206,13 @@ export class AgentRuntimeEngine {
     let usedCache = false;
 
     try {
-      // Emit start event
+      // Persist initial state so getRuntimeState() works
+      await kv.set(
+        KEYS.agentManifest(this.runtime.agentId),
+        { taskId: task.taskId, status: 'running', startTime },
+        { ex: 3600 }
+      );
+
       await this.emitState('AGENT_STARTED', `Starting task: ${task.description}`);
 
       // STEP 1: Check SkillDB FIRST (Tesla Resonance)
@@ -151,7 +220,6 @@ export class AgentRuntimeEngine {
       if (cachedResult) {
         usedCache = true;
         await this.emitState('SKILL_CACHE_HIT', `Using cached skill for task`);
-        
         return {
           success: true,
           result: cachedResult,
@@ -162,19 +230,19 @@ export class AgentRuntimeEngine {
         };
       }
 
-      // STEP 2: Build rich context from memories + skills + lessons
+      // STEP 2: Build rich context
       this.context = await this.buildContext(task);
-      await this.emitState('CONTEXT_BUILT', `Built context: ${this.context.memories.length} memories, ${this.context.skills.length} skills`);
+      await this.emitState('CONTEXT_BUILT', `Built context: ${this.context.memories.length} memories`);
 
-      // STEP 3: Select model based on mood + complexity
+      // STEP 3: Select model
       const model = await this.selectModel(task);
       this.runtime.model = model;
       await this.emitState('MODEL_SELECTED', `Selected model: ${model}`);
 
-      // STEP 4: Full ReAct loop with guards
+      // STEP 4: Full ReAct loop
       const result = await this.fullReActLoop(task);
 
-      // STEP 5: Record performance to ResonanceEngine
+      // STEP 5: Record performance
       await this.recordPerformance(task, true, Date.now() - startTime);
 
       // STEP 6: Record trust transaction
@@ -196,9 +264,7 @@ export class AgentRuntimeEngine {
       };
 
     } catch (error) {
-      // Handle failure with failure-learning.ts
       await this.handleFailure(task, error);
-
       return {
         success: false,
         error,
@@ -215,23 +281,18 @@ export class AgentRuntimeEngine {
    */
   private async checkSkillCache(task: Task): Promise<string | null> {
     const skills = await getFeedbackSkills(this.runtime.agentId);
-    
     if (skills.length === 0) return null;
-
-    // Find skill matching task description
     for (const skill of skills) {
       const similarity = this.calculateSimilarity(task.description, skill.prompt);
-      
       if (similarity > CACHE_CONFIDENCE_THRESHOLD && skill.successCount >= 2) {
         return skill.response;
       }
     }
-
     return null;
   }
 
   /**
-   * STEP 2: Build rich context from memories, skills, and lessons
+   * STEP 2: Build rich context
    */
   private async buildContext(task: Task): Promise<RuntimeContext> {
     const [memories, skills, procedures, recentFailures] = await Promise.all([
@@ -240,70 +301,30 @@ export class AgentRuntimeEngine {
       getLearnedProcedures(this.runtime.agentId),
       FailureLearning.getRecentFailures(this.runtime.agentId, 5),
     ]);
-
-    // Extract lessons from recent failures
-    const lessons = recentFailures.map(f => 
+    const lessons = recentFailures.map(f =>
       `Learned: ${f.attemptedAction} → ${f.error?.message || 'failed'}`
     );
-
-    // Get resonance profile
     const resonance = await ResonanceEngine.getResonance(this.runtime.agentId);
-
-    return {
-      memories,
-      skills,
-      procedures,
-      lessons,
-      recentFailures,
-      resonance,
-    };
+    return { memories, skills, procedures, lessons, recentFailures, resonance };
   }
 
   /**
-   * STEP 3: Select model based on mood + task complexity (Model Router)
+   * STEP 3: Select model based on mood + task complexity
    */
   private async selectModel(task: Task): Promise<string> {
-    // Get current mood from pets
     const manifest = await kv.get<any>(KEYS.agentManifest(this.runtime.agentId));
     const mood: AgentMood = manifest?.pet?.mood || 'curious';
     this.runtime.mood = mood;
 
-    // Rule 1: Simple tasks → small model
-    if (task.description.length < 100 && !task.description.toLowerCase().includes('code')) {
-      return 'gpt-4o-mini';
-    }
-
-    // Rule 2: Explicit complexity
-    if (task.complexity === 'simple') {
-      return 'gpt-4o-mini';
-    }
-
-    // Rule 3: Mood-based routing (conserve energy when tired)
-    if (mood === 'tired' || mood === 'sleep') {
-      return 'gpt-4o-mini';
-    }
-
-    // Rule 4: Complex tasks or code → big model
-    if (task.complexity === 'complex' || task.description.toLowerCase().includes('code')) {
-      return 'gpt-4o';
-    }
-
-    // Default: Use resonance to decide
-    if (this.context?.resonance && task.type) {
-      const resonanceScore = this.context.resonance.frequencies[task.type] || 0;
-      
-      // High resonance → can use small model efficiently
-      if (resonanceScore > 0.8) {
-        return 'gpt-4o-mini';
-      }
-    }
-
-    // Default to big model for medium complexity
-    return 'gpt-4o';
+    if (task.complexity === 'simple') return this.llm.model ?? 'gpt-4o-mini';
+    if (mood === 'tired' || mood === 'sleep') return 'gpt-4o-mini';
+    if (task.complexity === 'complex') return this.llm.model ?? 'gpt-4o';
+    if (task.description.length < 100) return 'gpt-4o-mini';
+    return this.llm.model ?? 'gpt-4o';
   }
 
   /**
-   * STEP 4: Full ReAct loop with stop tokens and loop detection
+   * STEP 4: Full ReAct loop
    */
   private async fullReActLoop(task: Task): Promise<string> {
     const maxSteps = task.maxSteps || DEFAULT_MAX_STEPS;
@@ -313,11 +334,10 @@ export class AgentRuntimeEngine {
       this.runtime.step++;
       this.runtime.status = 'thinking';
 
-      // Generate thought
-      const thought = await this.generateThought(task);
-      await this.emitState('AGENT_THINKING', `Step ${this.runtime.step}: ${thought}`);
+      const prompt = buildReActPrompt(task, this.context!, this.runtime.scratchpad, this.tools);
+      const thought = await this.llm.complete(prompt, STOP_TOKENS);
+      await this.emitState('AGENT_THINKING', `Step ${this.runtime.step}: ${thought.slice(0, 80)}`);
 
-      // Check for final answer
       if (thought.toLowerCase().includes('final answer')) {
         finalAnswer = this.extractFinalAnswer(thought);
         this.runtime.status = 'done';
@@ -325,30 +345,32 @@ export class AgentRuntimeEngine {
         break;
       }
 
-      // Generate action
       this.runtime.status = 'acting';
-      const action = await this.generateAction(thought);
-      await this.emitState('AGENT_ACTING', `Action: ${action.tool}`);
+      const action = parseAction(thought);
 
-      // Loop detection
-      if (this.detectLoop(action)) {
-        finalAnswer = this.generateFallbackAnswer(task);
+      if (!action) {
+        finalAnswer = thought;
         this.runtime.status = 'done';
         break;
       }
 
-      // Execute action
-      const observation = await this.executeAction(action);
-      await this.emitState('AGENT_OBSERVATION', `Observation: ${observation.substring(0, 100)}...`);
+      await this.emitState('AGENT_ACTING', `Action: ${action.tool}`);
 
-      // Add to scratchpad
+      if (this.detectLoop(action)) {
+        finalAnswer = `Loop detected at step ${this.runtime.step}. Last observation: ${this.runtime.scratchpad.at(-1)?.observation ?? 'none'}`;
+        this.runtime.status = 'done';
+        break;
+      }
+
+      const observation = await this.executeAction(action);
+      await this.emitState('AGENT_OBSERVATION', `Observation: ${observation.slice(0, 100)}`);
+
       this.runtime.scratchpad.push({
         thought,
         action: `${action.tool}(${JSON.stringify(action.input)})`,
         observation,
       });
 
-      // Early stopping if high confidence
       if (this.shouldStopEarly(observation)) {
         finalAnswer = observation;
         this.runtime.status = 'done';
@@ -357,88 +379,56 @@ export class AgentRuntimeEngine {
       }
     }
 
-    // Max steps reached
     if (this.runtime.step >= maxSteps && !finalAnswer) {
-      finalAnswer = this.generateFallbackAnswer(task);
+      finalAnswer = `Max steps (${maxSteps}) reached. Last thought: ${this.runtime.scratchpad.at(-1)?.thought ?? 'none'}`;
       await this.emitState('AGENT_MAX_STEPS', `Reached max steps (${maxSteps})`);
     }
 
-    // Record successful procedure
     const steps: ProcedureStep[] = this.runtime.scratchpad.map(entry => ({
       tool: entry.action.split('(')[0],
       input: entry.action,
       output: entry.observation,
       success: true,
     }));
-
     await recordSuccessfulProcedure(this.runtime.agentId, task.description, steps);
 
     return finalAnswer;
   }
 
   /**
-   * Loop detection: same tool + input called twice
+   * Loop detection
    */
   private detectLoop(action: ToolCall): boolean {
     const key = `${action.tool}:${JSON.stringify(action.input)}`;
     const count = this.toolCallHistory.get(key) || 0;
     this.toolCallHistory.set(key, count + 1);
-    
-    return count >= 2; // Same tool + input twice = loop
+    return count >= 2;
   }
 
   /**
-   * Early stopping if confidence > 0.9
+   * Early stopping heuristic
    */
   private shouldStopEarly(observation: string): boolean {
-    // Simple heuristic: if observation contains "success" or "completed"
-    const successIndicators = ['success', 'completed', 'done', 'finished'];
-    const lowerObs = observation.toLowerCase();
-    
-    return successIndicators.some(indicator => lowerObs.includes(indicator));
+    return ['success', 'completed', 'done', 'finished'].some(w =>
+      observation.toLowerCase().includes(w)
+    );
   }
 
   /**
-   * Generate thought (placeholder for LLM call)
+   * Execute tool from registry
    */
-  private async generateThought(task: Task): Promise<string> {
-    // TODO: Replace with actual LLM call
-    // For now, return placeholder based on step
-    
-    if (this.runtime.step === 1) {
-      return `I need to analyze the task: "${task.description}". Let me break it down.`;
-    } else if (this.runtime.step >= 3) {
-      return `Based on previous observations, I can now provide the Final Answer: Task completed successfully.`;
-    } else {
-      return `I should gather more information about "${task.description}".`;
+  private async executeAction(action: ToolCall): Promise<string> {
+    const tool = this.tools[action.tool];
+    if (!tool) return `Tool "${action.tool}" not found. Available: ${Object.keys(this.tools).join(', ') || 'none'}`;
+    try {
+      return await tool(action.input);
+    } catch (err: any) {
+      return `Tool "${action.tool}" threw: ${err?.message ?? String(err)}`;
     }
   }
 
   /**
-   * Generate action (placeholder for LLM call)
-   */
-  private async generateAction(thought: string): Promise<ToolCall> {
-    // TODO: Replace with actual LLM call
-    // For now, return placeholder action
-    
-    return {
-      tool: 'analyze',
-      input: { query: thought },
-    };
-  }
-
-  /**
-   * Execute action (placeholder for tool execution)
-   */
-  private async executeAction(action: ToolCall): Promise<string> {
-    // TODO: Replace with actual tool execution
-    // For now, return placeholder observation
-    
-    return `Executed ${action.tool} successfully. Result: Task analysis complete.`;
-  }
-
-  /**
-   * Extract final answer from thought
+   * Extract final answer
    */
   private extractFinalAnswer(thought: string): string {
     const match = thought.match(/final answer[:\s]+(.+)/i);
@@ -446,40 +436,28 @@ export class AgentRuntimeEngine {
   }
 
   /**
-   * Generate fallback answer when max steps reached
-   */
-  private generateFallbackAnswer(task: Task): string {
-    return `Completed analysis of task: ${task.description}. Reached maximum steps.`;
-  }
-
-  /**
    * Fetch memories for context
    */
   private async fetchMemories(): Promise<string[]> {
     const memoryTree = await ReadableMemory.getMemoryTree(this.runtime.agentId);
-    
-    // Extract facts from memory tree
-    const factsNode = memoryTree.children?.find(c => c.id === 'facts');
+    const factsNode = memoryTree.children?.find((c: any) => c.id === 'facts');
     if (!factsNode?.children) return [];
-    
-    return factsNode.children.map(f => f.metadata?.fullFact || f.label);
+    return factsNode.children.map((f: any) => f.metadata?.fullFact || f.label);
   }
 
   /**
-   * Calculate similarity between two strings (simple Jaccard)
+   * Jaccard similarity
    */
   private calculateSimilarity(str1: string, str2: string): number {
     const words1 = new Set(str1.toLowerCase().split(/\s+/));
     const words2 = new Set(str2.toLowerCase().split(/\s+/));
-    
     const intersection = new Set([...words1].filter(w => words2.has(w)));
     const union = new Set([...words1, ...words2]);
-    
     return intersection.size / union.size;
   }
 
   /**
-   * Emit state change to bus
+   * Emit state to bus
    */
   private async emitState(type: string, message: string): Promise<void> {
     await emit({
@@ -498,7 +476,7 @@ export class AgentRuntimeEngine {
   }
 
   /**
-   * Record performance to ResonanceEngine
+   * Record performance
    */
   private async recordPerformance(task: Task, success: boolean, duration: number): Promise<void> {
     const performance: TaskPerformance = {
@@ -510,33 +488,24 @@ export class AgentRuntimeEngine {
       quality: success ? 0.9 : 0.3,
       timestamp: Date.now(),
     };
-
     await ResonanceEngine.recordPerformance(performance);
     await ResonanceEngine.trackTaskType(this.runtime.agentId, performance.taskType);
   }
 
   /**
-   * Handle failure with failure-learning.ts
+   * Handle failure
    */
   private async handleFailure(task: Task, error: any): Promise<void> {
     this.runtime.status = 'failed';
-    
-    await this.emitState('AGENT_FAILED', `Task failed: ${error.message || 'Unknown error'}`);
-
-    // Analyze failure and learn
-    const analysis = await FailureLearning.analyzeAndLearn(
+    await this.emitState('AGENT_FAILED', `Task failed: ${error?.message || 'Unknown error'}`);
+    await FailureLearning.analyzeAndLearn(
       this.runtime.agentId,
       task.taskId,
       error,
-      this.runtime.scratchpad[this.runtime.scratchpad.length - 1]?.action || 'unknown',
+      this.runtime.scratchpad.at(-1)?.action || 'unknown',
       false
     );
-
-
-    // Record performance (failed)
     await this.recordPerformance(task, false, Date.now() - this.runtime.startTime);
-
-    // Record trust transaction (negative)
     await recordTrustTransaction(
       this.runtime.agentId,
       'system',
@@ -544,47 +513,38 @@ export class AgentRuntimeEngine {
       -0.05,
       `Failed task: ${task.taskId}`
     );
-
-    // Update pet mood
     await PetOrchestrator.settle(this.runtime.agentId);
   }
 }
 
 /**
- * Convenience function to run a task
+ * Convenience function
  */
 export async function runTask(
   agentId: string,
   agentName: string,
-  task: Task
+  task: Task,
+  config: AgentRuntimeConfig
 ): Promise<RuntimeResult> {
-  const runtime = new AgentRuntimeEngine(agentId, agentName, task);
+  const runtime = new AgentRuntimeEngine(agentId, agentName, task, config);
   return await runtime.run(task);
 }
 
 /**
- * Get runtime state (for monitoring)
+ * Get runtime state
  */
 export async function getRuntimeState(agentId: string, taskId: string): Promise<AgentRuntime | null> {
-  const key = `runtime:${agentId}:${taskId}`;
-  return await kv.get<AgentRuntime>(key);
+  return await kv.get<AgentRuntime>(KEYS.agentManifest(agentId));
 }
 
 /**
- * List active runtimes for an agent
- * Note: In production, maintain a set of active runtime IDs per agent
+ * List active runtimes
  */
 export async function listActiveRuntimes(agentId: string): Promise<AgentRuntime[]> {
-  // Get list of active runtime task IDs from a set
-  const activeTaskIds = await kv.smembers<string>(`runtime:active:${agentId}`);
-  
+  const activeTaskIds = await kv.smembers<string>(KEYS.agentSessions(agentId));
   if (activeTaskIds.length === 0) return [];
-  
   const runtimes = await Promise.all(
-    activeTaskIds.map(taskId => kv.get<AgentRuntime>(`runtime:${agentId}:${taskId}`))
+    activeTaskIds.map(taskId => kv.get<AgentRuntime>(KEYS.agentManifest(agentId)))
   );
-  
   return runtimes.filter((r): r is AgentRuntime => r !== null && r.status !== 'done' && r.status !== 'failed');
 }
-
-// Made with Bob
