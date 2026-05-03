@@ -14,7 +14,7 @@ import {
   Activity
 } from 'lucide-react';
 import { AgentPet } from '@/components/shared/AgentPet';
-import FadeIn from '@/components/animations/FadeIn';
+import { FadeIn } from '@/components/animations/FadeIn';
 
 interface PulseEvent {
   id: string;
@@ -23,7 +23,7 @@ interface PulseEvent {
   agentId: string;
   agentName: string;
   message: string;
-  pet?: any;
+  pet?: Record<string, unknown>;
 }
 
 const TYPE_ICONS = {
@@ -53,7 +53,7 @@ export default function PulsePage() {
           // Merge new events, filter out duplicates, sort by timestamp
           const newEvents = data.events.filter((ne: PulseEvent) => !prev.some(pe => pe.id === ne.id));
           return [...newEvents, ...prev].slice(0, 50);
-        });
+        }, []);
       }
     };
 
@@ -80,7 +80,7 @@ export default function PulsePage() {
       {/* Header */}
       <header className="flex items-center justify-between mb-12">
         <div>
-          <FadeIn>
+          <div>
             <div className="flex items-center gap-3 mb-2">
               <div className={`w-2 h-2 rounded-full ${isLive ? 'bg-red-500 animate-pulse' : 'bg-zinc-600'}`} />
               <span className="text-xs font-black text-white/40 uppercase tracking-[0.3em]">
@@ -93,7 +93,7 @@ export default function PulsePage() {
                 LIVE
               </span>
             </h1>
-          </FadeIn>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -197,3 +197,5 @@ export default function PulsePage() {
     </div>
   );
 }
+
+function.displayName = 'function';

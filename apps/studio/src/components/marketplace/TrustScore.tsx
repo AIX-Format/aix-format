@@ -1,50 +1,90 @@
+'use client';
+
 import React from 'react';
-import { motion } from 'framer-motion';
+import { Shield, ShieldCheck, ShieldAlert, ShieldX } from 'lucide-react';
 
 interface TrustScoreProps {
-  score: number;
-  size?: number;
+  score: number; // 0-100
+  size?: 'sm' | 'md' | 'lg';
+  showLabel?: boolean;
+  className?: string;
 }
 
-export const TrustScore: React.FC<TrustScoreProps> = ({ score, size = 40 }) => {
-  const radius = (size - 4) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (score / 100) * circumference;
-
-  const getColor = (s: number) => {
-    if (s >= 90) return '#10b981'; // Success
-    if (s >= 70) return '#3b82f6'; // Primary
-    if (s >= 50) return '#f59e0b'; // Warning
-    return '#ef4444'; // Danger
+export function TrustScore({
+  score,
+  size = 'md',
+  showLabel = true,
+  className = ''
+}: TrustScoreProps) {
+  const sizeClasses = {
+    sm: 'w-4 h-4',
+    md: 'w-5 h-5',
+    lg: 'w-6 h-6'
   };
 
+  const iconSize = sizeClasses[size];
+
+  // Determine trust level and styling
+  const getTrustLevel = () => {
+    if (score >= 90) {
+      return {
+        label: 'Excellent',
+        icon: ShieldCheck,
+        color: 'text-green-500',
+        bgColor: 'bg-green-500/10',
+        borderColor: 'border-green-500/20'
+      };
+    } else if (score >= 70) {
+      return {
+        label: 'Good',
+        icon: Shield,
+        color: 'text-blue-500',
+        bgColor: 'bg-blue-500/10',
+        borderColor: 'border-blue-500/20'
+      };
+    } else if (score >= 50) {
+      return {
+        label: 'Fair',
+        icon: ShieldAlert,
+        color: 'text-yellow-500',
+        bgColor: 'bg-yellow-500/10',
+        borderColor: 'border-yellow-500/20'
+      };
+    } else {
+      return {
+        label: 'Low',
+        icon: ShieldX,
+        color: 'text-red-500',
+        bgColor: 'bg-red-500/10',
+        borderColor: 'border-red-500/20'
+      };
+    }
+  };
+
+  const trustLevel = getTrustLevel();
+  const Icon = trustLevel.icon;
+
   return (
-    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="transform -rotate-90">
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke="currentColor"
-          strokeWidth="2"
-          fill="transparent"
-          className="text-white/5"
-        />
-        <motion.circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke={getColor(score)}
-          strokeWidth="2"
-          fill="transparent"
-          strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1, ease: 'easeOut' }}
-          strokeLinecap="round"
-        />
-      </svg>
-      <span className="absolute text-[10px] font-bold text-white/90">{score}</span>
+    <div className={`inline-flex items-center gap-2 ${className}`}>
+      <div
+        className={`
+          flex items-center gap-1.5 px-2 py-1 rounded-lg border
+          ${trustLevel.bgColor} ${trustLevel.borderColor}
+        `}
+      >
+        <Icon className={`${iconSize} ${trustLevel.color}`} />
+        <span className={`text-sm font-medium ${trustLevel.color}`}>
+          {score}
+        </span>
+      </div>
+      
+      {showLabel && (
+        <span className="text-xs text-gray-500">
+          {trustLevel.label} Trust
+        </span>
+      )}
     </div>
   );
-};
+}
+
+// Made with Moe Abdelaziz

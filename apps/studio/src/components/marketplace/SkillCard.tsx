@@ -1,3 +1,4 @@
+import Image from 'next/image';
 'use client';
 
 import React from 'react';
@@ -17,7 +18,7 @@ export const SkillCard: React.FC<SkillCardProps> = ({ item, onClick }) => {
       layout
       whileHover={{ y: -5 }}
       onClick={onClick}
-      className="p-5 rounded-2xl border border-white/10 bg-white/5 hover:border-purple-500/50 hover:bg-white/[0.08] transition-all cursor-pointer group"
+      className="p-5 rounded-2xl border border-white/10 bg-white/5 hover:border-purple-500/50 hover: transition-all cursor-pointer group"
     >
       <div className="flex items-start justify-between mb-4">
         <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
@@ -44,7 +45,7 @@ export const SkillCard: React.FC<SkillCardProps> = ({ item, onClick }) => {
 
       <div className="flex items-center justify-between pt-4 border-t border-white/5">
         <div className="flex items-center gap-3">
-          <img src={item.author.avatar} className="w-5 h-5 rounded-full" alt="" />
+          <Image width={0} height={0} src={item.author.avatar} className="w-5 h-5 rounded-full" alt="" />
           <span className="text-xs text-white/40">{item.author.name}</span>
         </div>
         <div className="flex items-center gap-1.5 text-[10px] font-bold text-white/60">

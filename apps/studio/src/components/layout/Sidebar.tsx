@@ -35,7 +35,7 @@ export function Sidebar() {
     <aside className="fixed left-0 top-0 bottom-0 w-64 bg-[var(--color-surface)] border-r border-[var(--color-border)] z-40 hidden lg:flex flex-col">
       <div className="p-6 border-b border-[var(--color-border)]">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)] flex items-center justify-center shadow-[0_0_15px_var(--color-primary-dim)]">
+          <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)] flex items-center justify-center [0_0_15px_var(--color-primary-dim)]">
             <Activity className="w-5 h-5 text-black" />
           </div>
           <div>
@@ -58,7 +58,7 @@ export function Sidebar() {
                 "group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 relative",
                 isActive 
                   ? "text-[var(--color-primary)] bg-[var(--color-primary-dim)]/10" 
-                  : "text-[var(--color-on-surface-variant)] hover:text-white hover:bg-white/[0.05]"
+                  : "text-[var(--color-on-surface-variant)] hover:text-white hover:"
               )}
             >
               <Icon className={cn("w-5 h-5 transition-transform duration-200", isActive ? "scale-110" : "group-hover:scale-110")} />
@@ -67,7 +67,7 @@ export function Sidebar() {
               {isActive && (
                 <motion.div 
                   layoutId="sidebar-active-indicator"
-                  className="absolute right-0 top-2 bottom-2 w-1 bg-[var(--color-primary)] rounded-l-full shadow-[0_0_10px_var(--color-primary)]"
+                  className="absolute right-0 top-2 bottom-2 w-1 bg-[var(--color-primary)] rounded-l-full [0_0_10px_var(--color-primary)]"
                 />
               )}
             </Link>
@@ -76,13 +76,13 @@ export function Sidebar() {
       </nav>
 
       <div className="p-4 mt-auto border-t border-[var(--color-border)]">
-        <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05] relative overflow-hidden group">
+        <div className="p-4 rounded-2xl  border border-white/[0.05] relative overflow-hidden group">
           <div className="absolute inset-0 bg-[var(--color-primary-dim)]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
           <p className="text-[10px] text-[var(--color-on-surface-variant)] uppercase mb-2">System Status</p>
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono text-white">Parser v${APP_VERSION}</span>
             <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-success)] animate-pulse shadow-[0_0_5px_var(--color-success)]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-success)] animate-pulse [0_0_5px_var(--color-success)]" />
               <span className="text-[10px] text-[var(--color-success)] font-bold uppercase">Online</span>
             </div>
           </div>

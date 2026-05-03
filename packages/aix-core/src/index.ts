@@ -1,193 +1,56 @@
 /**
- * AIX Unified Storage Adapter
- * Standardizes access to Upstash Redis across core and apps.
+ * aix-core public surface — 33 smart exports
+ *
+ * Primary API (start here):
+ *   import aix from 'aix-core';
+ *   import { aix, ParallelSim, GatewayManager } from 'aix-core';
  */
 
-export interface StorageOptions {
-  ex?: number; // Expiry in seconds
-  px?: number; // Expiry in milliseconds
-  nx?: boolean; // Only set if not exists
-  xx?: boolean; // Only set if exists
-}
+// ─── PRIMARY: The one function you need ──────────────────────────────────
+export { aix, aix as default }          from './aix';
+export type { AixOptions, AixResult, AixSwarmOptions, SwarmPattern } from './aix';
 
-export interface StorageAdapter {
-  get<T>(key: string): Promise<T | null>;
-  set(key: string, value: any, options?: StorageOptions): Promise<void>;
-  del(key: string | string[]): Promise<void>;
-  incr(key: string): Promise<number>;
-  decr(key: string): Promise<number>;
-  expire(key: string, seconds: number): Promise<void>;
-  exists(key: string): Promise<boolean>;
-  lpush(key: string, value: any): Promise<number>;
-  lrange<T>(key: string, start: number, stop: number): Promise<T[]>;
-  ltrim(key: string, start: number, stop: number): Promise<void>;
-  sadd(key: string, ...members: any[]): Promise<number>;
-  srem(key: string, ...members: any[]): Promise<number>;
-  smembers<T>(key: string): Promise<T[]>;
-}
+// ─── SIMULATION: Parallel execution engine ────────────────────────────
+export { ParallelSim }                  from './parallel-sim';
+export type { SimAgent, SimOptions, SimResult, AgentOutcome } from './parallel-sim';
 
-import { NS, TTL, KEYS } from './storage/keys';
-export { NS, TTL, KEYS };
-export * from './registry';
-export * from './learning';
-export * from './gateway';
-export * from './security';
-export * from './memory-readable';
-export * from './dead-hand';
-export * from './channels';
-export * from './pets';
-export * from './pulse';
+// ─── CONTROL PLANE: Gateway process lifecycle ───────────────────────
+export { GatewayManager }               from './gateway';
+export type { GatewayProcess, GatewayTask, GatewayResult, GatewayStatus } from './gateway';
 
-/** Map our generic StorageOptions → Upstash SetCommandOptions */
-import type { SetCommandOptions } from '@upstash/redis';
+// ─── EXECUTION ENGINE: ReAct loop ─────────────────────────────────
+export { AgentRuntimeEngine }           from './agent-runtime';
+export type { RuntimeResult }           from './agent-runtime';
 
-function toSetOptions(options?: StorageOptions): SetCommandOptions | undefined {
-  if (!options) return undefined;
-  const opts: SetCommandOptions = {} as any;
-  if (options.ex !== undefined) (opts as any).ex = options.ex;
-  if (options.px !== undefined) (opts as any).px = options.px;
-  if (options.nx) return { ...(opts as any), nx: true };
-  if (options.xx) return { ...(opts as any), xx: true };
-  return opts as SetCommandOptions;
-}
+// ─── LLM PROVIDERS: OpenAI / Anthropic / Ollama / Mock ────────────────
+export { createDefaultRouter, MockProvider, LLMRouter } from './llm-provider';
+export type { LLMProvider, CompletionOptions, CompletionResponse } from './llm-provider';
 
-import { Redis } from '@upstash/redis';
+// ─── SWARM: Multi-agent coordination (lower-level) ──────────────────
+export { SwarmRouter }                  from './SwarmRouter';
 
-class UpstashRedisAdapter implements StorageAdapter {
-  private client: Redis;
-  private isConnected: boolean = false;
+// ─── PHILOSOPHICAL ENGINES ──────────────────────────────────────
+export { CuriosityEngine }              from './curiosity-engine';
+export { ExpectationEngine }            from './expectation-engine';
+export { FailureLearning }              from './failure-learning';
 
-  constructor() {
-    const url = process.env.UPSTASH_REDIS_REST_URL;
-    const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+// ─── ROUTING: Constrained model selection ──────────────────────────
+export { ConstrainedRouter }            from './constrained-router';
+export type { Task, TaskConstraints }   from './constrained-router';
 
-    if (!url || !token) {
-      console.warn('[Storage] Missing Upstash Redis credentials. All storage operations will be bypassed.');
-      this.client = new Redis({ url: 'http://localhost', token: 'mock' });
-      this.isConnected = false;
-    } else {
-      this.client = new Redis({ url, token });
-      this.isConnected = true;
-    }
-  }
+// ─── SAFETY: Lineage + Trust ─────────────────────────────────────
+export { LineageRegistry }              from './lineage-registry';
+export { TrustChain }                   from './trust-chain';
 
-  private checkConnection() {
-    if (!this.isConnected) {
-      throw new Error('[Storage] Connection not initialized. Check environment variables.');
-    }
-  }
+// ─── STORAGE: Redis adapter + key registry ────────────────────────
+export { kv }                           from './storage/adapter';
+export { KEYS, TTL }                    from './storage/keys';
 
-  private async withRetry<T>(operation: () => Promise<T>, label: string, key: string, retries: number = 2): Promise<T | null> {
-    let attempt = 0;
-    while (attempt <= retries) {
-      try {
-        this.checkConnection();
-        return await operation();
-      } catch (error) {
-        attempt++;
-        if (attempt > retries) {
-          console.error(`[Storage] ${label} failed permanently for key: ${key.split(':')[0]}:*** | Attempts: ${attempt} | Error:`, (error as Error).message);
-          return null;
-        }
-        await new Promise(resolve => setTimeout(resolve, 100 * attempt));
-      }
-    }
-    return null;
-  }
+// ─── BUS: Event system ────────────────────────────────────────
+export { emit, subscribe, BUS_RINGS }  from './bus';
 
-  async get<T>(key: string): Promise<T | null> {
-    return this.withRetry(() => this.client.get<T>(key), 'GET', key);
-  }
+// ─── MODELS: Performance database ───────────────────────────────
+export { ModelDatabase }               from './model-database';
 
-  async set(key: string, value: unknown, options?: StorageOptions): Promise<void> {
-    const upstashOpts = toSetOptions(options);
-    const success = await this.withRetry(async () => {
-      if (upstashOpts) {
-        await this.client.set(key, value, upstashOpts);
-      } else {
-        await this.client.set(key, value);
-      }
-      return true;
-    }, 'SET', key);
-
-    if (!success) {
-      throw new Error(`[Storage] Persistent write failed for ${key.split(':')[0]}:***`);
-    }
-  }
-
-  async del(key: string | string[]): Promise<void> {
-    try {
-      this.checkConnection();
-      await this.client.del(...(Array.isArray(key) ? key : [key]));
-    } catch (error) {
-      console.error(`[Storage] DEL failed for ${key}:`, error);
-    }
-  }
-
-  async incr(key: string): Promise<number> {
-    try {
-      this.checkConnection();
-      return await this.client.incr(key);
-    } catch (error) {
-      console.error(`[Storage] INCR failed for ${key}:`, error);
-      throw error;
-    }
-  }
-
-  async decr(key: string): Promise<number> {
-    try {
-      this.checkConnection();
-      return await this.client.decr(key);
-    } catch (error) {
-      console.error(`[Storage] DECR failed for ${key}:`, error);
-      throw error;
-    }
-  }
-
-  async expire(key: string, seconds: number): Promise<void> {
-    try {
-      this.checkConnection();
-      await this.client.expire(key, seconds);
-    } catch (error) {
-      console.error(`[Storage] EXPIRE failed for ${key}:`, error);
-    }
-  }
-
-  async exists(key: string): Promise<boolean> {
-    try {
-      this.checkConnection();
-      const count = await this.client.exists(key);
-      return count > 0;
-    } catch (error) {
-      console.error(`[Storage] EXISTS failed for ${key}:`, error);
-      return false;
-    }
-  }
-
-  async lpush(key: string, value: any): Promise<number> {
-    return this.withRetry(() => this.client.lpush(key, value), 'LPUSH', key) as any;
-  }
-
-  async lrange<T>(key: string, start: number, stop: number): Promise<T[]> {
-    return (await this.withRetry(() => this.client.lrange<T>(key, start, stop), 'LRANGE', key)) || [];
-  }
-
-  async ltrim(key: string, start: number, stop: number): Promise<void> {
-    await this.withRetry(() => this.client.ltrim(key, start, stop), 'LTRIM', key);
-  }
-
-  async sadd(key: string, ...members: any[]): Promise<number> {
-    return this.withRetry(() => this.client.sadd(key, ...members), 'SADD', key) as any;
-  }
-
-  async srem(key: string, ...members: any[]): Promise<number> {
-    return this.withRetry(() => this.client.srem(key, ...members), 'SREM', key) as any;
-  }
-
-  async smembers<T>(key: string): Promise<T[]> {
-    return (await this.withRetry(() => this.client.smembers<T>(key), 'SMEMBERS', key)) || [];
-  }
-}
-
-export const kv = new UpstashRedisAdapter();
-export default kv;
+// ─── PETS: Mood-driven routing ──────────────────────────────────
+export { getPetState, getDynamicConstraints } from './pets';

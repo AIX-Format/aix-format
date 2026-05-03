@@ -25,5 +25,5 @@ The Artificial Intelligence eXchange (AIX) is a Tier 1 sovereign open-source sta
 
 ## Documentation References
 - [README.md](file:///Users/cryptojoker710/Desktop/aix-format/README.md) - Vision & Onboarding
-- [AXIOM_AGENTS.md](file:///Users/cryptojoker710/Desktop/aix-format/AXIOM_AGENTS.md) - Engineering Bible for Agents
+- [AXIOM.md](file:///Users/cryptojoker710/Desktop/aix-format/AXIOM.md) - Engineering Bible for Agents
 - [openmemory.md](file:///Users/cryptojoker710/Desktop/aix-format/openmemory.md) - Project History & Context

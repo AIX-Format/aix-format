@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
-import { Badge, Typography } from '@/components/shared';
+
 import { 
   Download, 
   Star, 
@@ -18,7 +18,7 @@ import {
   Github
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
+
 import Link from 'next/link';
 
 const DEVELOPERS = {
@@ -149,7 +149,7 @@ export default function DeveloperProfilePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.1 }}
-                    className="group glass-panel-heavy p-6 rounded-[2.5rem] border-white/5 hover:border-primary/40 hover:bg-white/[0.03] transition-all flex flex-col gap-6"
+                    className="group card p-6 rounded-[2.5rem] border-white/5 hover:border-primary/40 hover:bg-white/[0.03] transition-all flex flex-col gap-6"
                   >
                      <div className="flex items-start justify-between">
                         <div className="w-14 h-14 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-center text-2xl shadow-2xl">
@@ -192,3 +192,5 @@ export default function DeveloperProfilePage() {
     </div>
   );
 }
+
+function.displayName = 'function';

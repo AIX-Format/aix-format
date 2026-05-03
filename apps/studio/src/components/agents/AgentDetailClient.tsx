@@ -59,10 +59,14 @@ export default function AgentDetailClient({ id }: { id: string }) {
   const handleDownload = () => {
     if (!agent) return;
     const blob = new Blob([agent.yaml], { type: 'application/x-aix' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
     a.download = `${agent.name.toLowerCase().replace(/\s+/g, '-')}.aix`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url); // ✅ prevent memory leak
   };
 
   const handlePublishToMcp = async () => {
@@ -95,7 +99,7 @@ export default function AgentDetailClient({ id }: { id: string }) {
       setAgent(updatedAgent);
       
       toast.success(data.message || 'Agent published to MCP discovery');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       toast.error(error.message || 'Failed to publish agent to MCP registry');
     } finally {
@@ -123,7 +127,7 @@ export default function AgentDetailClient({ id }: { id: string }) {
       setAgent(updatedAgent);
       
       toast.success(data.message || 'Agent removed from MCP discovery');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       toast.error(error.message || 'Failed to unregister agent from MCP registry');
     } finally {
@@ -173,7 +177,7 @@ export default function AgentDetailClient({ id }: { id: string }) {
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-16">
           <div className="flex items-center gap-6">
             <div 
-              className="w-24 h-24 rounded-3xl flex items-center justify-center border-2 border-indigo-500/30 bg-indigo-500/10 shadow-[0_0_40px_rgba(99,102,241,0.15)]"
+              className="w-24 h-24 rounded-3xl flex items-center justify-center border-2 border-indigo-500/30 bg-indigo-500/10 [0_0_40px_rgba(99,102,241,0.15)]"
             >
               <Cpu className="w-12 h-12 text-indigo-400" />
             </div>
@@ -236,7 +240,7 @@ export default function AgentDetailClient({ id }: { id: string }) {
                 href={agent.deployment?.endpointUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl transition-all shadow-[0_20px_50px_rgba(16,185,129,0.2)] hover:scale-[1.02]"
+                className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl transition-all [0_20px_50px_rgba(16,185,129,0.2)] hover:scale-[1.02]"
               >
                 <Activity className="w-4 h-4" />
                 View Live Agent
@@ -244,7 +248,7 @@ export default function AgentDetailClient({ id }: { id: string }) {
             ) : (
               <button 
                 onClick={() => setShowDeploy(true)}
-                className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl transition-all shadow-[0_20px_50px_rgba(99,102,241,0.2)] hover:scale-[1.02] active:scale-[0.98]"
+                className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl transition-all [0_20px_50px_rgba(99,102,241,0.2)] hover:scale-[1.02] active:scale-[0.98]"
               >
                 <Rocket className="w-4 h-4" />
                 Deploy Agent
@@ -258,7 +262,7 @@ export default function AgentDetailClient({ id }: { id: string }) {
           <div className="lg:col-span-8 space-y-10">
             {/* Metadata Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 backdrop-blur-xl">
+              <div className="p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 ">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="p-2 rounded-lg bg-zinc-800 text-indigo-400">
                     <Fingerprint className="w-5 h-5" />
@@ -279,7 +283,7 @@ export default function AgentDetailClient({ id }: { id: string }) {
                 </div>
               </div>
 
-              <div className="p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 backdrop-blur-xl">
+              <div className="p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 ">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="p-2 rounded-lg bg-zinc-800 text-amber-400">
                     <Calendar className="w-5 h-5" />
@@ -299,7 +303,7 @@ export default function AgentDetailClient({ id }: { id: string }) {
             </div>
 
             {/* Discovery Preview */}
-            <div className="p-10 rounded-[2.5rem] bg-zinc-900/50 border border-zinc-800 backdrop-blur-xl">
+            <div className="p-10 rounded-[2.5rem] bg-zinc-900/50 border border-zinc-800 ">
               <div className="flex items-center gap-3 mb-8">
                 <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                   <Cpu className="w-6 h-6" />
@@ -325,7 +329,7 @@ export default function AgentDetailClient({ id }: { id: string }) {
               <div className="flex flex-col gap-3">
                 {agent.abom?.capabilities.map((cap: string, i: number) => (
                   <div key={i} className="flex items-center gap-3 p-4 bg-zinc-950 rounded-2xl border border-zinc-800 group hover:border-indigo-500/30 transition-all">
-                    <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
+                    <div className="w-2 h-2 rounded-full bg-indigo-500 [0_0_10px_rgba(99,102,241,0.5)]" />
                     <span className="font-bold text-zinc-300 group-hover:text-white transition-colors">{cap}</span>
                   </div>
                 )) || (
@@ -336,7 +340,7 @@ export default function AgentDetailClient({ id }: { id: string }) {
 
             {/* Deployment Status */}
             {agent.deployment && (
-              <div className="p-8 rounded-3xl bg-emerald-500/5 border border-emerald-500/10 backdrop-blur-xl">
+              <div className="p-8 rounded-3xl bg-emerald-500/5 border border-emerald-500/10 ">
                 <h3 className="text-sm font-black text-emerald-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
                   <Activity className="w-4 h-4" />
                   Live Deployment
@@ -391,22 +395,8 @@ export default function AgentDetailClient({ id }: { id: string }) {
       </main>
 
       <SovereignStatusBar />
-
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.1);
-        }
-      `}</style>
     </div>
   );
 }
+
+function.displayName = 'function';

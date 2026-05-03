@@ -1,13 +1,17 @@
 import type { 
-  AIXManifest as CanonicalManifest, 
-  ABOM as CanonicalABOM, 
-  IdentityLayer as CanonicalIdentityLayer, 
-  SaasService as CanonicalSaasService,
-  Meta as CanonicalMeta,
-  Persona as CanonicalPersona,
-  BuildProvenance as CanonicalBuildProvenance,
+  AIXManifest, 
+  ABOM, 
+  IdentityLayer, 
+  Meta,
+  Persona,
+  AgentSkill,
+  McpPrompt,
+  KycTier,
   RegistryEntry as CanonicalRegistryEntry
 } from '@aix-types';
+
+export type Manifest = AIXManifest;
+export type { ABOM, IdentityLayer, Meta, Persona, AgentSkill, McpPrompt, KycTier };
 
 /**
  * AIX Studio Unified Types
@@ -36,7 +40,6 @@ export interface PetConfig {
   accessories?: string[];
 }
 
-
 /**
  * RegistryEntry: Canonical + UI Overlays
  */
@@ -60,12 +63,12 @@ export interface AgentRecord {
   deployment?: DeploymentRecord;
   pet?: PetConfig;
   color?: string;
-  status?: 'online' | 'offline' | 'busy';
+  status?: 'online' | 'offline' | 'busy' | 'compromised';
+  tamperDetails?: string;
   successRate?: number;
   tasksCompleted?: number;
-  manifest?: CanonicalManifest;
+  manifest?: Manifest;
 }
-
 
 export type NormalizedAgent = AgentRecord & { isMock: boolean };
 
@@ -78,11 +81,7 @@ export interface McpDiscoveryResponse {
   agents: CanonicalRegistryEntry[];
 }
 
-export interface AgentSkill {
-  name: string;
-  description: string;
-  parameters?: Record<string, unknown>;
-}
+// Types now correctly imported from @aix-types at top of file
 
 // ─── Identity & Auth ───────────────────────────────────────────────────────
 

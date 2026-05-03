@@ -56,10 +56,10 @@ export const AgentPet: React.FC<AgentPetProps> = ({ pet, className = '', size = 
   // Animation classes based on mood
   const moodClasses = {
     busy: 'opacity-50 grayscale-[0.5] scale-95', // "Tired" look
-    alert: 'animate-pulse scale-110 shadow-[0_0_30px_rgba(239,68,68,0.5)]', // "Angry/Dead Hand"
+    alert: 'animate-pulse scale-110 [0_0_30px_rgba(239,68,68,0.5)]', // "Angry/Dead Hand"
     creative: 'animate-bounce',
     happy: 'hover:scale-110 transition-transform',
-    energized: 'animate-[spin_10s_linear_infinite] shadow-[0_0_40px_rgba(255,255,255,0.2)]',
+    energized: 'animate-[spin_10s_linear_infinite] [0_0_40px_rgba(255,255,255,0.2)]',
     sleep: 'opacity-30 blur-[1px] scale-90'
   };
 
@@ -75,7 +75,7 @@ export const AgentPet: React.FC<AgentPetProps> = ({ pet, className = '', size = 
       )}
       {/* Visual representation of the Pet */}
       <div 
-        className={`rounded-full flex items-center justify-center bg-zinc-900 border-2 transition-all duration-700 shadow-[0_0_20px_rgba(0,0,0,0.5)]`}
+        className={`rounded-full flex items-center justify-center bg-zinc-900 border-2 transition-all duration-700 [0_0_20px_rgba(0,0,0,0.5)]`}
         style={{ 
           borderColor: effectiveColor,
           backgroundColor: `${effectiveColor}15`,
@@ -91,13 +91,13 @@ export const AgentPet: React.FC<AgentPetProps> = ({ pet, className = '', size = 
         {/* Accessories Layer */}
         {pet.accessories?.map((acc, idx) => (
           <div key={idx} className="absolute -top-1 -left-1">
-             <Zap className="w-4 h-4 text-yellow-400 drop-shadow-lg" />
+             <Zap className="w-4 h-4 text-yellow-400 drop-" />
           </div>
         ))}
 
         {/* Mood Indicator */}
         <div 
-          className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-zinc-950 shadow-xl transition-all duration-500"
+          className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-zinc-950  transition-all duration-500"
           style={{ 
             backgroundColor: isAngry ? '#EF4444' : pet.mood === 'busy' ? '#F59E0B' : '#10B981',
             transform: pet.mood === 'busy' ? 'scale(0.8)' : 'scale(1)'
@@ -108,7 +108,7 @@ export const AgentPet: React.FC<AgentPetProps> = ({ pet, className = '', size = 
 
       {/* Level Badge for LG/XL */}
       {(size === 'lg' || size === 'xl') && (
-        <div className="absolute -top-4 -right-4 px-3 py-1 bg-zinc-950 border border-white/10 rounded-full shadow-2xl">
+        <div className="absolute -top-4 -right-4 px-3 py-1 bg-zinc-950 border border-white/10 rounded-full ">
           <span className="text-[10px] font-black text-white uppercase tracking-widest">LVL {pet.level}</span>
         </div>
       )}

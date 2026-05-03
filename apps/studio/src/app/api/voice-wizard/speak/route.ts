@@ -1,4 +1,5 @@
-import { EdgeTTS } from 'edge-tts';
+// import { EdgeTTS } from 'edge-tts';
+const EdgeTTS = null;
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
         'Cache-Control': 'no-cache'
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[Voice TTS] Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

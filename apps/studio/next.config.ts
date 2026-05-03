@@ -1,17 +1,27 @@
 import type { NextConfig } from "next";
 import path from "node:path";
+import bundleAnalyzer from '@next/bundle-analyzer';
 // @ts-ignore
 import packageJson from "./package.json";
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+  openAnalyzer: true,
+});
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   // Fix monorepo tracing root - pointing to workspace root
-  outputFileTracingRoot: path.join(__dirname, "../../"),
+  outputFileTracingRoot: path.join(process.cwd(), "../../"),
   transpilePackages: ["@aix-core/storage", "aix-format"], 
   
   env: {
     NEXT_PUBLIC_APP_VERSION: packageJson.version,
+  },
+
+  experimental: {
+    optimizePackageImports: ['framer-motion', 'lucide-react', '@xyflow/react'],
   },
 
   async headers() {
@@ -42,6 +52,15 @@ const nextConfig: NextConfig = {
           { key: "Cache-Control", value: "s-maxage=60, stale-while-revalidate=300" },
         ],
       },
+      {
+        // Pi Network domain validation — must be plain text, publicly accessible
+        source: "/validation-key.txt",
+        headers: [
+          { key: "Content-Type", value: "text/plain; charset=utf-8" },
+          { key: "Cache-Control", value: "public, max-age=86400" },
+          { key: "Access-Control-Allow-Origin", value: "*" },
+        ],
+      },
     ];
   },
 
@@ -52,4 +71,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);
+
+// Made with Moe Abdelaziz

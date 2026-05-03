@@ -54,7 +54,7 @@ export async function POST(
       skillHash 
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[Feedback API] Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

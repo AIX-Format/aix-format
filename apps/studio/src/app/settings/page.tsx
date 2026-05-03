@@ -4,10 +4,11 @@ import { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import { useSettings } from '@/hooks/useSettings';
-import { 
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
+import {
   AlertTriangle,
-  Copy, 
-  Check, 
+  Copy,
+  Check,
   LogOut,
   Download,
   Settings as SettingsIcon,
@@ -15,13 +16,15 @@ import {
   Box,
   Layers,
   Fingerprint,
-  Bell
+  Bell,
+  Key,
+  Shield
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge, InfoTooltip, Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/shared';
 import { cn } from '@/lib/utils';
 
-export default function SettingsPage() {
+function SettingsContent() {
   const [copied, setCopied] = useState(false);
   const [activeCategory, setActiveCategory] = useState('identity');
   const {
@@ -81,7 +84,7 @@ export default function SettingsPage() {
           <div className="flex-1 space-y-8">
             {activeCategory === 'identity' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <section className="glass-panel rounded-[2.5rem] p-8 border border-white/10">
+                <section className="card rounded-[2.5rem] p-8 border border-white/10">
                   <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-4">
                       <div className="p-3 rounded-2xl bg-white/5 text-primary">
@@ -134,7 +137,7 @@ export default function SettingsPage() {
                   </div>
                 </section>
 
-                <section className="glass-panel rounded-[2.5rem] p-8 border border-white/10 space-y-6">
+                <section className="card rounded-[2.5rem] p-8 border border-white/10 space-y-6">
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-black text-white uppercase tracking-widest">Connected Wallets</h3>
                     <InfoTooltip content="Manage the external accounts that can settle transactions for your agents." />
@@ -156,7 +159,7 @@ export default function SettingsPage() {
 
             {activeCategory === 'infrastructure' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <section className="glass-panel rounded-[2.5rem] p-8 border border-white/10">
+                <section className="card rounded-[2.5rem] p-8 border border-white/10">
                   <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-4">
                       <div className="p-3 rounded-2xl bg-white/5 text-purple-mcp">
@@ -194,7 +197,7 @@ export default function SettingsPage() {
                   </div>
                 </section>
 
-                <section className="glass-panel rounded-[2.5rem] p-8 border border-white/10">
+                <section className="card rounded-[2.5rem] p-8 border border-white/10">
                   <div className="flex items-center gap-4 mb-8">
                     <div className="p-3 rounded-2xl bg-white/5 text-blue-500">
                       <Layers className="w-6 h-6" />
@@ -222,7 +225,7 @@ export default function SettingsPage() {
 
             {activeCategory === 'security' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <section className="glass-panel rounded-[2.5rem] p-8 border border-white/10">
+                <section className="card rounded-[2.5rem] p-8 border border-white/10">
                   <div className="flex items-center gap-4 mb-8">
                     <div className="p-3 rounded-2xl bg-white/5 text-primary">
                       <Key className="w-6 h-6" />
@@ -259,7 +262,7 @@ export default function SettingsPage() {
                   </div>
                 </section>
 
-                <section className="glass-panel rounded-[2.5rem] p-8 border border-red-500/20 bg-red-500/[0.02]">
+                <section className="card rounded-[2.5rem] p-8 border border-red-500/20 bg-red-500/[0.02]">
                   <div className="flex items-center gap-4 mb-8 text-red-500">
                     <AlertTriangle className="w-6 h-6" />
                     <h2 className="text-2xl font-bold">Danger Zone</h2>
@@ -278,7 +281,7 @@ export default function SettingsPage() {
 
             {activeCategory === 'notifications' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <section className="glass-panel rounded-[2.5rem] p-8 border border-white/10">
+                <section className="card rounded-[2.5rem] p-8 border border-white/10">
                   <div className="flex items-center gap-4 mb-8">
                     <div className="p-3 rounded-2xl bg-white/5 text-primary">
                       <Bell className="w-6 h-6" />
@@ -317,3 +320,13 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+export default function SettingsPage() {
+  return (
+    <ErrorBoundary boundaryName="SettingsPage">
+      <SettingsContent />
+    </ErrorBoundary>
+  );
+}
+
+function.displayName = 'function';

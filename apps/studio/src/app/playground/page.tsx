@@ -4,10 +4,10 @@ import { useState, useMemo } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import { Badge, Typography } from '@/components/shared';
-import { 
-  Play, 
-  Send, 
-  Code2, 
+import {
+  Play,
+  Send,
+  Code2,
   Terminal as TerminalIcon,
   Cpu,
   History,
@@ -24,6 +24,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { cn } from '@/lib/utils';
 
 const API_ENDPOINTS = [
@@ -88,7 +89,7 @@ export default function PlaygroundPage() {
   const [activeLang, setActiveLang] = useState('curl');
   const [copied, setCopied] = useState(false);
 
-  const handleEndpointSelect = (endpoint: any) => {
+  const handleEndpointSelect = (endpoint: typeof API_ENDPOINTS[number]) => {
     setSelectedEndpoint(endpoint);
     setRequestPayload(endpoint.defaultRequest ? JSON.stringify(endpoint.defaultRequest, null, 2) : "{}");
     setResponse(null);
@@ -150,6 +151,7 @@ func main() {
   }, [selectedEndpoint, requestPayload]);
 
   return (
+    <ErrorBoundary>
     <div className="min-h-screen bg-background">
       <Navbar />
 
@@ -179,7 +181,7 @@ func main() {
 
            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               {/* Sidebar */}
-              <div className="lg:col-span-3 glass-panel-heavy rounded-[2rem] border-white/5 bg-white/[0.01] p-6 space-y-6">
+              <div className="lg:col-span-3 card rounded-[2rem] border-white/5 bg-white/[0.01] p-6 space-y-6">
                  <div className="relative group">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600" />
                     <input 
@@ -222,7 +224,7 @@ func main() {
               {/* Main Content */}
               <div className="lg:col-span-9 grid grid-cols-1 xl:grid-cols-2 gap-8">
                  {/* Request Section */}
-                 <div className="glass-panel-heavy rounded-[3rem] border-white/5 bg-[#0a0a0f]/80 p-8 space-y-8">
+                 <div className="card rounded-[3rem] border-white/5 bg-[#0a0a0f]/80 p-8 space-y-8">
                     <div className="space-y-4">
                        <h2 className="text-2xl font-black text-white italic uppercase tracking-tight">{selectedEndpoint.label}</h2>
                        <p className="text-xs text-zinc-500 leading-relaxed">{selectedEndpoint.description}</p>
@@ -287,7 +289,7 @@ func main() {
                  </div>
 
                  {/* Code Samples Section */}
-                 <div className="glass-panel-heavy rounded-[3rem] border-white/5 bg-[#0a0a0f]/40 overflow-hidden flex flex-col h-full">
+                 <div className="card rounded-[3rem] border-white/5 bg-[#0a0a0f]/40 overflow-hidden flex flex-col h-full">
                     <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
                        <div className="flex gap-6">
                           {['curl', 'javascript', 'python', 'go'].map(lang => (
@@ -306,7 +308,7 @@ func main() {
                        <button 
                          className="p-2 rounded-lg bg-white/5 text-zinc-500 hover:text-white transition-colors"
                          onClick={() => {
-                            navigator.clipboard.writeText((codeSamples as any)[activeLang]);
+                            navigator.clipboard.writeText((codeSamples as unknown)[activeLang]);
                             setCopied(true);
                             setTimeout(() => setCopied(false), 2000);
                          }}
@@ -315,7 +317,7 @@ func main() {
                        </button>
                     </div>
                     <div className="flex-1 p-8 font-mono text-[11px] overflow-auto custom-scrollbar bg-black/40 text-zinc-500">
-                       <pre className="whitespace-pre leading-relaxed">{(codeSamples as any)[activeLang]}</pre>
+                       <pre className="whitespace-pre leading-relaxed">{(codeSamples as unknown)[activeLang]}</pre>
                     </div>
                  </div>
               </div>
@@ -325,5 +327,8 @@ func main() {
 
       <SovereignStatusBar />
     </div>
+    </ErrorBoundary>
   );
 }
+
+function.displayName = 'function';

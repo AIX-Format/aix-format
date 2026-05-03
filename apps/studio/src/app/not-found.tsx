@@ -1,9 +1,9 @@
+import React from 'react';
 import Link from 'next/link';
-<<<<<<< HEAD
 import * as motion from 'framer-motion/client';
 import { SovereignAetherClient } from '@/components/studio/SovereignAetherClient';
 
-export default function NotFound() {
+function NotFound() {
   return (
     <div className="min-h-screen bg-[var(--color-background)] flex flex-col items-center justify-center overflow-hidden relative">
       <SovereignAetherClient />
@@ -32,3 +32,7 @@ export default function NotFound() {
     </div>
   );
 }
+
+export default React.memo(NotFound);
+
+NotFound.displayName = 'NotFound';

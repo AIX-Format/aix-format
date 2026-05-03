@@ -104,6 +104,7 @@ export interface IdentityLayer {
     expiresAt?: string;
     publicKey?: PublicKey;
     signature?: Signature;
+    dna_hash?: string;
 }
 export interface Skill {
     name: string;
@@ -200,18 +201,30 @@ export interface PiNetwork {
     payment_provider?: string;
     kyc_required?: boolean;
 }
-export interface ABOMConstituent {
+export interface SaasService {
     name: string;
-    version: string;
-    type?: 'model' | 'dataset' | 'library' | 'tool' | 'plugin' | 'agent' | 'runtime';
-    purl?: string;
-    hash?: string;
-    integrity_hash?: string;
-    license?: string;
-    supplier?: string;
-    trust_tier?: 'verified' | 'community' | 'unverified' | 'revoked';
-    security_status?: 'clean' | 'vulnerable' | 'revoked' | 'unknown';
-    source_registry?: string;
+    provider: string;
+    version?: string;
+    compliance_tier?: 'low' | 'medium' | 'high' | 'critical';
+    endpoints?: string[];
+    data_flow?: string[];
+}
+export interface UnifiedBOM {
+    agents?: Array<{
+        did: string;
+        name: string;
+        version: string;
+    }>;
+    saas?: SaasService[];
+    ai_models?: Array<{
+        model_id: string;
+        provider: string;
+        weights_hash?: string;
+    }>;
+    infrastructure?: Array<{
+        provider: string;
+        region?: string;
+    }>;
 }
 export interface ABOM {
     spec_version?: string;
@@ -226,6 +239,28 @@ export interface ABOM {
         value?: string;
         signer?: string;
     }>;
+    saas_services?: SaasService[];
+    unified_bom?: UnifiedBOM;
+    risk_score?: number;
+    compliance_notes?: string;
+}
+export interface BuildProvenance {
+    builder_id: string;
+    build_type: string;
+    invocation?: {
+        config_source: {
+            uri: string;
+            digest: Record<string, string>;
+        };
+    };
+    materials: Array<{
+        uri: string;
+        digest: Record<string, string>;
+    }>;
+}
+export interface MonetizationConfig {
+    tier: 'free' | 'builder' | 'pro' | 'enterprise';
+    pricing: Record<string, unknown>;
 }
 export interface LiveVoice {
     enabled: boolean;
@@ -273,6 +308,8 @@ export interface AIXDocument {
     requirements?: Requirements;
     /** Meta Arbiter runtime config — 'العقل المدبر' orchestration layer */
     meta_arbiter?: MetaArbiterConfig;
+    build_provenance?: BuildProvenance;
+    monetization?: MonetizationConfig;
     [key: string]: unknown;
 }
 export interface AIXValidationError {
@@ -314,11 +351,12 @@ export declare class AIXParser {
     /** Validate Meta Arbiter configuration block — new in v1.3 */
     private validateMetaArbiter;
     private validateABOM;
+    private _validateSaasService;
+    private _validateUnifiedBOM;
+    private validateBuildProvenance;
+    private validateMonetization;
     private _validateABOMConstituent;
-<<<<<<< HEAD
     private validateBlackBox;
-=======
->>>>>>> remotes/origin/feat/identity-page-complete-12323017966989893396
     private validateSecurity;
     private removeSecuritySection;
     private calculateChecksum;

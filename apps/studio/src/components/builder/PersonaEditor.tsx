@@ -30,7 +30,7 @@ export function PersonaEditor() {
             Enter to Add
           </span>
         </div>
-        <div className="flex flex-wrap gap-2 p-3 rounded-2xl bg-white/[0.02] border border-white/[0.08] min-h-[52px]">
+        <div className="flex flex-wrap gap-2 p-3 rounded-2xl  border border-white/[0.08] min-h-[52px]">
           {traits.map((trait, i) => (
             <span 
               key={i} 

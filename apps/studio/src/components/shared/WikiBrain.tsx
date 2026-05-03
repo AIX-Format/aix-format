@@ -114,7 +114,7 @@ export const WikiBrain: React.FC<WikiBrainProps> = ({ agentId }) => {
   if (loading) return <div className="h-40 bg-white/5 rounded-2xl animate-pulse" />;
 
   return (
-    <div className="p-6 bg-zinc-950 border border-white/5 rounded-3xl shadow-2xl">
+    <div className="p-6 bg-zinc-950 border border-white/5 rounded-3xl ">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xs font-black text-indigo-500 uppercase tracking-[0.3em] flex items-center gap-2">
           <BrainCircuit size={16} />
@@ -133,7 +133,7 @@ export const WikiBrain: React.FC<WikiBrainProps> = ({ agentId }) => {
         <div className="text-[10px] text-white/30 font-medium max-w-[200px]">
           Knowledge nodes are automatically indexed via the Sovereign Gateway pulse loop.
         </div>
-        <button className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-[10px] font-black text-white transition-all shadow-lg shadow-indigo-500/20">
+        <button className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-[10px] font-black text-white transition-all  /20">
           RE-INDEX BRAIN
         </button>
       </div>

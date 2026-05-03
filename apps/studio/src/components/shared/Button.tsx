@@ -15,11 +15,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const baseStyles = "inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50";
     
     const variants = {
-      primary: "bg-primary text-primary-dark hover:bg-primary/90 shadow-[0_0_20px_rgba(59,130,246,0.3)]",
+      primary: "bg-primary text-primary-dark hover:bg-primary/90 [0_0_20px_rgba(59,130,246,0.3)]",
       secondary: "bg-surface-3 text-foreground border border-white/10 hover:bg-surface-4",
       ghost: "bg-transparent text-foreground/70 hover:bg-white/5 hover:text-foreground",
-      danger: "bg-danger text-white hover:bg-danger/90 shadow-[0_0_20px_rgba(239,68,68,0.3)]",
-      purple: "bg-purple-mcp text-white hover:bg-purple-mcp/90 shadow-[0_0_20px_rgba(139,92,246,0.3)]",
+      danger: "bg-danger text-white hover:bg-danger/90 [0_0_20px_rgba(239,68,68,0.3)]",
+      purple: "bg-purple-mcp text-white hover:bg-purple-mcp/90 [0_0_20px_rgba(139,92,246,0.3)]",
     };
 
     const sizes = {
@@ -32,11 +32,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     return (
       <CombinedButton
-        ref={ref as any}
+        ref={ref as unknown}
         whileHover={isAnimated ? { scale: 1.02, translateY: -1 } : undefined}
         whileTap={isAnimated ? { scale: 0.98 } : undefined}
         className={cn(baseStyles, variants[variant], sizes[size], className)}
-        {...(props as any)}
+        {...(props as unknown)}
       />
     );
   }

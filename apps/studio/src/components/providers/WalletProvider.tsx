@@ -13,13 +13,13 @@ const queryClient = new QueryClient();
 export function WalletProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initPi = () => {
-      if (typeof window !== 'undefined' && (window as any).Pi) {
-        console.log('Initializing Pi SDK...');
+      if (typeof window !== 'undefined' && (window as unknown).Pi) {
+
         try {
-          (window as any).Pi.init({
+          (window as unknown).Pi.init({
             version: '2.0',
             sandbox: process.env.NODE_ENV !== 'production'
-          });
+          }, []);
         } catch (e) {
           console.error('Failed to initialize Pi SDK:', e);
         }
@@ -27,7 +27,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     };
 
     // If script is already loaded
-    if ((window as any).Pi) {
+    if ((window as unknown).Pi) {
       initPi();
     } else {
       window.addEventListener('load', initPi);

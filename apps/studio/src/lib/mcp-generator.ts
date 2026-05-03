@@ -1,3 +1,4 @@
+import { LATEST_VERSION } from "@/constants/protocol";
 import { Manifest, AgentSkill, McpPrompt } from "@/lib/types";
 
 /**
@@ -88,7 +89,7 @@ export function generateAIXDiscovery(aixManifest: Manifest, serverUri: string): 
   const card = generateMCPServerCard(aixManifest, serverUri);
   
   return {
-    format_version: "1.3.0",
+    format_version: LATEST_VERSION,
     agent: {
       id: aixManifest.identity_layer.id,
       name: aixManifest.meta.name,

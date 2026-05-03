@@ -1,6 +1,7 @@
+import React from 'react';
 import { Loader2 } from 'lucide-react';
 
-export default function Loading() {
+function Loading() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
       <div className="relative">
@@ -8,7 +9,7 @@ export default function Loading() {
         <div className="absolute inset-0 rounded-full bg-[var(--color-primary)] opacity-20 blur-2xl animate-pulse" />
         
         {/* Spinner */}
-        <div className="relative glass-panel rounded-full p-4 border border-white/10">
+        <div className="relative card rounded-full p-4 border border-white/10">
           <Loader2 className="w-8 h-8 text-[var(--color-primary)] animate-spin" />
         </div>
       </div>
@@ -24,3 +25,7 @@ export default function Loading() {
     </div>
   );
 }
+
+export default React.memo(Loading);
+
+Loading.displayName = 'Loading';

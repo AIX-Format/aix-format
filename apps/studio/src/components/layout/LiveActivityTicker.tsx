@@ -3,7 +3,6 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Zap, CheckCircle2, PlusCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const ACTIVITIES = [
   { id: 1, type: "completion", text: "ResearchBot completed 50 tasks → π 25 earned", icon: <CheckCircle2 className="w-3 h-3 text-emerald-400" /> },
@@ -14,7 +13,7 @@ const ACTIVITIES = [
 
 export const LiveActivityTicker = () => {
   return (
-    <div className="w-full bg-black/40 border-y border-white/5 py-2 overflow-hidden whitespace-nowrap relative">
+    <div className="w-full  border-y border-white/5 py-2 overflow-hidden whitespace-nowrap relative">
       <div className="flex animate-marquee hover:[animation-play-state:paused]">
         {[...ACTIVITIES, ...ACTIVITIES].map((activity, index) => (
           <div

@@ -1,4 +1,6 @@
-import { AIXManifest } from "@aix-types";
+
+import { SUPPORTED_VERSIONS } from "@/constants/protocol";
+import { scanAgent } from "./abom-scanner";
 
 export interface ValidationResult {
   valid: boolean;
@@ -9,7 +11,7 @@ export interface ValidationResult {
 
 /**
  * Sovereign Protocol Validator
- * Enforces strict compliance with AIX v1.3.0 standards.
+ * Enforces strict compliance with AIX standards.
  */
 export function validateSovereignManifest(manifest: any): ValidationResult {
   const errors: string[] = [];
@@ -21,8 +23,8 @@ export function validateSovereignManifest(manifest: any): ValidationResult {
     errors.push("Missing 'meta' block");
   } else {
     if (!manifest.meta.name) errors.push("meta.name is required");
-    if (!manifest.meta.format_version || manifest.meta.format_version !== "1.3.0") {
-      errors.push("Invalid format_version. Expected '1.3.0'");
+    if (!manifest.meta.format_version || !SUPPORTED_VERSIONS.includes(manifest.meta.format_version)) {
+      errors.push(`Invalid format_version. Supported: ${SUPPORTED_VERSIONS.join(", ")}`);
     }
     if (!manifest.meta.author) warnings.push("Missing meta.author (Sovereign recommendation)");
   }
@@ -50,14 +52,15 @@ export function validateSovereignManifest(manifest: any): ValidationResult {
   }
 
   // 4. ABOM (Risk Enforcement)
-  if (!manifest.abom) {
-    warnings.push("Missing 'abom' block. Risk score defaulted to maximum.");
-    risk_score = 100;
-  } else {
-    if (manifest.abom.risk_level === 'critical') risk_score = 100;
-    else if (manifest.abom.risk_level === 'high') risk_score = 75;
-    else if (manifest.abom.risk_level === 'medium') risk_score = 50;
-    else risk_score = 10;
+  const scanResult = scanAgent(manifest);
+  risk_score = scanResult.risk_score;
+  
+  if (scanResult.risks.length > 0) {
+    warnings.push(...scanResult.risks);
+  }
+
+  if (scanResult.tier === 'critical') {
+    errors.push("Agent poses critical security risk and cannot be validated.");
   }
 
   return {

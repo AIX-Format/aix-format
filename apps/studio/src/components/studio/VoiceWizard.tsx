@@ -3,9 +3,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, X, Loader2, Volume2, Sparkles, CheckCircle2 } from "lucide-react";
 import { useVoiceWizard } from "@/hooks/useVoiceWizard";
-import { Button } from "@/components/ui/button";
+
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 
 /**
  * AIX Voice Setup Wizard UI
@@ -36,9 +35,9 @@ export function VoiceWizard({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 "
     >
-      <Card className="relative w-full max-w-2xl overflow-hidden border-zinc-800 bg-zinc-950/90 shadow-2xl">
+      <Card className="relative w-full max-w-2xl overflow-hidden border-zinc-800 bg-zinc-950/90 ">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-zinc-800/50">
           <div className="flex items-center gap-3">
@@ -50,9 +49,9 @@ export function VoiceWizard({
               <p className="text-sm text-zinc-400">Describe your agent to get started</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="text-zinc-400 hover:text-white">
+          <button className="button" variant="ghost" size="icon" onClick={onClose} className="text-zinc-400 hover:text-white">
             <X className="w-5 h-5" />
-          </Button>
+          </button>
         </div>
 
         {/* Content Area */}
@@ -85,11 +84,11 @@ export function VoiceWizard({
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center transition-colors duration-500 shadow-xl ${
+                    className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center transition-colors duration-500  ${
                       isListening 
-                        ? "bg-red-500 text-white shadow-red-500/50" 
+                        ? "bg-red-500 text-white /50"
                         : isSpeaking
-                        ? "bg-blue-500 text-white shadow-blue-500/50"
+                        ? "bg-blue-500 text-white /50"
                         : "bg-zinc-900 text-zinc-400 border border-zinc-800"
                     }`}
                     onMouseDown={handleVoiceTurn}
@@ -108,7 +107,7 @@ export function VoiceWizard({
 
                 {/* Status & Last Message */}
                 <div className="space-y-4 max-w-md mx-auto">
-                  <Badge variant="outline" className={`${
+                  <span className="badge" variant="outline" className={`${
                     isListening ? "border-red-500 text-red-500 bg-red-500/5" :
                     isProcessing ? "border-purple-500 text-purple-500 bg-purple-500/5" :
                     isSpeaking ? "border-blue-500 text-blue-500 bg-blue-500/5" :
@@ -118,7 +117,7 @@ export function VoiceWizard({
                      isProcessing ? "THINKING..." :
                      isSpeaking ? "WIZARD SPEAKING..." : 
                      "HOLD TO TALK"}
-                  </Badge>
+                  </span>
                   
                   <p className="text-lg text-white font-medium leading-relaxed">
                     {lastMessage?.role === 'assistant' 
@@ -154,19 +153,19 @@ export function VoiceWizard({
                 </div>
 
                 <div className="flex gap-4">
-                  <Button 
+                  <button className="button"
                     variant="outline" 
                     className="flex-1 border-zinc-800 hover:bg-zinc-900"
                     onClick={() => onComplete(manifest)}
                   >
                     Edit Details
-                  </Button>
-                  <Button 
+                  </button>
+                  <button className="button"
                     className="flex-1 bg-red-600 hover:bg-red-700 text-white"
                     onClick={() => onDeploy(manifest)}
                   >
                     Deploy Agent
-                  </Button>
+                  </button>
                 </div>
               </motion.div>
             )}
@@ -179,7 +178,7 @@ export function VoiceWizard({
             Powered by Groq Whisper & Gemini 2.0 Flash
           </p>
         </div>
-      </Card>
+      </div>
     </motion.div>
   );
 }

@@ -146,6 +146,36 @@ Marketplace and User Agent views must be unified behind the `useRegistry` and `u
 
 ---
 
+## ADR-006 — Triple Threat Stack & AIX Essence
+
+| Field | Value |
+|-------|-------|
+| **Status** | ✅ Accepted |
+| **Date** | 2026-05-01 |
+| **Applies to** | Entire AIX Ecosystem, `aix-agent-skills` repo |
+
+### Decision
+
+1. **Triple Threat Stack**: AIX officially adopts a polyglot architecture:
+   - **Rust (DNA)**: Core logic, security parsers, and cryptographic primitives. Compiled to WASM for cross-platform runtime.
+   - **Go (Agency)**: High-concurrency orchestration layer and channel gateway (WhatsApp/Telegram).
+   - **TypeScript (Forge)**: Studio UI, DX tooling, and rapid prototyping.
+2. **AIX Essence**: All agentic capabilities (Skills, MCP servers, Plugins, APIs) are unified into a single format called an **Essence**.
+3. **Identity Graph**: Sovereign identity is anchored by `did:axiom`, with `bsuid` as the primary operational key for channel-scoped interactions.
+
+### Consequences
+
+- **Performance**: Rust/Go provide the performance needed for the GrandAgent's orchestration.
+- **Portability**: WASM allows the same core logic to run in the browser (Studio) and on the server (Agency).
+- **Simplicity**: Developers interact with a single unit (Essence) rather than juggling multiple standards.
+
+### Alternatives Considered
+
+- **All-TypeScript**: Rejected for performance and security isolation concerns at the core level.
+- **Python for AI**: Rejected in favor of Go/Rust for system-level predictability and concurrency.
+
+---
+
 ## How to Add a New ADR
 
 1. Copy the template below.
@@ -170,3 +200,19 @@ Marketplace and User Agent views must be unified behind the `useRegistry` and `u
 ### Alternatives Considered
 ...
 ```
+
+## ADR-008: Infrastructure Design Aesthetic and AXIOM.md SSOT
+**Date: 2025-05-01**
+**Status: Accepted**
+
+### Context
+The AIX ecosystem was using a mix of 'Cyberpunk' glassmorphism and high-contrast monochrome designs. Additionally, agent configuration was fragmented across multiple files.
+
+### Decision
+1. **Visual Identity**: AIX Studio will strictly follow an "Infrastructure Design" aesthetic: high-contrast monochrome (Black/White/Gray), crisp typography, massive whitespace, and flat/clean components. All 'Cyberpunk', glowing gradients, and heavy glassmorphism are prohibited.
+2. **SSOT**: `AXIOM.md` is the absolute Single Source of Truth for agent DNA, topology, and runtime configuration. `AXIOM_AGENTS.md` is deprecated and removed.
+3. **Parsing**: All core components (Rust, Go, TS) must use official YAML/Markdown parsers to read `AXIOM.md` to ensure structural integrity.
+
+### Consequences
+- Studio UI components must be refactored to remove glows and blurs.
+- Go agency engine requires a migration from manual string parsing to a YAML library.

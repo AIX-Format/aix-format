@@ -1,9 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getRegistry, updateRegistryEntry, deleteRegistryEntry } from "@/lib/registry";
+import { successResponse, requireAuth, ERR, parseBody } from '@/lib/api-helpers';
+import { indexAgent } from '@aix/core';
 
 /**
  * GET /api/agents/[id]
  * Fetches a specific agent by its DID.
+ *
+ * PUBLIC: No auth required - agents are publicly readable
  */
 export async function GET(
   req: NextRequest,
@@ -15,39 +19,36 @@ export async function GET(
     const entry = entries.find((e) => e.did === id);
 
     if (!entry) {
-      return NextResponse.json(
-        { error: "Agent not found" },
-        { status: 404 }
-      );
+      return ERR.NOT_FOUND('Agent not found');
     }
 
-    return NextResponse.json(entry);
-  } catch (error) {
-    console.error("Agent GET Error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch agent" },
-      { status: 500 }
-    );
+    return successResponse(entry);
+  } catch (error: unknown) {
+    console.error("[agents/id] GET failed:", error.message);
+    return ERR.INTERNAL('Failed to fetch agent');
   }
 }
 
 /**
  * PUT /api/agents/[id]
  * Updates a specific agent entry.
+ *
+ * PROTECTED: Requires authentication
  */
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { session, error: authError } = await requireAuth();
+    if (authError) return authError;
+
     const { id } = await params;
-    const body = await req.json();
+    const { body, error } = await parseBody<any>(req);
+    if (error) return error;
     
     if (body.did && body.did !== id) {
-      return NextResponse.json(
-        { error: "ID mismatch between path and body" },
-        { status: 400 }
-      );
+      return ERR.VALIDATION('ID mismatch between path and body');
     }
 
     const updatedEntry = {
@@ -56,34 +57,42 @@ export async function PUT(
     };
 
     await updateRegistryEntry(updatedEntry);
-    return NextResponse.json(updatedEntry);
-  } catch (error) {
-    console.error("Agent PUT Error:", error);
-    return NextResponse.json(
-      { error: "Failed to update agent" },
-      { status: 500 }
-    );
+    
+    // Index agent for semantic search
+    try {
+      await indexAgent(updatedEntry);
+    } catch(e) {
+      console.warn('Failed to semantically index agent:', e);
+    }
+    
+    return successResponse(updatedEntry);
+    
+  } catch (error: unknown) {
+    console.error("[agents/id] PUT failed:", error);
+    return ERR.INTERNAL('Failed to update agent');
   }
 }
 
 /**
  * DELETE /api/agents/[id]
  * Removes an agent from the registry.
+ *
+ * PROTECTED: Requires authentication
  */
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { session, error: authError } = await requireAuth();
+    if (authError) return authError;
+
     const { id } = await params;
     await deleteRegistryEntry(id);
-    return NextResponse.json({ message: "Agent deleted", id });
+    return successResponse({ message: "Agent deleted", id });
 
-  } catch (error) {
-    console.error("Agent DELETE Error:", error);
-    return NextResponse.json(
-      { error: "Failed to delete agent" },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    console.error("[agents/id] DELETE failed:", error.message);
+    return ERR.INTERNAL('Failed to delete agent');
   }
 }

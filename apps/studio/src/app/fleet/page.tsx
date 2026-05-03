@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import { useRouter } from 'next/navigation';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -24,7 +25,7 @@ import {
 import { Badge } from '@/components/shared';
 import { cn } from '@/lib/utils';
 
-export default function MissionControlPage() {
+function MissionControlContent() {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
   const [metrics, setMetrics] = useState<any>(null);
@@ -86,7 +87,7 @@ export default function MissionControlPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
            {loading ? (
              Array.from({ length: 4 }).map((_, i) => (
-               <div key={i} className="glass-panel-heavy p-6 rounded-[2.5rem] border-white/5 bg-white/[0.01] animate-pulse h-32" />
+               <div key={i} className="card p-6 rounded-[2.5rem] border-white/5 bg-white/[0.01] animate-pulse h-32" />
              ))
            ) : (
              stats.map((s, i) => (
@@ -95,7 +96,7 @@ export default function MissionControlPage() {
                  animate={{ opacity: 1, y: 0 }}
                  transition={{ delay: i * 0.1 }}
                  key={i} 
-                 className="glass-panel-heavy p-6 rounded-[2.5rem] border-white/5 bg-white/[0.01] flex flex-col gap-4"
+                 className="card p-6 rounded-[2.5rem] border-white/5 bg-white/[0.01] flex flex-col gap-4"
                >
                   <div className="flex items-center gap-3">
                      <div className={cn("p-2 rounded-xl bg-white/5")}>
@@ -110,7 +111,7 @@ export default function MissionControlPage() {
         </div>
 
         {/* Agent List Table */}
-        <div className="glass-panel-heavy rounded-[3rem] border-white/5 bg-black/40 overflow-hidden">
+        <div className="card rounded-[3rem] border-white/5 bg-black/40 overflow-hidden">
            <div className="p-8 border-b border-white/5 flex items-center justify-between">
               <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">Agent Fleet — Active Intelligence</h3>
               <div className="relative">
@@ -193,3 +194,13 @@ export default function MissionControlPage() {
     </div>
   );
 }
+
+export default function MissionControlPage() {
+  return (
+    <ErrorBoundary boundaryName="MissionControlPage">
+      <MissionControlContent />
+    </ErrorBoundary>
+  );
+}
+
+function.displayName = 'function';

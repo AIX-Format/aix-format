@@ -172,7 +172,7 @@ export default function PluginDirectoryPage() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
                       transition={{ duration: 0.2, delay: i * 0.05 }}
-                      className="group glass-panel-heavy p-6 rounded-[2.5rem] border-white/5 hover:border-primary/40 hover:bg-white/[0.03] transition-all flex flex-col gap-6 relative overflow-hidden"
+                      className="group card p-6 rounded-[2.5rem] border-white/5 hover:border-primary/40 hover:bg-white/[0.03] transition-all flex flex-col gap-6 relative overflow-hidden"
                     >
                        <div className="flex items-start justify-between">
                           <div className="w-14 h-14 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-center text-2xl shadow-2xl">
@@ -231,3 +231,5 @@ export default function PluginDirectoryPage() {
     </div>
   );
 }
+
+function.displayName = 'function';

@@ -22,7 +22,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ value, onChange, isLoading
   return (
     <div className="relative group w-full max-w-2xl">
       <div className="absolute inset-0 bg-blue-500/10 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
-      <div className="relative flex items-center bg-white/5 border border-white/10 rounded-2xl overflow-hidden focus-within:border-blue-500/50 transition-all shadow-lg backdrop-blur-md">
+      <div className="relative flex items-center bg-white/5 border border-white/10 rounded-2xl overflow-hidden focus-within:border-blue-500/50 transition-all  ">
         <div className="pl-4 text-white/40">
           {isLoading ? (
             <Loader2 className="w-5 h-5 animate-spin" />
