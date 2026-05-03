@@ -251,17 +251,18 @@ input, button, textarea, select   { font: inherit; color: inherit; }
 }
 
 /* ─── Sovereign Masterpiece Tokens ─────────────────────────────────────────── */
-:root {
-
+@keyframes float-up {
+  from { transform: translateY(0); }
   to { transform: translateY(-50%); }
 }
 
-
-
+@keyframes shimmer {
+  from { background-position: 0 0; }
   to { background-position: -200% 0; }
 }
 
-
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(0, 242, 255, 0.2); }
   50% { box-shadow: 0 0 40px rgba(0, 242, 255, 0.35); }
 }
 
@@ -282,6 +283,8 @@ input, button, textarea, select   { font: inherit; color: inherit; }
 }
 
 /* AIX Space Visual Tricks */
+@keyframes node-pulse {
+  0% { filter: drop-shadow(0 0 4px #FF0044); }
   50% { filter: drop-shadow(0 0 15px #FF0044); }
   100% { filter: drop-shadow(0 0 4px #FF0044); }
 }
