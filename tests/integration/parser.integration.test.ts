@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { AIXParser } from '../core/parser'; // Adjust path if needed
+import { AIXParser } from '../../core/parser.js';
 import * as fs from 'fs';
 import * as path from 'path';
 
