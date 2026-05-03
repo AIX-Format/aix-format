@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     return new Response('task param required', { status: 400 });
   }
 
-  const { aix } = await import('../../../../../../packages/aix-core/src/aix');
+  const { aix } = await import('@/../../packages/aix-core/src/index');
 
   const encoder = new TextEncoder();
   const stream  = new ReadableStream({

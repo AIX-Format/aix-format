@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Dynamic import — keeps bundle small, only loads when called
-    const { aix } = await import('../../../../../../packages/aix-core/src/aix');
+    const { aix } = await import('@/../../packages/aix-core/src/index');
 
     const result = await aix(agentId, task, { tools: tools ?? {} });
     return NextResponse.json(result);

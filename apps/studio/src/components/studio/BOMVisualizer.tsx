@@ -118,7 +118,7 @@ interface BOMVisualizerProps {
   formData: Manifest;
 }
 
-export default function BOMVisualizer({ formData }: BOMVisualizerProps) {
+function BOMVisualizer({ formData }: BOMVisualizerProps) {
   const { initialNodes, initialEdges } = useMemo(() => {
     const nodes: any[] = [];
     const edges: any[] = [];
@@ -232,3 +232,5 @@ const BackgroundVariant = {
   Lines: 'lines',
   Cross: 'cross',
 } as any;
+
+export default React.memo(BOMVisualizer);

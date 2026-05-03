@@ -1,7 +1,5 @@
 "use client";
 
-import { Shield } from "lucide-react";
-
 export default function Loading() {
   return (
     <div className="p-6 space-y-6 animate-pulse">

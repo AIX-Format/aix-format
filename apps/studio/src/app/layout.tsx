@@ -29,7 +29,6 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-
 export const metadata: Metadata = {
   title: "Sovereign Pi Agents Studio",
   description: "The Global Marketplace for Autonomous AI Agents, secured by Pi Network KYC.",

@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'agents array required' }, { status: 400 });
     }
 
-    const { aix } = await import('../../../../../../packages/aix-core/src/aix');
+    const { aix } = await import('@/../../packages/aix-core/src/index');
 
     const result = await aix.swarm(agents, { pattern, dryRun, aggregator });
     return NextResponse.json(result);

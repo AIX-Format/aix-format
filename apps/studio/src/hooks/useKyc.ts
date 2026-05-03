@@ -44,7 +44,6 @@ export function useKyc(user?: PiUser) {
     }
   }, [user, step, isVerified, startKyc]);
 
-
   const resetKyc = useCallback(() => {
     timersRef.current.forEach(clearTimeout);
     timersRef.current = [];

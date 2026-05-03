@@ -86,7 +86,7 @@ export default function PulsePage() {
 
   // Auto-scroll to top (newest events)
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" }, []);
   }, [events.length]);
 
   return (

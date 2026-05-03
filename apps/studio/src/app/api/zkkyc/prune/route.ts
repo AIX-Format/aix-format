@@ -1,7 +1,5 @@
 import { NextRequest } from 'next/server';
 import { successResponse, requireAuth, ERR } from '@/lib/api-helpers';
-import { kv } from '@/lib/redis';
-import { KEYS } from '@/lib/redis-keys';
 
 /**
  * POST /api/zkkyc/prune

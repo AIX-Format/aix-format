@@ -19,7 +19,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           (window as any).Pi.init({
             version: '2.0',
             sandbox: process.env.NODE_ENV !== 'production'
-          });
+          }, []);
         } catch (e) {
           console.error('Failed to initialize Pi SDK:', e);
         }
