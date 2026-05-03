@@ -25,6 +25,12 @@ export class ValidationPlugin {
     }
     this.name = name;
     this.priority = priority;
+    this.meta = {
+      name: this.name,
+      version: '1.0.0',
+      author: 'unknown',
+      description: ''
+    };
   }
 
   /**

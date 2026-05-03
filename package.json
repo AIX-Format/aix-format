@@ -8,7 +8,8 @@
   "bin": {
     "aix-validate": "./bin/aix-validate.js",
     "aix-convert": "./bin/aix-convert.js",
-    "aix-regulator-export": "./bin/aix-regulator-export.js"
+    "aix-regulator-export": "./bin/aix-regulator-export.js",
+    "aix-plugins": "./bin/aix-plugins.js"
   },
   "scripts": {
     "test": "vitest run",

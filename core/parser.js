@@ -15,6 +15,7 @@ import yaml from 'js-yaml';
 
 // Import plugin system
 import { PluginRegistry } from './validation-plugins.js';
+import { PluginLoader } from './plugin-loader.js';
 import {
   MetaValidator,
   PersonaValidator,
@@ -56,6 +57,12 @@ export class AIXParser {
     this.warnings = [];
     // Allow custom plugin registry or use default
     this.registry = options.registry || defaultRegistry;
+    this.loader = new PluginLoader(this.registry);
+    
+    // Auto-load from config if exists
+    if (options.autoLoadPlugins !== false) {
+      this.loader.loadFromConfig().catch(() => {}); // Silent fail if no config
+    }
   }
 
   /**
