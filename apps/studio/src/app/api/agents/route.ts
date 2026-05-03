@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid';
 import { kv, NS, KEYS } from '@/lib/redis';
 import { updateRegistryEntry } from '@/lib/registry';
 import { validateSovereignManifest } from '@/lib/protocol-validator';
+import { indexAgent } from '@aix-core/storage';
 
 import { LATEST_VERSION } from '@/constants/protocol';
 // DNAVerifier import removed to fix build error. It seems this might need a different path mapping or configuration to work in Next.js
@@ -22,7 +23,9 @@ export async function POST(req: Request) {
     // 1. Runtime Protocol Enforcement (Sovereign Pattern 1)
     const validation = validateSovereignManifest(manifest);
     if (!validation.valid) {
-      return NextResponse.json({ 
+      try { await indexAgent(manifest); } catch(e) { console.warn('Failed to semantically index agent:', e); }
+
+    return NextResponse.json({
         success: false, 
         error: 'Sovereign Protocol Violation',
         details: validation.errors 

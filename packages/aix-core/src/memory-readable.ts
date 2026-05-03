@@ -1,6 +1,6 @@
 import { kv } from './storage/adapter';
 import { KEYS } from './storage/keys';
-import { LearningEngine } from './learning';
+import * as LearningEngine from './learning';
 
 /**
  * Readable Memory System (v1.3.6)

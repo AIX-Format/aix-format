@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { getRegistry, updateRegistryEntry, deleteRegistryEntry } from "@/lib/registry";
 import { successResponse, requireAuth, ERR, parseBody } from '@/lib/api-helpers';
+import { indexAgent } from '@aix/core';
 
 /**
  * GET /api/agents/[id]
@@ -56,10 +57,18 @@ export async function PUT(
     };
 
     await updateRegistryEntry(updatedEntry);
+    
+    // Index agent for semantic search
+    try {
+      await indexAgent(updatedEntry);
+    } catch(e) {
+      console.warn('Failed to semantically index agent:', e);
+    }
+    
     return successResponse(updatedEntry);
     
   } catch (error: unknown) {
-    console.error("[agents/id] PUT failed:", error.message);
+    console.error("[agents/id] PUT failed:", error);
     return ERR.INTERNAL('Failed to update agent');
   }
 }
