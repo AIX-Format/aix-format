@@ -250,7 +250,18 @@ const STRATEGIES: Strategy[] = [
         let content = fs.readFileSync(f, 'utf8');
         const original = content;
         // Remove console.log/warn/debug/info lines (not console.error)
-        content = content.replace(/^\s*console\.(log|warn|debug|info)\s*\([^)]*(?:\([^)]*\)[^)]*)*\)\s*;?\s*$/gm, '');
+        // More conservative: only remove standalone console statements, not those in catch blocks
+        const lines = content.split('\n');
+        const newLines = lines.filter((line, idx) => {
+          // Keep lines that don't have console.log/warn/debug/info
+          if (!/console\.(log|warn|debug|info)/.test(line)) return true;
+          // Keep if it's in a catch block (check previous 5 lines for 'catch')
+          const context = lines.slice(Math.max(0, idx - 5), idx).join('\n');
+          if (/catch\s*\(/.test(context)) return true;
+          // Remove standalone console statements
+          return false;
+        });
+        content = newLines.join('\n');
         // Clean up multiple blank lines left behind
         content = content.replace(/\n{3,}/g, '\n\n');
         if (content !== original) {
@@ -363,7 +374,7 @@ const STRATEGIES: Strategy[] = [
 
   {
     id: 'add-display-names',
-    description: 'Add displayName to anonymous React components for better DevTools',
+    description: 'Add displayName to React components in /components (skip pages/app)',
     priority: 4,
     estimate: () => 0.03,
     apply: async (src, _root, dry): Promise<StrategyResult> => {
@@ -371,6 +382,20 @@ const STRATEGIES: Strategy[] = [
       let changed = 0;
       const details: string[] = [];
       for (const f of files) {
+        // CRITICAL FIX: Skip Next.js App Router pages and route handlers
+        const relativePath = path.relative(src, f);
+        if (
+          relativePath.includes('/app/') ||           // Skip app directory (Next.js App Router)
+          relativePath.includes('/pages/') ||         // Skip pages directory
+          relativePath.endsWith('/page.tsx') ||       // Skip page.tsx files
+          relativePath.endsWith('/layout.tsx') ||     // Skip layout.tsx files
+          relativePath.endsWith('/route.ts') ||       // Skip API routes
+          relativePath.endsWith('/loading.tsx') ||    // Skip loading.tsx files
+          relativePath.endsWith('/error.tsx')         // Skip error.tsx files
+        ) {
+          continue; // Skip Next.js special files
+        }
+        
         let content = fs.readFileSync(f, 'utf8');
         const original = content;
         const match = content.match(/export default (?:React\.memo\()?(\w+)/);

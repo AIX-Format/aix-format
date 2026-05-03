@@ -166,13 +166,18 @@ export class PetOrchestrator {
  * - curious → τ=0.3 (exploring, quality flexible)
  * - tired → τ=0.2 (low quality OK, save resources)
  * - burned-out → τ=0.1 (minimal quality, conservation mode)
- * - dying → τ=0.0 (survival mode, any model works)
- * - sleep → τ=0.0 (hibernated, minimal resources)
+ * - dying → τ=0.1 (survival mode, minimum floor to prevent death spiral)
+ * - sleep → τ=0.1 (hibernated, minimum floor maintained)
+ *
+ * CRITICAL FIX: τ minimum floor = 0.1 to prevent death spiral
+ * Without this floor: failure → tired → cheap model → failure → dying → cheaper → failure → ∞
  *
  * @param mood - Current pet mood
- * @returns Quality threshold τ ∈ [0, 1]
+ * @returns Quality threshold τ ∈ [0.1, 1] (minimum 0.1 enforced)
  */
 export function moodToQualityThreshold(mood: PetMood): number {
+  const TAU_MIN_FLOOR = 0.1; // Prevent death spiral
+  
   switch (mood) {
     case 'ecstatic':    return 0.9;
     case 'energized':   return 0.8;
@@ -182,9 +187,9 @@ export function moodToQualityThreshold(mood: PetMood): number {
     case 'busy':        return 0.4;
     case 'curious':     return 0.3;
     case 'tired':       return 0.2;
-    case 'burned-out':  return 0.1;
-    case 'dying':       return 0.0;
-    case 'sleep':       return 0.0;
+    case 'burned-out':  return TAU_MIN_FLOOR;
+    case 'dying':       return TAU_MIN_FLOOR;  // FIXED: was 0.0
+    case 'sleep':       return TAU_MIN_FLOOR;  // FIXED: was 0.0
     default:            return 0.5; // Safe default
   }
 }

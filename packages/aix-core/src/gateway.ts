@@ -248,7 +248,8 @@ export class GatewayManager {
       expectationSet: false,
     };
     await kv.set(KEYS.gateway(processId), process, { ex: TTL.GATEWAY });
-    await ExpectationEngine.setExpectation(agentId, processId, { description: task, ...metadata });
+    // Fix: setExpectation expects (agentId, taskId, task) not (agentId, processId, {description, ...})
+    await ExpectationEngine.setExpectation(agentId, processId, task);
     process.expectationSet = true;
     await kv.set(KEYS.gateway(processId), process, { ex: TTL.GATEWAY });
     return process;
