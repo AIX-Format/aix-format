@@ -4,7 +4,7 @@
  * Licensed under Apache-2.0 License - See LICENSE.md
  */
 
-import { isValidURL } from '../plugins/validation-utils.js';
+import { isValidURL } from '../validation-utils.js';
 
 export const apisRules = [
   {

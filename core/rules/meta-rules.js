@@ -4,7 +4,7 @@
  * Licensed under Apache-2.0 License - See LICENSE.md
  */
 
-import { isValidID, isValidISO8601, isValidSemver } from '../plugins/validation-utils.js';
+import { isValidID, isValidISO8601, isValidSemver } from '../validation-utils.js';
 
 export const metaRules = [
   {

@@ -4,7 +4,7 @@
  * Licensed under Apache-2.0 License - See LICENSE.md
  */
 
-import { isValidISO8601 } from '../plugins/validation-utils.js';
+import { isValidISO8601 } from '../validation-utils.js';
 
 const ABOM_VALID_TYPES = ['model', 'dataset', 'library', 'tool', 'plugin', 'agent', 'runtime'];
 const ABOM_VALID_TRUST_TIERS = ['verified', 'community', 'unverified', 'revoked'];
