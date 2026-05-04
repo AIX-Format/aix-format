@@ -4,11 +4,6 @@
   "outputDirectory": "apps/studio/.next",
   "framework": "nextjs",
   "regions": ["iad1"],
-  "functions": {
-    "apps/studio/src/app/api/**/*.ts": {
-      "runtime": "edge"
-    }
-  },
   "env": {
     "NODE_ENV": "production"
   },
