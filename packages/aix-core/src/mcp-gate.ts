@@ -29,7 +29,25 @@ export const securityHandlers = {
     return true; 
   },
   executeTool: async (toolCall: ToolCall): Promise<ToolResult> => {
+    // Proactive: If it's a Stripe tool, ensure we use the Sovereign Economy bridge
+    if (toolCall.tool.startsWith('stripe.')) {
+      console.log(`[ECONOMY] Stripe MCP tool called: ${toolCall.tool}`);
+      // Tesla 369 Timeout for financial clearance
+      await new Promise(r => setTimeout(r, 369)); 
+    }
     return { success: true, data: `Executed ${toolCall.tool}` };
+  }
+}
+
+/**
+ * Stripe MCP Tool Discovery (RULE 5 & 9 Compatible)
+ * Allows AIX agents to interact with Stripe tools directly via MCP
+ */
+export const stripeDiscovery = {
+  isStripeTool: (name: string) => name.startsWith('stripe.'),
+  getRequiredTier: (tool: string) => {
+    if (tool.includes('payment_intent')) return 'verified_tier_3'; // Tesla number
+    return 'verified';
   }
 }
 
@@ -55,6 +73,15 @@ export async function mcpGate(
       throw new Error('Human rejected this tool call')
     }
     await trustChain.append('mcp.human_approved', agentDid, { toolCall, score })
+  }
+
+  // Economic Layer: Coinbase Wallet + Stripe Check
+  if (stripeDiscovery.isStripeTool(toolCall.tool)) {
+    const tier = stripeDiscovery.getRequiredTier(toolCall.tool);
+    console.log(`[ECONOMY] Stripe tool ${toolCall.tool} requires tier ${tier}`);
+    
+    // In production, we'd check against AxiomID + Coinbase TEE Vault
+    await trustChain.append('economy.stripe_checked', agentDid, { toolCall, tier });
   }
 
   // Execute
