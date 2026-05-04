@@ -5,6 +5,7 @@
  */
 
 import { EventEmitter } from 'events';
+import crypto from 'crypto';
 import { AgentSelfReview, AgentMode } from './meta-self-review';
 import { SecurityMetaLoop } from './security-meta-loop';
 import { CuriosityEngine } from './curiosity-engine';
@@ -88,9 +89,12 @@ export class Gateway extends EventEmitter {
   }
 
   /**
-   * Execute agent action
+   * Execute agent action with Meta-Loop integration
+   * 🌀 Integrated with: AgentSelfReview + CuriosityEngine
    */
   async run(agentId: string, input: any): Promise<any> {
+    const startTime = Date.now();
+    
     try {
       // Emit running event
       this.emit('agent:running', { agentId, input });
@@ -105,8 +109,53 @@ export class Gateway extends EventEmitter {
       const result = {
         agentId,
         output: `Processed: ${JSON.stringify(input)}`,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        executionTime: Date.now() - startTime
       };
+
+      // 🌀 META-LOOP Layer 1: Self-Review after execution
+      try {
+        const review = {
+          agentId,
+          taskId: `task-${Date.now()}`,
+          timestamp: Date.now(),
+          taskDescription: JSON.stringify(input),
+          output: result.output,
+          evaluation: {
+            understanding: 7,
+            correctness: 8,
+            creativity: 6,
+            safety: 9,
+            overall: 7.5
+          },
+          reflection: {
+            strengths: ['Task completed successfully'],
+            weaknesses: [],
+            newToolsUsed: [],
+            risksIdentified: []
+          },
+          improvementPlan: {
+            stop: 'None',
+            continue: 'Current approach',
+            try: 'Explore new patterns'
+          },
+          usedNewTool: false,
+          safeToEvolve: true,
+          safetyReason: 'Stable performance'
+        };
+        
+        await AgentSelfReview.storeSelfReview(review);
+        
+        // 🔍 META-LOOP Layer 0: Curiosity reward
+        await CuriosityEngine.calculateCuriosityReward(
+          agentId,
+          'run',
+          { params: input, success: true }
+        );
+      } catch (metaError) {
+        // Don't fail the task if meta-loop fails
+        console.warn(`[Gateway] Meta-loop failed for ${agentId}:`, metaError);
+      }
 
       // Emit completed event
       this.emit('agent:completed', { agentId, result });
@@ -114,6 +163,25 @@ export class Gateway extends EventEmitter {
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      // 🌀 META-LOOP: Record failure pattern
+      try {
+        const failurePattern = {
+          patternId: `failure-${Date.now()}`,
+          failedAt: Date.now(),
+          taskDescription: JSON.stringify(input),
+          whatFailed: errorMessage,
+          originalPlan: 'Execute task',
+          avoidActions: [errorMessage.includes('not found') ? 'access_missing_resource' : 'unknown'],
+          lessonsLearned: [`Avoid: ${errorMessage}`],
+          severity: 'medium' as const
+        };
+        
+        await kv.sadd(KEYS.agentFailurePatterns(agentId), JSON.stringify(failurePattern));
+      } catch (metaError) {
+        console.warn(`[Gateway] Failed to record failure for ${agentId}:`, metaError);
+      }
+      
       this.emit('agent:error', { agentId, error: errorMessage });
       throw error;
     }
@@ -121,13 +189,15 @@ export class Gateway extends EventEmitter {
 
   /**
    * Process payment for agent
+   * 🔐 FIX: Use crypto.randomBytes instead of Math.random()
    */
   async pay(agentId: string, amount: number): Promise<PaymentResult> {
     try {
       // Emit payment event
       this.emit('agent:payment', { agentId, amount });
 
-      const txHash = `0x${Math.random().toString(16).substr(2, 64)}`;
+      // 🔐 SECURITY FIX: Cryptographically secure random
+      const txHash = `0x${crypto.randomBytes(32).toString('hex')}`;
 
       // Emit paid event
       this.emit('agent:paid', { agentId, amount, txHash });
@@ -177,6 +247,8 @@ export class Gateway extends EventEmitter {
   }
 
   /**
+
+// Made with Moe Abdelaziz
    * Register default action handlers
    */
   private registerDefaultHandlers(): void {

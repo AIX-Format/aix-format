@@ -27,6 +27,17 @@ export declare const KEYS: {
     readonly agentConfig: (id: string) => string;
     readonly agentState: (id: string) => string;
     readonly agentMetrics: (id: string) => string;
+    readonly agentExplorationHistory: (id: string) => string;
+    readonly agentExplorations: (id: string) => string;
+    readonly agentCuriosityScore: (id: string) => string;
+    readonly agentSkillCombos: (id: string) => string;
+    readonly agentSkillCombo: (id: string, hash: string) => string;
+    readonly agentActionCount: (id: string, action: string) => string;
+    readonly agentSelfReview: (id: string, taskId: string) => string;
+    readonly agentSelfReviewHistory: (id: string) => string;
+    readonly agentFailurePatterns: (id: string) => string;
+    readonly agentCurrentMode: (id: string) => string;
+    readonly agentExplorationRate: (id: string) => string;
     readonly aix: (key: string) => string;
     readonly aixManifest: (agentId: string) => string;
     readonly aixSkills: (agentId: string) => string;

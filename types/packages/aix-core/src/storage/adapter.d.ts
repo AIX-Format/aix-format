@@ -23,6 +23,7 @@ export interface StorageAdapter {
 declare class UpstashRedisAdapter implements StorageAdapter {
     private client;
     private isConnected;
+    private readonly RETRY_BASE_DELAY_MS;
     constructor();
     private checkConnection;
     private withRetry;

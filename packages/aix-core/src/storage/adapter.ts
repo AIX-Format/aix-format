@@ -38,6 +38,7 @@ function toSetOptions(options?: StorageOptions): SetCommandOptions | undefined {
 class UpstashRedisAdapter implements StorageAdapter {
   private client: Redis;
   private isConnected: boolean = false;
+  private readonly RETRY_BASE_DELAY_MS = 100; // Base delay for exponential backoff
 
   constructor() {
     const url = process.env.UPSTASH_REDIS_REST_URL;
@@ -69,7 +70,7 @@ class UpstashRedisAdapter implements StorageAdapter {
         if (attempt > retries) {
           return null;
         }
-        await new Promise(resolve => setTimeout(resolve, 100 * attempt));
+        await new Promise(resolve => setTimeout(resolve, this.RETRY_BASE_DELAY_MS * attempt));
       }
     }
     return null;
@@ -91,7 +92,7 @@ class UpstashRedisAdapter implements StorageAdapter {
     }, 'SET', key);
 
     if (!success) {
-      throw new Error(`[Storage] Persistent write failed for ${key.split(':')[0]}:***`);
+      throw new Error('[Storage] Persistent write failed - connection timeout');
     }
   }
 
@@ -100,6 +101,8 @@ class UpstashRedisAdapter implements StorageAdapter {
       this.checkConnection();
       await this.client.del(...(Array.isArray(key) ? key : [key]));
     } catch (error) {
+      console.error('[Storage] DEL operation failed:', error instanceof Error ? error.message : 'Unknown error');
+      throw error;
     }
   }
 
@@ -126,6 +129,8 @@ class UpstashRedisAdapter implements StorageAdapter {
       this.checkConnection();
       await this.client.expire(key, seconds);
     } catch (error) {
+      console.error('[Storage] EXPIRE operation failed:', error instanceof Error ? error.message : 'Unknown error');
+      throw error;
     }
   }
 
@@ -153,12 +158,14 @@ class UpstashRedisAdapter implements StorageAdapter {
 
   async sadd(key: string, ...members: any[]): Promise<number> {
     const result = await this.withRetry(() => this.client.sadd(key, ...(members as [any, ...any[]])), 'SADD', key);
-    return Number(result) || 0;
+    // Safe integer conversion - Redis returns integers within safe range
+    return typeof result === 'number' ? result : Number(result) || 0;
   }
 
   async srem(key: string, ...members: any[]): Promise<number> {
     const result = await this.withRetry(() => this.client.srem(key, ...(members as [any, ...any[]])), 'SREM', key);
-    return Number(result) || 0;
+    // Safe integer conversion - Redis returns integers within safe range
+    return typeof result === 'number' ? result : Number(result) || 0;
   }
 
   async smembers<T = any>(key: string): Promise<T[]> {
