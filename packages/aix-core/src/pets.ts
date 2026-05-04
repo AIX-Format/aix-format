@@ -22,7 +22,7 @@ export type PetMood =
   | 'sleep';
 
 /**
- * AIX Pet Orchestrator (v1.4.0 - Philosophical Enhancement)
+ * AIX Pet Orchestrator (v0.369.0 - Philosophical Enhancement)
  * Manages the evolution and state of agent personas.
  *
  * Enhanced with Philosophical Engines:

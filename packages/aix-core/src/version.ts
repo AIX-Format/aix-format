@@ -67,7 +67,7 @@ export const VERSION_HISTORY = {
  * Feature Flags
  */
 export const FEATURES = {
-  // Core Features (v1.3.0)
+  // Core Features (v0.369.0)
   IDENTITY: true,
   MCP: true,
   ABOM: true,
