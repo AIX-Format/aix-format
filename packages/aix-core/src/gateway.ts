@@ -1,10 +1,15 @@
 /**
  * AIX Gateway
  * Central routing and orchestration for agent actions
- * Integrates with: ExpectationEngine, TrustChain, Bus
+ * Integrates with: ExpectationEngine, TrustChain, Bus, Meta-Loop
  */
 
 import { EventEmitter } from 'events';
+import { AgentSelfReview, AgentMode } from './meta-self-review';
+import { SecurityMetaLoop } from './security-meta-loop';
+import { CuriosityEngine } from './curiosity-engine';
+import { kv } from './storage/adapter';
+import { KEYS } from './storage/keys';
 
 export interface AgentAction {
   agentId: string;
