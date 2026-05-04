@@ -1,56 +1,83 @@
 /**
- * aix-core public surface — 33 smart exports
- *
- * Primary API (start here):
- *   import aix from 'aix-core';
- *   import { aix, ParallelSim, GatewayManager } from 'aix-core';
+ * AIX Core - Main Entry Point
+ * Exports all core components for the 4-Ring Bus Architecture
  */
 
-// ─── PRIMARY: The one function you need ──────────────────────────────────
-export { aix, aix as default }          from './aix';
-export type { AixOptions, AixResult, AixSwarmOptions, SwarmPattern } from './aix';
+// Gateway - Central orchestration
+export {
+  Gateway,
+  getGateway,
+  resetGateway,
+  type AgentAction,
+  type ActionResult,
+  type SpawnConfig,
+  type SpawnResult,
+  type PaymentResult
+} from './gateway';
 
-// ─── SIMULATION: Parallel execution engine ────────────────────────────
-export { ParallelSim }                  from './parallel-sim';
-export type { SimAgent, SimOptions, SimResult, AgentOutcome } from './parallel-sim';
+// ExpectationEngine - Task monitoring
+export {
+  ExpectationEngine,
+  getExpectationEngine,
+  resetExpectationEngine,
+  type Expectation
+} from './expectation-engine';
 
-// ─── CONTROL PLANE: Gateway process lifecycle ───────────────────────
-export { GatewayManager }               from './gateway';
-export type { GatewayProcess, GatewayTask, GatewayResult, GatewayStatus } from './gateway';
+// TrustChain - Signature verification
+export {
+  TrustChain,
+  getTrustChain,
+  resetTrustChain,
+  type SignatureData,
+  type LineageRecord
+} from './trust-chain';
 
-// ─── EXECUTION ENGINE: ReAct loop ─────────────────────────────────
-export { AgentRuntimeEngine }           from './agent-runtime';
-export type { RuntimeResult }           from './agent-runtime';
+// Bus - 4-Ring event bus
+export {
+  Bus,
+  getBus,
+  resetBus,
+  waitForEvent,
+  type BusEvent,
+  type BusEventType,
+  type BusSubscription
+} from './bus';
 
-// ─── LLM PROVIDERS: OpenAI / Anthropic / Ollama / Mock ────────────────
-export { createDefaultRouter, MockProvider, LLMRouter } from './llm-provider';
-export type { LLMProvider, CompletionOptions, CompletionResponse } from './llm-provider';
+/**
+ * Initialize all core components
+ */
+export async function initializeCore() {
+  const { getGateway } = await import('./gateway');
+  const { getExpectationEngine } = await import('./expectation-engine');
+  const { getTrustChain } = await import('./trust-chain');
+  const { getBus } = await import('./bus');
 
-// ─── SWARM: Multi-agent coordination (lower-level) ──────────────────
-export { SwarmRouter }                  from './SwarmRouter';
+  const gateway = getGateway();
+  const expectationEngine = getExpectationEngine();
+  const trustChain = getTrustChain();
+  const bus = getBus();
 
-// ─── PHILOSOPHICAL ENGINES ──────────────────────────────────────
-export { CuriosityEngine }              from './curiosity-engine';
-export { ExpectationEngine }            from './expectation-engine';
-export { FailureLearning }              from './failure-learning';
+  return {
+    gateway,
+    expectationEngine,
+    trustChain,
+    bus
+  };
+}
 
-// ─── ROUTING: Constrained model selection ──────────────────────────
-export { ConstrainedRouter }            from './constrained-router';
-export type { Task, TaskConstraints }   from './constrained-router';
+/**
+ * Reset all core components (for testing)
+ */
+export async function resetCore() {
+  const { resetGateway } = await import('./gateway');
+  const { resetExpectationEngine } = await import('./expectation-engine');
+  const { resetTrustChain } = await import('./trust-chain');
+  const { resetBus } = await import('./bus');
 
-// ─── SAFETY: Lineage + Trust ─────────────────────────────────────
-export { LineageRegistry }              from './lineage-registry';
-export { TrustChain }                   from './trust-chain';
+  resetGateway();
+  resetExpectationEngine();
+  resetTrustChain();
+  resetBus();
+}
 
-// ─── STORAGE: Redis adapter + key registry ────────────────────────
-export { kv }                           from './storage/adapter';
-export { KEYS, TTL }                    from './storage/keys';
-
-// ─── BUS: Event system ────────────────────────────────────────
-export { emit, subscribe, BUS_RINGS }  from './bus';
-
-// ─── MODELS: Performance database ───────────────────────────────
-export { ModelDatabase }               from './model-database';
-
-// ─── PETS: Mood-driven routing ──────────────────────────────────
-export { getPetState, getDynamicConstraints } from './pets';
+// Made with Bob

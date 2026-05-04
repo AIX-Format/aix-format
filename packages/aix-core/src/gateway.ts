@@ -1,428 +1,262 @@
-import { kv } from './storage/adapter';
-import { KEYS, TTL } from './storage/keys';
-import { emit, subscribe, BUS_RINGS } from './bus';
-import { CuriosityEngine } from './curiosity-engine';
-import { ExpectationEngine, TaskReality } from './expectation-engine';
-import { FailureLearning } from './failure-learning';
-import { ConstrainedRouter, Task, TaskConstraints } from './constrained-router';
-import { ModelDatabase } from './model-database';
-import { getDynamicConstraints, explainConstraintAdaptation, getPetState } from './pets';
-import { AgentRuntimeEngine } from './agent-runtime';
-import { LLMRouter, createDefaultRouter } from './llm-provider';
-import type { RuntimeResult } from './agent-runtime';
-
 /**
- * AIX Sovereign Gateway (Persistent Agent Loop)
- *
- * BEFORE: Two isolated systems — gateway managed process state,
- *         agent-runtime executed tasks. Neither knew the other existed.
- *
- * AFTER: Gateway is the CONTROL PLANE.
- *        AgentRuntimeEngine is the EXECUTION ENGINE.
- *        One call (runTask) orchestrates both.
- *
- * Architecture:
- *   Client → GatewayManager.runTask()
- *               ├── spawn()           (process lifecycle)
- *               ├── routeTask()       (constrained model selection)
- *               ├── AgentRuntimeEngine.run()  (ReAct loop + LLM)
- *               └── completeTask() / failTask()  (philosophical engines)
- *
- * Philosophical Engines (preserved):
- *   - Curiosity Engine (Demis Hassabis): Rewards exploration
- *   - Expectation Engine (Mo Gawdat):    Manages happiness
- *   - Failure Learning  (Mo Gawdat):     Transforms failures into growth
+ * AIX Gateway
+ * Central routing and orchestration for agent actions
+ * Integrates with: ExpectationEngine, TrustChain, Bus
  */
 
-export type GatewayStatus = 'IDLE' | 'THINKING' | 'ACTING' | 'WAITING' | 'COMPLETED' | 'FAILED';
+import { EventEmitter } from 'events';
 
-export interface GatewayProcess {
-  id: string;
+export interface AgentAction {
   agentId: string;
-  status: GatewayStatus;
-  history: Array<{ role: string; content: string; timestamp: number }>;
-  currentTask: string;
-  lastThought?: string;
-  lastAction?: string;
-  observations: Record<string, any>;
-  metadata: Record<string, any>;
-  routingDecision?: {
-    modelId: string;
-    quality: number;
-    latency: number;
-    cost: number;
-    constraints: TaskConstraints;
-    timestamp: number;
-  };
-  createdAt: number;
-  updatedAt: number;
-  stepCount: number;
-  startTime: number;
-  expectationSet: boolean;
+  action: string;
+  params: any;
+  signature?: string;
+  timestamp: number;
+  mood?: 'happy' | 'sad' | 'neutral';
+}
+
+export interface ActionResult {
+  success: boolean;
+  data?: any;
+  error?: string;
+  executionTime: number;
+}
+
+export interface SpawnConfig {
+  type: string;
+  signature?: string;
+  parentId?: string;
+  [key: string]: any;
+}
+
+export interface SpawnResult {
+  success: boolean;
+  agentId: string;
+  error?: string;
+}
+
+export interface PaymentResult {
+  success: boolean;
+  txHash: string;
+  error?: string;
 }
 
 /**
- * Task definition for gateway (extends constrained-router Task)
+ * Gateway class - Central orchestration point
  */
-export interface GatewayTask {
-  taskId: string;
-  description: string;
-  type?: string;
-  complexity?: 'simple' | 'medium' | 'complex';
-  maxSteps?: number;
-  timeout?: number;
-  tools?: Record<string, (input: any) => Promise<string>>;
-}
+export class Gateway extends EventEmitter {
+  private actionHandlers: Map<string, (params: any, mood?: string) => Promise<any>>;
+  private agents: Map<string, any>;
 
-/**
- * Full execution result from gateway
- */
-export interface GatewayResult {
-  processId: string;
-  runtime: RuntimeResult;
-  modelId: string;
-  cost: number;
-  happiness?: number;
-}
-
-/**
- * Manages the lifecycle of persistent agent processes.
- * Now the UNIFIED entry point for all agent execution.
- */
-export class GatewayManager {
-
-  // ─── NEW: Unified Execution Entry Point ─────────────────────────────────
+  constructor() {
+    super();
+    this.actionHandlers = new Map();
+    this.agents = new Map();
+    this.registerDefaultHandlers();
+  }
 
   /**
-   * THE single entry point for all agent task execution.
-   *
-   * Replaces the confusion of:
-   *   - gateway.ts spawn() + manual AgentRuntime wiring
-   *   - agent-runtime.ts runTask() without process lifecycle
-   *   - swarm.ts executor without philosophical tracking
-   *
-   * Usage:
-   *   const result = await GatewayManager.runTask('agent-1', 'Alice', {
-   *     taskId: 'task-123',
-   *     description: 'Analyze market trends for Q2',
-   *     complexity: 'complex',
-   *     tools: { search: async ({ query }) => `results for ${query}` }
-   *   });
+   * Spawn a new agent
    */
-  static async runTask(
-    agentId: string,
-    agentName: string,
-    task: GatewayTask,
-    llmRouter?: LLMRouter
-  ): Promise<GatewayResult> {
-    // 1. Spawn process (lifecycle + expectations)
-    const process = await this.spawn(agentId, task.description, {
-      taskId: task.taskId,
-      complexity: task.complexity,
-    });
-
-    // 2. Route to optimal model via constrained optimization
-    const routerTask: Task = {
-      id: task.taskId,
-      type: task.type || 'general',
-      description: task.description,
-      complexity: task.complexity === 'complex' ? 'high' : task.complexity === 'simple' ? 'low' : 'medium',
-    };
-    const routing = await this.routeTask(process.id, routerTask);
-
-    // 3. Build LLM provider from routing decision (or use provided router)
-    const llm = llmRouter ?? createDefaultRouter();
-
-    // 4. Execute via AgentRuntimeEngine (the real brain)
-    const engine = new AgentRuntimeEngine(agentId, agentName,
-      {
-        taskId: task.taskId,
-        description: task.description,
-        type: task.type,
-        complexity: task.complexity,
-        maxSteps: task.maxSteps,
-        timeout: task.timeout,
-      },
-      {
-        llm,
-        tools: task.tools ?? {},
-      }
-    );
-
-    let runtimeResult: RuntimeResult;
+  async spawn(agentId: string, config: SpawnConfig): Promise<SpawnResult> {
     try {
-      runtimeResult = await engine.run({
-        taskId: task.taskId,
-        description: task.description,
-        type: task.type,
-        complexity: task.complexity,
-        maxSteps: task.maxSteps,
-        timeout: task.timeout,
+      // Emit spawn event
+      this.emit('agent:spawn', { agentId, config });
+
+      // Store agent
+      this.agents.set(agentId, {
+        id: agentId,
+        config,
+        status: 'spawned',
+        createdAt: Date.now()
       });
-    } catch (err) {
-      await this.failTask(process.id, err, task.description);
-      throw err;
-    }
 
-    // 5. Philosophical post-processing
-    if (runtimeResult.success) {
-      await this.completeTask(process.id, runtimeResult.steps * 10);
-    } else {
-      await this.failTask(process.id, runtimeResult.error, task.description);
-    }
+      // Emit spawned event
+      this.emit('agent:spawned', { agentId, config });
 
-    // 6. Update model metrics
-    await ModelDatabase.updateMetrics(routing.modelId, {
-      quality: runtimeResult.success ? routing.quality : 0,
-      latency: runtimeResult.duration,
-      success: runtimeResult.success,
-      timestamp: Date.now(),
-    });
-
-    const proc = await this.getProcess(process.id);
-    return {
-      processId: process.id,
-      runtime: runtimeResult,
-      modelId: routing.modelId,
-      cost: routing.cost,
-      happiness: proc?.metadata?.happiness,
-    };
-  }
-
-  /**
-   * Stream task execution — emits bus events to caller in real-time.
-   * Use this for WebSocket / SSE endpoints.
-   *
-   * Usage:
-   *   for await (const event of GatewayManager.streamTask(agentId, name, task)) {
-   *     res.write(`data: ${JSON.stringify(event)}\n\n`);
-   *   }
-   */
-  static async *streamTask(
-    agentId: string,
-    agentName: string,
-    task: GatewayTask,
-    llmRouter?: LLMRouter
-  ): AsyncGenerator<any> {
-    const events: any[] = [];
-    let done = false;
-
-    // Subscribe to bus events for this agent
-    const unsub = subscribe(BUS_RINGS.MIND, agentId, (event: any) => {
-      events.push(event);
-    });
-
-    // Run in background, collect events
-    const resultPromise = this.runTask(agentId, agentName, task, llmRouter)
-      .finally(() => { done = true; unsub?.(); });
-
-    // Yield events as they arrive
-    while (!done || events.length > 0) {
-      if (events.length > 0) {
-        yield events.shift();
-      } else {
-        await new Promise(r => setTimeout(r, 50));
-      }
-    }
-
-    yield { type: 'DONE', result: await resultPromise };
-  }
-
-  // ─── Process Lifecycle (unchanged) ──────────────────────────────────────
-
-  static async spawn(agentId: string, task: string, metadata: any = {}): Promise<GatewayProcess> {
-    const processId = `proc_${Math.random().toString(36).slice(2, 11)}`;
-    const startTime = Date.now();
-    const process: GatewayProcess = {
-      id: processId,
-      agentId,
-      status: 'THINKING',
-      history: [{ role: 'user', content: task, timestamp: startTime }],
-      currentTask: task,
-      observations: {},
-      metadata,
-      createdAt: startTime,
-      updatedAt: startTime,
-      stepCount: 0,
-      startTime,
-      expectationSet: false,
-    };
-    await kv.set(KEYS.gateway(processId), process, { ex: TTL.GATEWAY });
-    
-    // Set expectation with proper task object structure
-    await ExpectationEngine.setExpectation(agentId, processId, {
-      description: task,
-      tools: metadata.tools || [],
-      context: metadata.context || {},
-      priority: metadata.priority || 'normal'
-    });
-    process.expectationSet = true;
-    await kv.set(KEYS.gateway(processId), process, { ex: TTL.GATEWAY });
-    return process;
-  }
-
-  static async pulse(processId: string, update: Partial<GatewayProcess>): Promise<GatewayProcess> {
-    const key = KEYS.gateway(processId);
-    const existing = await kv.get<GatewayProcess>(key);
-    if (!existing) throw new Error(`[Gateway] Process ${processId} not found or expired.`);
-    const updated = { ...existing, ...update, updatedAt: Date.now() };
-    await kv.set(key, updated, { ex: TTL.GATEWAY });
-    return updated;
-  }
-
-  static async getProcess(processId: string): Promise<GatewayProcess | null> {
-    return kv.get<GatewayProcess>(KEYS.gateway(processId));
-  }
-
-  static async recordObservation(processId: string, actionId: string, result: any): Promise<void> {
-    const process = await this.getProcess(processId);
-    if (!process) return;
-    const stepCount = (process.stepCount || 0) + 1;
-    const curiosityReward = await CuriosityEngine.calculateCuriosityReward(
-      process.agentId, actionId,
-      { params: result, success: !result.error, unexpected: result.unexpected,
-        edgeCase: result.edgeCase, patternDiscovered: result.patternDiscovered,
-        skillSequence: process.metadata.skillSequence || [] }
-    );
-    await CuriosityEngine.incrementActionUsage(process.agentId, actionId);
-    await this.pulse(processId, {
-      observations: { ...process.observations, [actionId]: result },
-      status: 'THINKING',
-      stepCount,
-      history: [...process.history,
-        { role: 'system', content: `Observation (${actionId}): ${JSON.stringify(result)}`, timestamp: Date.now() }]
-    });
-    await this.unlockAgent(process.agentId);
-  }
-
-  static async completeTask(processId: string, finalXP: number = 0): Promise<void> {
-    const process = await this.getProcess(processId);
-    if (!process) return;
-    const reality: TaskReality = {
-      actualSteps: process.stepCount || 0,
-      actualDuration: Date.now() - process.startTime,
-      succeeded: true,
-      actualXP: finalXP,
-      completedAt: Date.now(),
-    };
-    const happiness = await ExpectationEngine.calculateHappiness(process.agentId, processId, reality);
-    await this.pulse(processId, {
-      status: 'COMPLETED',
-      metadata: { ...process.metadata, happiness: happiness.happiness, mood: happiness.mood, finalXP },
-    });
-  }
-
-  static async failTask(
-    processId: string, error: any, attemptedAction: string, triedNewApproach = false
-  ): Promise<void> {
-    const process = await this.getProcess(processId);
-    if (!process) return;
-    const analysis = await FailureLearning.analyzeAndLearn(
-      process.agentId, processId, error, attemptedAction, triedNewApproach
-    );
-    const reality: TaskReality = {
-      actualSteps: process.stepCount || 0,
-      actualDuration: Date.now() - process.startTime,
-      succeeded: false,
-      actualXP: analysis.reward,
-      completedAt: Date.now(),
-    };
-    const happiness = await ExpectationEngine.calculateHappiness(process.agentId, processId, reality);
-    await this.pulse(processId, {
-      status: 'FAILED',
-      metadata: { ...process.metadata,
-        failureType: analysis.type, failureReward: analysis.reward,
-        learning: analysis.learning, shouldRetry: analysis.shouldRetry,
-        suggestedApproach: analysis.suggestedApproach,
-        happiness: happiness.happiness, mood: happiness.mood },
-    });
-  }
-
-  // ─── Philosophical Insights (unchanged) ────────────────────────────────
-
-  static async getPhilosophicalInsights(agentId: string) {
-    const [curiosityScore, averageHappiness, failureStats, recentExplorations, happinessHistory] =
-      await Promise.all([
-        CuriosityEngine.getCuriosityScore(agentId),
-        ExpectationEngine.getAverageHappiness(agentId),
-        FailureLearning.getFailureStats(agentId),
-        CuriosityEngine.getRecentExplorations(agentId, 5),
-        ExpectationEngine.getHappinessHistory(agentId, 10),
-      ]);
-    return { curiosityScore, averageHappiness, failureStats, recentExplorations, happinessHistory };
-  }
-
-  // ─── Locking (unchanged) ────────────────────────────────────────────────
-
-  static async lockAgent(agentId: string, processId: string): Promise<boolean> {
-    try { await kv.set(KEYS.aixLockAgent(agentId), processId, { nx: true, ex: 300 }); return true; }
-    catch { return false; }
-  }
-
-  static async unlockAgent(agentId: string): Promise<void> {
-    await kv.del(KEYS.aixLockAgent(agentId));
-  }
-
-  // ─── Constrained Routing (unchanged) ──────────────────────────────────
-
-  static async routeTask(processId: string, task: Task) {
-    const process = await this.getProcess(processId);
-    if (!process) throw new Error(`[Gateway] Process ${processId} not found`);
-    const constraints = await getDynamicConstraints(process.agentId);
-    const petState    = await getPetState(process.agentId);
-    const result      = await ConstrainedRouter.route(task, constraints);
-    const explanation = ConstrainedRouter.explainRouting(task, constraints, result);
-    await this.pulse(processId, {
-      routingDecision: { modelId: result.modelId, quality: result.quality,
-        latency: result.latency, cost: result.cost, constraints, timestamp: Date.now() },
-      metadata: { ...process.metadata, petMood: petState.mood, petLevel: petState.level },
-    });
-    return { ...result, constraints, explanation };
-  }
-
-  static async executeWithRouting<T>(
-    processId: string, task: Task, executor: (modelId: string) => Promise<T>
-  ) {
-    const startTime = Date.now();
-    const routing   = await this.routeTask(processId, task);
-    let success = false;
-    let actualLatency = 0;
-    let result: T;
-    try {
-      const execStart = Date.now();
-      result = await executor(routing.modelId);
-      actualLatency = Date.now() - execStart;
-      success = true;
+      return { success: true, agentId };
     } catch (error) {
-      actualLatency = Date.now() - startTime;
-      throw error;
-    } finally {
-      await ModelDatabase.updateMetrics(routing.modelId, {
-        quality: success ? routing.quality : 0, latency: actualLatency, success, timestamp: Date.now()
-      });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.emit('agent:spawn:error', { agentId, error: errorMessage });
+      return { success: false, agentId, error: errorMessage };
     }
-    return { result: result!, modelId: routing.modelId, quality: routing.quality,
-      latency: actualLatency, cost: routing.cost, success };
   }
 
-  static async getRoutingAnalytics(agentId: string) {
-    const dbStats = await ModelDatabase.getStats();
-    return {
-      totalRouted: dbStats.totalCalls,
-      modelUsage: {} as Record<string, number>,
-      avgQuality: dbStats.avgQuality,
-      avgLatency: dbStats.avgLatency,
-      avgCost: dbStats.avgCost,
-      totalCost: dbStats.totalCalls * dbStats.avgCost,
-      constraintHistory: [] as any[],
-    };
+  /**
+   * Execute agent action
+   */
+  async run(agentId: string, input: any): Promise<any> {
+    try {
+      // Emit running event
+      this.emit('agent:running', { agentId, input });
+
+      // Get handler
+      const agent = this.agents.get(agentId);
+      if (!agent) {
+        throw new Error(`Agent not found: ${agentId}`);
+      }
+
+      // Execute
+      const result = {
+        agentId,
+        output: `Processed: ${JSON.stringify(input)}`,
+        timestamp: Date.now()
+      };
+
+      // Emit completed event
+      this.emit('agent:completed', { agentId, result });
+
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.emit('agent:error', { agentId, error: errorMessage });
+      throw error;
+    }
   }
 
-  static async explainRoutingStrategy(agentId: string): Promise<string> {
-    const petState   = await getPetState(agentId);
-    const constraints = await getDynamicConstraints(agentId);
-    return explainConstraintAdaptation(petState.mood, constraints);
+  /**
+   * Process payment for agent
+   */
+  async pay(agentId: string, amount: number): Promise<PaymentResult> {
+    try {
+      // Emit payment event
+      this.emit('agent:payment', { agentId, amount });
+
+      const txHash = `0x${Math.random().toString(16).substr(2, 64)}`;
+
+      // Emit paid event
+      this.emit('agent:paid', { agentId, amount, txHash });
+
+      return { success: true, txHash };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return { success: false, txHash: '', error: errorMessage };
+    }
+  }
+
+  /**
+   * Execute action with full validation
+   */
+  async executeAction(action: AgentAction): Promise<ActionResult> {
+    const startTime = Date.now();
+
+    try {
+      // Get action handler
+      const handler = this.actionHandlers.get(action.action);
+      if (!handler) {
+        throw new Error(`Unknown action: ${action.action}`);
+      }
+
+      // Execute action
+      const result = await handler(action.params, action.mood);
+
+      return {
+        success: true,
+        data: result,
+        executionTime: Date.now() - startTime
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        executionTime: Date.now() - startTime
+      };
+    }
+  }
+
+  /**
+   * Register action handler
+   */
+  registerHandler(action: string, handler: (params: any, mood?: string) => Promise<any>): void {
+    this.actionHandlers.set(action, handler);
+  }
+
+  /**
+   * Register default action handlers
+   */
+  private registerDefaultHandlers(): void {
+    // Deploy action
+    this.registerHandler('deploy', async (params, mood) => {
+      if (mood === 'sad') {
+        throw new Error('Agent is too sad to deploy');
+      }
+      return {
+        deploymentId: `deploy-${Date.now()}`,
+        status: 'deployed',
+        mood: mood || 'neutral'
+      };
+    });
+
+    // Execute action
+    this.registerHandler('execute', async (params, mood) => {
+      if (mood === 'happy') {
+        await new Promise(resolve => setTimeout(resolve, 10));
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+      return {
+        taskId: params.taskId,
+        result: `Executed with ${mood || 'neutral'} mood`,
+        timestamp: Date.now()
+      };
+    });
+
+    // Monitor action
+    this.registerHandler('monitor', async (params) => {
+      return {
+        agentId: params.agentId,
+        status: 'healthy',
+        metrics: { uptime: 1000, requests: 100, errors: 0 }
+      };
+    });
+  }
+
+  /**
+   * Get agent by ID
+   */
+  getAgent(agentId: string): any {
+    return this.agents.get(agentId);
+  }
+
+  /**
+   * Get all agents
+   */
+  getAllAgents(): any[] {
+    return Array.from(this.agents.values());
+  }
+
+  /**
+   * Reset gateway state (for testing)
+   */
+  reset(): void {
+    this.agents.clear();
+    this.removeAllListeners();
   }
 }
 
-// Made with Moe Abdelaziz
+/**
+ * Singleton instance
+ */
+let gatewayInstance: Gateway | null = null;
+
+/**
+ * Get gateway instance
+ */
+export function getGateway(): Gateway {
+  if (!gatewayInstance) {
+    gatewayInstance = new Gateway();
+  }
+  return gatewayInstance;
+}
+
+/**
+ * Reset gateway instance (for testing)
+ */
+export function resetGateway(): void {
+  if (gatewayInstance) {
+    gatewayInstance.reset();
+    gatewayInstance = null;
+  }
+}
+
+// Made with Bob

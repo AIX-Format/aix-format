@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import {
-  ShieldCheck,
-  Key,
-  History,
-  Cpu,
+import { 
+  ShieldCheck, 
+  Key, 
+  History, 
+  Cpu, 
   ShieldAlert,
   ArrowRight,
   ExternalLink,
@@ -17,7 +17,6 @@ import { Navbar } from "@/components/layout/Navbar";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import { DIDCard } from "@/components/studio/DIDCard";
 import { AgenticKycSetup } from "@/components/studio/AgenticKycSetup";
-import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { cn } from "@/lib/utils";
 
 const IDENTITY_FEATURES = [
@@ -53,16 +52,18 @@ export default function IdentityPage() {
       if (typeof window !== "undefined" && window.Pi) {
         window.Pi.init({ version: "2.0", sandbox: process.env.NODE_ENV !== "production" });
         const authResult = await window.Pi.authenticate(["username", "payments"], (payment: unknown) => {
-
+          console.warn("Incomplete payment found:", payment);
         });
         setPiUser(authResult.user);
-      } else {
-        // Fallback for demo/development if Pi SDK not loaded
-        await new Promise(r => setTimeout(r, 1000));
+      } else if (process.env.NODE_ENV !== "production") {
+        // Fallback for local development if Pi SDK is not loaded
+        await new Promise((r) => setTimeout(r, 1000));
         setPiUser({
           username: "Pioneer_Dev",
-          uid: "dev_" + Math.random().toString(36).slice(2, 8)
+          uid: "dev_" + Math.random().toString(36).slice(2, 8),
         });
+      } else {
+        throw new Error("Pi SDK unavailable. Please enable the Pi SDK and try again.");
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Authentication failed";

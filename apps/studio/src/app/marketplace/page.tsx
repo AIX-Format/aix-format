@@ -5,9 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import { ShoppingCart, Star, Shield, Zap, Search, Filter } from "lucide-react";
-import { useLocalAgents } from "@/hooks/useLocalAgents";
-import { AgentCard } from "@/components/agents/AgentCard";
-import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
+import { mockAgents } from "@/lib/mock-agents";
+import { AgentCard } from "@/components/studio/AgentCard";
 
 const tags = ["All", "research", "support", "coding", "robotics", "finance", "content"];
 
@@ -15,24 +14,8 @@ function MarketplaceContent() {
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState("All");
   const [kycFilter, setKycFilter] = useState("All");
-  const { agents, loaded } = useLocalAgents();
 
-  // Convert agents to marketplace format
-  const marketplaceAgents = agents.map(agent => ({
-    id: agent.id,
-    name: agent.meta?.name || agent.name || 'Unnamed Agent',
-    role: agent.persona?.role || 'AI Agent',
-    price: agent.economics?.basePrice || '0.1',
-    rating: 4.5, // TODO: Calculate from stats
-    reviews: 0, // TODO: Get from stats
-    status: agent.status || 'offline',
-    kyc: agent.identity?.kycVerified || false,
-    color: agent.meta?.color || '#6366f1',
-    tags: agent.meta?.tags || [],
-    description: agent.meta?.description || 'No description available'
-  }));
-
-  const filtered = marketplaceAgents.filter(a => {
+  const filtered = mockAgents.filter(a => {
     const matchSearch = a.name.toLowerCase().includes(search.toLowerCase()) || a.description.toLowerCase().includes(search.toLowerCase());
     const matchTag = activeTag === "All" || a.tags.includes(activeTag);
     const matchKyc = kycFilter === "All" ? true : kycFilter === "Verified" ? a.kyc : !a.kyc;

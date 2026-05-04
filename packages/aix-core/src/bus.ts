@@ -1,366 +1,254 @@
-import { kv } from './storage/adapter';
-import { PulseEngine, PulseEventType } from './pulse';
-
 /**
- * AIX Nervous System — Universal Cross-Language Event Bus (v1.0.0)
- *
- * Architecture: 4-Ring Heartbeat Topology
- *   Ring 0 — GENESIS : Rust DNA signing/verification
- *   Ring 1 — SOUL    : Identity, KYC, Pets, Dead Hand
- *   Ring 2 — MIND    : Go routing, TS Hermes learning
- *   Ring 3 — BODY    : MCP gateway, Channels, Economics
- *
- * All layers (Rust / Go / TypeScript) write to the same
- * Redis spine via PulseEngine.emit().
- * Studio reads back via the SSE /api/pulse/stream endpoint.
+ * 4-Ring Bus Architecture
+ * Central event bus for pet → expectation → gateway → trust-chain flow
  */
 
-export const BUS_RINGS = {
-  GENESIS : 0,
-  SOUL    : 1,
-  MIND    : 2,
-  BODY    : 3,
-} as const;
+import { EventEmitter } from 'events';
 
-export type BusRing = (typeof BUS_RINGS)[keyof typeof BUS_RINGS];
-
-// ─── Extended event types for cross-layer visibility ────────────────────────
-export type BusEventType =
-  | PulseEventType
-  | 'DNA_VERIFIED'
-  | 'DNA_TAMPERED'
-  | 'TASK_ROUTED'
-  | 'TASK_FAILED'
-  | 'PAYMENT_SETTLED'
-  | 'AGENT_HIBERNATED'
-  | 'CHANNEL_PROVISIONED'
-  // ReAct Loop (Ring 2 — MIND)
-  | 'THOUGHT_GENERATED'
-  | 'ACTION_PLANNED'
-  | 'ACTION_EXECUTING'
-  | 'OBSERVATION_RECORDED'
-  | 'REFLECTION_COMPLETE'
-  // Pet (Ring 1 — SOUL)
-  | 'PET_MOOD_CHANGED'
-  | 'PET_LEVELED_UP'
-  | 'PET_ACCESSORY_UNLOCKED'
-  // Trust (Ring 0 — GENESIS)
-  | 'TRUST_TX_MINING'
-  | 'TRUST_TX_MINED'
-  | 'TRUST_SCORE_UPDATED'
-  // Stream (Ring 3 — BODY)
-  | 'RESULT_CHUNK'
-  | 'RESULT_COMPLETE'
-  | 'METRICS_UPDATED'
-  | 'STEP_STARTED'
-  | 'STEP_COMPLETE';
+export type BusEventType = 
+  | 'pet:spawn'
+  | 'pet:run'
+  | 'pet:complete'
+  | 'pet:error'
+  | 'expectation:set'
+  | 'expectation:step'
+  | 'expectation:timeout'
+  | 'expectation:complete'
+  | 'gateway:spawn'
+  | 'gateway:run'
+  | 'gateway:pay'
+  | 'gateway:error'
+  | 'trust:verify'
+  | 'trust:lineage'
+  | 'trust:pow'
+  | 'trust:error';
 
 export interface BusEvent {
-  id        : string;
-  timestamp : number;
-  ring      : BusRing;
-  type      : BusEventType;
-  agentId   : string;
-  agentName : string;
-  message   : string;
-  metadata? : Record<string, unknown>;
+  type: BusEventType;
+  agentId: string;
+  taskId?: string;
+  data: any;
+  timestamp: number;
+  ring: 'pet' | 'expectation' | 'gateway' | 'trust';
 }
 
-// ─── Factory helpers (one per ring) ─────────────────────────────────────────
-
-/** Ring 0 — emitted by Rust aix-dna after verify_dna() */
-export function createDNAEvent(
-  manifestId : string,
-  hash       : string,
-  ok         : boolean,
-): BusEvent {
-  return mkEvent(BUS_RINGS.GENESIS, ok ? 'DNA_VERIFIED' : 'DNA_TAMPERED',
-    manifestId, 'aix-dna',
-    ok
-      ? `✅ genesis_hash verified: ${hash.slice(0, 12)}…`
-      : `🚨 Tamper detected — hash mismatch: ${hash.slice(0, 12)}…`,
-    { hash, ok });
-}
-
-/** Ring 1 — emitted by dead-hand.ts */
-export function createDeadHandEvent(
-  agentId     : string,
-  agentName   : string,
-  threatLevel : string,
-  reason      : string,
-  evidence    : Record<string, unknown>,
-): BusEvent {
-  return mkEvent(BUS_RINGS.SOUL, 'SECURITY_ALERT',
-    agentId, agentName,
-    `☠️  ${threatLevel}: ${reason}`,
-    { threatLevel, reason, evidence });
-}
-
-/** Ring 1 — emitted by pets.ts on level-up */
-export function createEvolutionEvent(
-  agentId   : string,
-  agentName : string,
-  level     : number,
-  reward?   : string,
-): BusEvent {
-  return mkEvent(BUS_RINGS.SOUL, 'EVOLUTION',
-    agentId, agentName,
-    reward
-      ? `⚡ Level ${level} reached — ${reward} unlocked!`
-      : `🌱 Level ${level} reached`,
-    { level, reward });
-}
-
-/** Ring 1 — emitted by pets.ts on sleep mode */
-export function createHibernationEvent(
-  agentId   : string,
-  agentName : string,
-): BusEvent {
-  return mkEvent(BUS_RINGS.SOUL, 'AGENT_HIBERNATED',
-    agentId, agentName,
-    `💤 Agent hibernated after 7 days inactivity`,
-    {});
-}
-
-/** Ring 2 — emitted by Go swarm_router after routing */
-export function createRoutingEvent(
-  agentId      : string,
-  capability   : string,
-  score        : number,
-  taskId       : string,
-): BusEvent {
-  return mkEvent(BUS_RINGS.MIND, 'TASK_ROUTED',
-    agentId, capability,
-    `🐹 Routed task ${taskId} → ${agentId} (score: ${score.toFixed(2)})`,
-    { score, taskId, capability });
-}
-
-/** Ring 2 — emitted by learning.ts (Hermes) */
-export function createSkillEvent(
-  agentId   : string,
-  agentName : string,
-  goal      : string,
-  skillHash : string,
-): BusEvent {
-  return mkEvent(BUS_RINGS.MIND, 'SKILL_EXTRACTED',
-    agentId, agentName,
-    `🧠 Learned: "${goal}" (${skillHash})`,
-    { goal, skillHash });
-}
-
-/** Ring 3 — emitted by economics.ts after settlement */
-export function createPaymentEvent(
-  agentId   : string,
-  agentName : string,
-  amount    : number,
-  currency  : string,
-): BusEvent {
-  return mkEvent(BUS_RINGS.BODY, 'PAYMENT_SETTLED',
-    agentId, agentName,
-    `💰 Settled ${amount} ${currency}`,
-    { amount, currency });
-}
-
-/** Ring 3 — emitted by channels.ts after provisioning */
-export function createChannelEvent(
-  agentId   : string,
-  agentName : string,
-  platform  : 'telegram' | 'whatsapp',
-  handle    : string,
-): BusEvent {
-  return mkEvent(BUS_RINGS.BODY, 'CHANNEL_PROVISIONED',
-    agentId, agentName,
-    `📡 ${platform === 'telegram' ? '✈️ Telegram' : '💬 WhatsApp'} provisioned: ${handle}`,
-    { platform, handle });
-}
-
-// ─── Interactive UI Event Factories ──────────────────────────────────────────
-
-/**
- * Ring 2 — MIND: Emitted by agent-runtime.ts during ReAct loop
- * @param agentId Agent identifier
- * @param agentName Agent display name
- * @param thought The reasoning step content
- * @param step Current step number in the ReAct loop
- * @returns BusEvent for THOUGHT_GENERATED
- */
-export function createThoughtEvent(
-  agentId   : string,
-  agentName : string,
-  thought   : string,
-  step      : number,
-): BusEvent {
-  return mkEvent(
-    BUS_RINGS.MIND,
-    'THOUGHT_GENERATED',
-    agentId,
-    agentName,
-    `💭 Step ${step}: ${thought.slice(0, 80)}${thought.length > 80 ? '...' : ''}`,
-    { thought, step }
-  );
+export interface BusSubscription {
+  id: string;
+  type: BusEventType | 'all';
+  handler: (event: BusEvent) => void | Promise<void>;
 }
 
 /**
- * Ring 2 — MIND: Emitted when agent executes a tool
- * @param agentId Agent identifier
- * @param agentName Agent display name
- * @param tool Tool name being executed
- * @param input Tool input parameters
- * @param step Current step number
- * @returns BusEvent for ACTION_EXECUTING
+ * Bus class - 4-Ring Event Bus
  */
-export function createActionEvent(
-  agentId   : string,
-  agentName : string,
-  tool      : string,
-  input     : unknown,
-  step      : number,
-): BusEvent {
-  return mkEvent(
-    BUS_RINGS.MIND,
-    'ACTION_EXECUTING',
-    agentId,
-    agentName,
-    `⚡ Action: ${tool}`,
-    { tool, input, step }
-  );
+export class Bus extends EventEmitter {
+  private subscriptions: Map<string, BusSubscription> = new Map();
+  private eventHistory: BusEvent[] = [];
+  private maxHistorySize = 1000;
+
+  constructor() {
+    super();
+    this.setMaxListeners(100); // Allow many subscribers
+  }
+
+  /**
+   * Emit event to bus
+   */
+  emitEvent(type: BusEventType, agentId: string, data: any, taskId?: string): void {
+    const ring = this.getRingFromEventType(type);
+    
+    const event: BusEvent = {
+      type,
+      agentId,
+      taskId,
+      data,
+      timestamp: Date.now(),
+      ring
+    };
+
+    // Add to history
+    this.eventHistory.push(event);
+    if (this.eventHistory.length > this.maxHistorySize) {
+      this.eventHistory.shift();
+    }
+
+    // Emit to EventEmitter
+    super.emit(type, event);
+    super.emit('all', event);
+  }
+
+  /**
+   * Subscribe to events
+   */
+  subscribe(type: BusEventType | 'all', handler: (event: BusEvent) => void | Promise<void>): string {
+    const id = `sub-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    const subscription: BusSubscription = {
+      id,
+      type,
+      handler
+    };
+
+    this.subscriptions.set(id, subscription);
+    this.on(type, handler);
+
+    return id;
+  }
+
+  /**
+   * Unsubscribe from events
+   */
+  unsubscribe(subscriptionId: string): boolean {
+    const subscription = this.subscriptions.get(subscriptionId);
+    if (!subscription) {
+      return false;
+    }
+
+    this.off(subscription.type, subscription.handler);
+    this.subscriptions.delete(subscriptionId);
+    return true;
+  }
+
+  /**
+   * Get event history
+   */
+  getHistory(filter?: {
+    type?: BusEventType;
+    agentId?: string;
+    ring?: 'pet' | 'expectation' | 'gateway' | 'trust';
+    since?: number;
+  }): BusEvent[] {
+    let events = [...this.eventHistory];
+
+    if (filter) {
+      if (filter.type) {
+        events = events.filter(e => e.type === filter.type);
+      }
+      if (filter.agentId) {
+        events = events.filter(e => e.agentId === filter.agentId);
+      }
+      if (filter.ring) {
+        events = events.filter(e => e.ring === filter.ring);
+      }
+      if (filter.since !== undefined) {
+        events = events.filter(e => e.timestamp >= filter.since!);
+      }
+    }
+
+    return events;
+  }
+
+  /**
+   * Get ring from event type
+   */
+  private getRingFromEventType(type: BusEventType): 'pet' | 'expectation' | 'gateway' | 'trust' {
+    if (type.startsWith('pet:')) return 'pet';
+    if (type.startsWith('expectation:')) return 'expectation';
+    if (type.startsWith('gateway:')) return 'gateway';
+    if (type.startsWith('trust:')) return 'trust';
+    return 'gateway'; // default
+  }
+
+  /**
+   * Get active subscriptions count
+   */
+  getSubscriptionCount(): number {
+    return this.subscriptions.size;
+  }
+
+  /**
+   * Clear event history
+   */
+  clearHistory(): void {
+    this.eventHistory = [];
+  }
+
+  /**
+   * Reset bus state (for testing)
+   */
+  reset(): void {
+    this.removeAllListeners();
+    this.subscriptions.clear();
+    this.eventHistory = [];
+  }
+
+  /**
+   * Get bus statistics
+   */
+  getStats(): {
+    subscriptions: number;
+    historySize: number;
+    eventsByRing: Record<string, number>;
+    eventsByType: Record<string, number>;
+  } {
+    const eventsByRing: Record<string, number> = {
+      pet: 0,
+      expectation: 0,
+      gateway: 0,
+      trust: 0
+    };
+
+    const eventsByType: Record<string, number> = {};
+
+    for (const event of this.eventHistory) {
+      eventsByRing[event.ring]++;
+      eventsByType[event.type] = (eventsByType[event.type] || 0) + 1;
+    }
+
+    return {
+      subscriptions: this.subscriptions.size,
+      historySize: this.eventHistory.length,
+      eventsByRing,
+      eventsByType
+    };
+  }
 }
 
 /**
- * Ring 2 — MIND: Emitted when tool execution completes
- * @param agentId Agent identifier
- * @param agentName Agent display name
- * @param observation Tool execution result
- * @param step Current step number
- * @returns BusEvent for OBSERVATION_RECORDED
+ * Singleton instance
  */
-export function createObservationEvent(
-  agentId     : string,
-  agentName   : string,
-  observation : string,
-  step        : number,
-): BusEvent {
-  return mkEvent(
-    BUS_RINGS.MIND,
-    'OBSERVATION_RECORDED',
-    agentId,
-    agentName,
-    `👁️ Observation: ${observation.slice(0, 80)}${observation.length > 80 ? '...' : ''}`,
-    { observation, step }
-  );
+let busInstance: Bus | null = null;
+
+/**
+ * Get bus instance
+ */
+export function getBus(): Bus {
+  if (!busInstance) {
+    busInstance = new Bus();
+  }
+  return busInstance;
 }
 
 /**
- * Ring 1 — SOUL: Emitted by pets.ts when mood changes
- * @param agentId Agent identifier
- * @param agentName Agent display name
- * @param fromMood Previous mood state
- * @param toMood New mood state
- * @param tau Quality threshold (0.1-1.0)
- * @returns BusEvent for PET_MOOD_CHANGED
+ * Reset bus instance (for testing)
  */
-export function createPetMoodEvent(
-  agentId   : string,
-  agentName : string,
-  fromMood  : string,
-  toMood    : string,
-  tau       : number,
-): BusEvent {
-  return mkEvent(
-    BUS_RINGS.SOUL,
-    'PET_MOOD_CHANGED',
-    agentId,
-    agentName,
-    `🐾 Mood: ${fromMood} → ${toMood} (τ=${tau.toFixed(2)})`,
-    { fromMood, toMood, tau }
-  );
+export function resetBus(): void {
+  if (busInstance) {
+    busInstance.reset();
+    busInstance = null;
+  }
 }
 
 /**
- * Ring 0 — GENESIS: Emitted by trust-chain.ts during PoW mining
- * @param agentId Agent identifier
- * @param agentName Agent display name
- * @param nonce Current nonce attempt
- * @param hash Current hash being tested
- * @param done Whether mining is complete
- * @returns BusEvent for TRUST_TX_MINING or TRUST_TX_MINED
+ * Helper: Wait for specific event
  */
-export function createTrustMiningEvent(
-  agentId   : string,
-  agentName : string,
-  nonce     : number,
-  hash      : string,
-  done      : boolean,
-): BusEvent {
-  return mkEvent(
-    BUS_RINGS.GENESIS,
-    done ? 'TRUST_TX_MINED' : 'TRUST_TX_MINING',
-    agentId,
-    agentName,
-    done
-      ? `⛏️ Block mined: ${hash.slice(0, 12)}…`
-      : `⛏️ Mining nonce ${nonce}…`,
-    { nonce, hash, done }
-  );
-}
+export function waitForEvent(
+  bus: Bus,
+  type: BusEventType,
+  timeout = 5000
+): Promise<BusEvent> {
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      bus.unsubscribe(subscriptionId);
+      reject(new Error(`Timeout waiting for event: ${type}`));
+    }, timeout);
 
-// ─── UI Layer Metadata Interface ─────────────────────────────────────────────
-
-/**
- * Optional metadata for UI layer routing and visualization
- */
-export interface UILayerMeta {
-  /** Target UI component for this event */
-  uiLayer: 'terminal' | 'pet' | 'trust' | 'stream';
-  /** ReAct loop step number (for terminal) */
-  step?: number;
-  /** Quality threshold tau (for pet) */
-  tau?: number;
-  /** Execution time in milliseconds (for metrics) */
-  ms?: number;
-}
-
-// ─── Emit helpers ────────────────────────────────────────────────────────────
-
-/**
- * Emit any BusEvent through PulseEngine.
- * This is the single funnel that all layers use.
- */
-export async function emit(event: Omit<BusEvent, 'id' | 'timestamp'>): Promise<void> {
-  await PulseEngine.emit({
-    type      : event.type as PulseEventType,
-    agentId   : event.agentId,
-    agentName : event.agentName,
-    message   : event.message,
-    metadata  : { ...event.metadata, ring: event.ring },
+    const subscriptionId = bus.subscribe(type, (event) => {
+      clearTimeout(timeoutId);
+      bus.unsubscribe(subscriptionId);
+      resolve(event);
+    });
   });
 }
 
-/**
- * Type-guard: is this event from a given ring?
- */
-export function isFromRing(event: BusEvent, ring: BusRing): boolean {
-  return event.ring === ring;
-}
-
-// ─── Internal ────────────────────────────────────────────────────────────────
-
-function mkEvent(
-  ring      : BusRing,
-  type      : BusEventType,
-  agentId   : string,
-  agentName : string,
-  message   : string,
-  metadata  : Record<string, unknown>,
-): BusEvent {
-  return {
-    id        : Math.random().toString(36).slice(2, 12),
-    timestamp : Date.now(),
-    ring,
-    type,
-    agentId,
-    agentName,
-    message,
-    metadata,
-  };
-}
+// Made with Bob

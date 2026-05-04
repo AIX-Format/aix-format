@@ -1,201 +1,238 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Zap, 
-  ShieldAlert, 
-  Send, 
-  Link2, 
-  Settings, 
-  Clock,
-  Filter,
-  Search,
-  Activity
-} from 'lucide-react';
-import { AgentPet } from '@/components/shared/AgentPet';
-import { FadeIn } from '@/components/animations/FadeIn';
+import { useEffect, useState, useRef } from 'react';
+import { Box, Text } from '@/design-system/components';
 
 interface PulseEvent {
-  id: string;
+  type: 'bus' | 'pet' | 'meta' | 'connected' | 'error';
+  data?: unknown;
   timestamp: number;
-  type: 'INVOCATION' | 'SKILL_EXTRACTED' | 'SECURITY_ALERT' | 'MESSAGE_SENT' | 'AGENT_CALL' | 'EVOLUTION';
-  agentId: string;
-  agentName: string;
-  message: string;
-  pet?: Record<string, unknown>;
 }
-
-const TYPE_ICONS = {
-  INVOCATION: { icon: Activity, color: '#3B82F6', label: 'Invocation' },
-  SKILL_EXTRACTED: { icon: Zap, color: '#F59E0B', label: 'Skill' },
-  SECURITY_ALERT: { icon: ShieldAlert, color: '#EF4444', label: 'Security' },
-  MESSAGE_SENT: { icon: Send, color: '#10B981', label: 'Message' },
-  AGENT_CALL: { icon: Link2, color: '#6366F1', label: 'A2A' },
-  EVOLUTION: { icon: Settings, color: '#EC4899', label: 'Evolution' }
-};
 
 export default function PulsePage() {
   const [events, setEvents] = useState<PulseEvent[]>([]);
-  const [filter, setFilter] = useState('ALL');
-  const [isLive, setIsLive] = useState(true);
+  const [isConnected, setIsConnected] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectAttempts = useRef(0);
 
   useEffect(() => {
-    // Establish SSE connection
-    const es = new EventSource('/api/pulse/stream');
-    eventSourceRef.current = es;
-
-    es.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'PULSE') {
-        setEvents(prev => {
-          // Merge new events, filter out duplicates, sort by timestamp
-          const newEvents = data.events.filter((ne: PulseEvent) => !prev.some(pe => pe.id === ne.id));
-          return [...newEvents, ...prev].slice(0, 50);
-        }, []);
-      }
-    };
-
-    es.onerror = (err) => {
-      console.error("Pulse SSE Error:", err);
-      setIsLive(false);
-    };
+    connectToStream();
 
     return () => {
-      es.close();
+      disconnect();
     };
   }, []);
 
-  const filteredEvents = events.filter(e => {
-    if (filter === 'ALL') return true;
-    if (filter === 'SECURITY' && e.type === 'SECURITY_ALERT') return true;
-    if (filter === 'SKILLS' && e.type === 'SKILL_EXTRACTED') return true;
-    if (filter === 'PLATFORM' && (e.type === 'MESSAGE_SENT' || e.type === 'INVOCATION')) return true;
-    return false;
-  });
+  const connectToStream = () => {
+    // Clear any existing connection
+    disconnect();
+
+    try {
+      const eventSource = new EventSource('/api/pulse/stream');
+      eventSourceRef.current = eventSource;
+
+      eventSource.onopen = () => {
+        console.log('[Pulse] Connected to SSE stream');
+        setIsConnected(true);
+        setError(null);
+        reconnectAttempts.current = 0;
+      };
+
+      eventSource.addEventListener('connected', (e) => {
+        const data = JSON.parse(e.data);
+        setEvents(prev => [...prev, { type: 'connected', data, timestamp: data.timestamp }]);
+      });
+
+      eventSource.addEventListener('bus', (e) => {
+        const data = JSON.parse(e.data);
+        setEvents(prev => [...prev.slice(-99), { type: 'bus', data, timestamp: Date.now() }]);
+      });
+
+      eventSource.addEventListener('pet', (e) => {
+        const data = JSON.parse(e.data);
+        setEvents(prev => [...prev.slice(-99), { type: 'pet', data, timestamp: Date.now() }]);
+      });
+
+      eventSource.addEventListener('meta', (e) => {
+        const data = JSON.parse(e.data);
+        setEvents(prev => [...prev.slice(-99), { type: 'meta', data, timestamp: Date.now() }]);
+      });
+
+      eventSource.addEventListener('error', (e) => {
+        const data = JSON.parse(e.data);
+        setEvents(prev => [...prev, { type: 'error', data, timestamp: Date.now() }]);
+      });
+
+      eventSource.onerror = (err) => {
+        console.error('[Pulse] SSE error:', err);
+        setIsConnected(false);
+        setError('Connection lost');
+
+        // Exponential backoff reconnection
+        const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
+        reconnectAttempts.current++;
+
+        console.log(`[Pulse] Reconnecting in ${delay}ms (attempt ${reconnectAttempts.current})`);
+        
+        reconnectTimeoutRef.current = setTimeout(() => {
+          connectToStream();
+        }, delay);
+      };
+    } catch (err) {
+      console.error('[Pulse] Failed to create EventSource:', err);
+      setError('Failed to connect');
+    }
+  };
+
+  const disconnect = () => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+    }
+
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+
+    setIsConnected(false);
+  };
+
+  const getEventIcon = (type: string) => {
+    switch (type) {
+      case 'bus': return '🚌';
+      case 'pet': return '🐾';
+      case 'meta': return '🧠';
+      case 'connected': return '✅';
+      case 'error': return '❌';
+      default: return '📡';
+    }
+  };
+
+  const getEventColor = (type: string) => {
+    switch (type) {
+      case 'bus': return 'text-blue-500';
+      case 'pet': return 'text-green-500';
+      case 'meta': return 'text-purple-500';
+      case 'connected': return 'text-emerald-500';
+      case 'error': return 'text-red-500';
+      default: return 'text-gray-500';
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white pt-24 pb-20 px-6 max-w-5xl mx-auto">
-      {/* Header */}
-      <header className="flex items-center justify-between mb-12">
-        <div>
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className={`w-2 h-2 rounded-full ${isLive ? 'bg-red-500 animate-pulse' : 'bg-zinc-600'}`} />
-              <span className="text-xs font-black text-white/40 uppercase tracking-[0.3em]">
-                {isLive ? 'Live Heartbeat Feed' : 'Stream Disconnected'}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2">
+            🔴 Pulse Dashboard
+          </h1>
+          <p className="text-gray-400">
+            Real-time AIX Format event stream with SSE
+          </p>
+        </div>
+
+        {/* Connection Status */}
+        <div className="mb-6 p-4 rounded-lg bg-gray-800 border border-gray-700">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+              <span className="text-white font-medium">
+                {isConnected ? 'Connected' : 'Disconnected'}
               </span>
+              {error && (
+                <span className="text-red-400 text-sm">
+                  ({error})
+                </span>
+              )}
             </div>
-            <h1 className="text-5xl font-black tracking-tighter flex items-center gap-4">
-              AIX PULSE
-              <span className="text-sm px-3 py-1 bg-red-500/10 border border-red-500/20 text-red-500 rounded-full font-bold animate-pulse">
-                LIVE
-              </span>
-            </h1>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 backdrop-blur-md">
-            {['ALL', 'PLATFORM', 'SECURITY', 'SKILLS'].map((f) => (
+            <div className="flex gap-2">
               <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`px-4 py-2 rounded-lg text-[10px] font-black transition-all ${
-                  filter === f 
-                  ? 'bg-white/10 text-white shadow-lg' 
-                  : 'text-white/30 hover:text-white/60'
-                }`}
+                onClick={connectToStream}
+                disabled={isConnected}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {f}
+                Reconnect
               </button>
-            ))}
-          </div>
-        </div>
-      </header>
-
-      {/* Pulse Feed */}
-      <div className="space-y-3">
-        <AnimatePresence initial={false} mode="popLayout">
-          {filteredEvents.map((event) => {
-            const typeInfo = TYPE_ICONS[event.type] || TYPE_ICONS.INVOCATION;
-            const Icon = typeInfo.icon;
-
-            return (
-              <motion.div
-                key={event.id}
-                initial={{ opacity: 0, x: -20, scale: 0.95 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                layout
-                className="group flex items-center gap-6 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-all"
+              <button
+                onClick={disconnect}
+                disabled={!isConnected}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {/* Timestamp */}
-                <div className="flex flex-col items-center justify-center min-w-[70px]">
-                  <span className="text-[10px] font-mono text-white/20">
-                    {new Date(event.timestamp).toLocaleTimeString([], { hour12: false })}
-                  </span>
-                  <div className="w-[1px] h-4 bg-white/5 my-1" />
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: typeInfo.color }} />
-                </div>
-
-                {/* Agent Identity */}
-                <div className="flex items-center gap-3 min-w-[180px]">
-                  <AgentPet pet={event.pet} size="sm" />
-                  <div>
-                    <div className="text-sm font-bold text-white/90">{event.agentName}</div>
-                    <div className="text-[10px] font-black text-white/30 uppercase tracking-widest">{event.agentId.slice(0, 8)}</div>
-                  </div>
-                </div>
-
-                {/* Event Message */}
-                <div className="flex-grow flex items-center gap-3">
-                  <div 
-                    className="p-2 rounded-lg" 
-                    style={{ backgroundColor: `${typeInfo.color}10`, color: typeInfo.color }}
-                  >
-                    <Icon size={14} />
-                  </div>
-                  <p className="text-sm text-white/60 font-medium">
-                    {event.message}
-                  </p>
-                </div>
-
-                {/* Action Tag */}
-                <div className="hidden md:block">
-                  <div 
-                    className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border"
-                    style={{ borderColor: `${typeInfo.color}20`, color: typeInfo.color, backgroundColor: `${typeInfo.color}05` }}
-                  >
-                    {typeInfo.label}
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
-
-        {events.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-40 border-2 border-dashed border-white/5 rounded-3xl">
-            <Activity className="w-12 h-12 text-white/10 mb-4 animate-pulse" />
-            <h3 className="text-white/40 font-bold uppercase tracking-widest text-xs">Waiting for agent activity...</h3>
+                Disconnect
+              </button>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
 
-      {/* Footer Stat */}
-      <footer className="mt-12 flex items-center justify-between text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">
-        <div>
-          Buffer: {events.length} / 50 events
+        {/* Stats */}
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="p-4 rounded-lg bg-gray-800 border border-gray-700">
+            <div className="text-gray-400 text-sm mb-1">Total Events</div>
+            <div className="text-2xl font-bold text-white">{events.length}</div>
+          </div>
+          <div className="p-4 rounded-lg bg-gray-800 border border-gray-700">
+            <div className="text-gray-400 text-sm mb-1">Bus Events</div>
+            <div className="text-2xl font-bold text-blue-500">
+              {events.filter(e => e.type === 'bus').length}
+            </div>
+          </div>
+          <div className="p-4 rounded-lg bg-gray-800 border border-gray-700">
+            <div className="text-gray-400 text-sm mb-1">Pet Events</div>
+            <div className="text-2xl font-bold text-green-500">
+              {events.filter(e => e.type === 'pet').length}
+            </div>
+          </div>
+          <div className="p-4 rounded-lg bg-gray-800 border border-gray-700">
+            <div className="text-gray-400 text-sm mb-1">Meta Events</div>
+            <div className="text-2xl font-bold text-purple-500">
+              {events.filter(e => e.type === 'meta').length}
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Clock size={12} />
-          Synchronized with Sovereign Gateway
+
+        {/* Event Stream */}
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+          <h2 className="text-xl font-bold text-white mb-4">Event Stream</h2>
+          
+          <div className="space-y-2 max-h-[600px] overflow-y-auto">
+            {events.length === 0 ? (
+              <div className="text-center text-gray-500 py-8">
+                No events yet. Waiting for stream...
+              </div>
+            ) : (
+              events.slice().reverse().map((event, index) => (
+                <div
+                  key={`${event.timestamp}-${index}`}
+                  className="p-3 rounded-lg bg-gray-900 border border-gray-700 hover:border-gray-600 transition-colors"
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">{getEventIcon(event.type)}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`font-medium ${getEventColor(event.type)}`}>
+                          {event.type.toUpperCase()}
+                        </span>
+                        <span className="text-gray-500 text-sm">
+                          {new Date(event.timestamp).toLocaleTimeString()}
+                        </span>
+                      </div>
+                      <pre className="text-gray-300 text-sm overflow-x-auto">
+                        {JSON.stringify(event.data, null, 2)}
+                      </pre>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
-      </footer>
+      </div>
     </div>
   );
 }
 
-function.displayName = 'function';
+// Made with Bob

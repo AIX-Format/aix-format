@@ -1,7 +1,6 @@
-import React from 'react';
 import { Cpu, Shield, Zap, Activity } from "lucide-react";
 
-function AnalyticsLoading() {
+export default function AnalyticsLoading() {
   return (
     <main className="min-h-screen pt-24 pb-16 px-6 max-w-7xl mx-auto animate-pulse">
       <div className="mb-10">
@@ -27,7 +26,3 @@ function AnalyticsLoading() {
     </main>
   );
 }
-
-export default React.memo(AnalyticsLoading);
-
-AnalyticsLoading.displayName = 'AnalyticsLoading';
