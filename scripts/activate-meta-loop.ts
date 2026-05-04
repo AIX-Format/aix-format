@@ -299,7 +299,19 @@ function initializeAgents() {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 async function runMetaLoop() {
+  // 🧠 CONDITIONAL EVOLUTION TRICK
+  const lastRun = await kv.get<number>('evolution:last_run') || 0;
+  const hoursSince = (Date.now() - lastRun) / 3600000;
+  const forcedRun = process.argv.includes('--force');
+
+  if (hoursSince < 6 && !forcedRun && CONFIG.mode === 'production') {
+    console.log(`\n⏭️  Skipping evolution loop. Last run was ${hoursSince.toFixed(2)} hours ago.`);
+    console.log('   Use --force to override.');
+    return;
+  }
+
   console.log('\n🔄 Starting Meta Loop...\n');
+  await kv.set('evolution:last_run', Date.now());
   isRunning = true;
 
   while (isRunning && loopCount < CONFIG.maxLoops) {

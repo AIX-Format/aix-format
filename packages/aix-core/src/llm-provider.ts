@@ -172,3 +172,59 @@ export class GroqProvider implements LLMProvider {
     }
   }
 }
+/**
+ * Langfuse Tracing Provider
+ * Wraps any LLMProvider to add observability
+ */
+export class LangfuseProvider implements LLMProvider {
+  private langfuse: any = null;
+
+  constructor(
+    private inner: LLMProvider,
+    private config: {
+      publicKey: string;
+      secretKey: string;
+      baseUrl?: string;
+    }
+  ) {
+    this.model = inner.model;
+  }
+
+  model?: string;
+
+  async complete(prompt: string, stopTokens?: string[]): Promise<string> {
+    if (!this.langfuse) {
+      try {
+        const { Langfuse } = await import('langfuse');
+        this.langfuse = new Langfuse({
+          publicKey: this.config.publicKey,
+          secretKey: this.config.secretKey,
+          baseUrl: this.config.baseUrl || 'https://cloud.langfuse.com',
+        });
+      } catch (e) {
+        console.warn('⚠️ Langfuse SDK not found, falling back to raw execution');
+        return this.inner.complete(prompt, stopTokens);
+      }
+    }
+
+    const trace = this.langfuse.trace({
+      name: `aix-evolution-cycle`,
+      metadata: { model: this.model },
+    });
+
+    const generation = trace.generation({
+      name: 'llm-completion',
+      model: this.model,
+      input: prompt,
+    });
+
+    try {
+      const output = await this.inner.complete(prompt, stopTokens);
+      generation.end({ output });
+      return output;
+    } catch (error) {
+      generation.end({ level: 'ERROR', statusMessage: error instanceof Error ? error.message : String(error) });
+      throw error;
+    }
+  }
+}

@@ -171,7 +171,7 @@ export class AgentRuntimeEngine {
   }
 
   private async buildContext(task: Task): Promise<RuntimeContext> {
-    const memories = await this.fetchMemories();
+    const memories = await this.fetchMemories(task);
     return {
       memories,
       skills: [],
@@ -266,9 +266,24 @@ export class AgentRuntimeEngine {
     return match ? match[1].trim() : thought;
   }
 
-  private async fetchMemories(): Promise<string[]> {
-    const memoryTree = await ReadableMemory.getMemoryTree(this.runtime.agentId);
-    return memoryTree.children?.find(c => c.id === 'facts')?.children?.map(f => f.label) || [];
+  private async fetchMemories(task: Task): Promise<string[]> {
+    try {
+      const { SemanticIndex } = await import('./wikibrain/SemanticIndex');
+      const index = new SemanticIndex();
+      
+      // Query semantic index for relevant wisdom (Proactive Memory)
+      const relevantWisdom = await index.search(task.description, { limit: 3 });
+      const wisdomStrings = relevantWisdom.map(w => `[WISDOM] ${w.text}`);
+
+      const memoryTree = await ReadableMemory.getMemoryTree(this.runtime.agentId);
+      const facts = memoryTree.children?.find(c => c.id === 'facts')?.children?.map(f => f.label) || [];
+      
+      return [...wisdomStrings, ...facts];
+    } catch (e) {
+      console.warn('⚠️ Semantic Index retrieval failed, falling back to basic memory');
+      const memoryTree = await ReadableMemory.getMemoryTree(this.runtime.agentId);
+      return memoryTree.children?.find(c => c.id === 'facts')?.children?.map(f => f.label) || [];
+    }
   }
 
   private async emitState(type: string, message: string): Promise<void> {

@@ -140,6 +140,20 @@ export async function indexAgent(manifest: any): Promise<void> {
   });
 }
 
+export class SemanticIndex {
+  async search(query: string, options: { limit?: number, filter?: SearchFilter } = {}): Promise<{ text: string, score: number }[]> {
+    const { results } = await search(query, options.limit || 5, options.filter);
+    return results.map(r => ({
+      text: r.snippet || r.name,
+      score: r.score
+    }));
+  }
+
+  async index(id: string, type: string, text: string, metadata: any = {}): Promise<void> {
+    await indexEntity(id, type, text, metadata);
+  }
+}
+
 /**
  * Sovereign Search - Filters results based on visibility and trust
  */
