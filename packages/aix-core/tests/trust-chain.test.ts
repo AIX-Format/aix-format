@@ -123,8 +123,9 @@ describe('Trust Chain', () => {
         .mockResolvedValueOnce(actions[0]) // action:hash2
         .mockResolvedValueOnce(actions[1]); // action:hash1
 
-      // Mock topology check to pass for 'act2:a1'
-      const topoHash = createHash('md5').update('act2:a1').digest('hex');
+      // 🚀 QUANTUM TOPOLOGY: Updated granular signature
+      const dataLength = Object.keys({}).join(',').length; // data is {}
+      const topoHash = createHash('md5').update(`act2:a1:${dataLength}`).digest('hex');
       actions[0].topologySignature = topoHash;
 
       const result = await trustChain.selfHeal('a1');

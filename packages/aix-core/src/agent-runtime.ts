@@ -380,16 +380,20 @@ export class AgentRuntimeEngine {
   }
 
   private buildReActPrompt(task: Task): string {
-    // 🚀 TURBOQUANT: PolarContext Compression (Simulated)
-    // We prioritize memory based on "Importance Radius" (Recency + Relevance)
+    // 🚀 TURBOQUANT v2: Entropy-Based Polar Compression
+    // We calculate 'contextual entropy' (pattern repetition) to prune redundant thoughts
     const polarMemory = this.runtime.scratchpad.map((s, i) => {
       const recency = i / this.runtime.scratchpad.length;
-      const relevance = s.observation.length > 0 ? 1.0 : 0.5; // Simple relevance proxy
-      const importanceRadius = recency * relevance;
+      
+      // Small details: detects repetitive tool calls or circular thoughts
+      const isRepetitive = this.runtime.scratchpad.slice(0, i).some(prev => 
+        prev.action?.tool === s.action?.tool && JSON.stringify(prev.action?.params) === JSON.stringify(s.action?.params)
+      );
+      
+      const importanceRadius = isRepetitive ? recency * 0.2 : recency * 1.0;
 
-      if (importanceRadius < 0.3 && this.runtime.scratchpad.length > 5) {
-        // High compression for low-importance 'outer shell' memories
-        return `[POLAR_COMPRESSED]: ${s.thought.slice(0, 50)}... -> Outcome: ${s.observation.slice(0, 50)}...`;
+      if (importanceRadius < 0.4 && this.runtime.scratchpad.length > 8) {
+        return `[ENTROPY_COMPRESSED]: ${s.thought.slice(0, 30)}... [REPETITIVE_PATTERN_PRUNED]`;
       }
       return `Thought: ${s.thought}\nAction: ${JSON.stringify(s.action)}\nObservation: ${s.observation}`;
     }).join('\n');

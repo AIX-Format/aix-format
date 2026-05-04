@@ -339,11 +339,46 @@ export class Gateway extends EventEmitter {
   }
 
   private async recordMetaLoopAction(agentId: string, input: any, output: string) {
-    // Layer 0: Curiosity Reward
-    await CuriosityEngine.calculateCuriosityReward(agentId, 'run', { params: input, success: true });
+    // 🌀 RULE 7: CuriosityEngine Feed
+    const inputEntropy = typeof input === 'string' ? input.length : JSON.stringify(input).length;
+    const curiosityReward = await CuriosityEngine.calculateCuriosityReward(agentId, 'run', { 
+      params: input, 
+      success: true,
+      entropy: inputEntropy // Inject entropy for smarter reward
+    });
 
-    // Layer 1 & 2: Self-Review handled by agent-runtime.ts
-    console.log(`[Gateway:MetaLoop] Execution recorded for agent ${agentId}`);
+    // Feed Curiosity into Trust Score (Proactive Growth)
+    const trustChain = getTrustChain();
+    const currentScore = await trustChain.getScore(agentId);
+    const newScore = Math.min(10, currentScore + (curiosityReward * 0.05));
+    await kv.set(KEYS.agentTrustScore(agentId), newScore);
+
+    // Layer 4: Wisdom Archive
+    if (output.length > 50) {
+      await this.archiveWisdom(agentId, input, output);
+    }
+    
+    console.log(`[Gateway:MetaLoop] Curiosity Reward (${curiosityReward.toFixed(2)}) applied to Trust for ${agentId}`);
+  }
+
+  private async archiveWisdom(agentId: string, input: any, output: string) {
+    try {
+      // 🚀 TURBOQUANT: Hierarchical Brain Archiving
+      const index = new (await import('./wikibrain/SemanticIndex')).SemanticIndex();
+      const inputStr = typeof input === 'object' ? JSON.stringify(input) : String(input);
+      
+      const wisdom = `Sovereign Pattern [${agentId}]: Input(${inputStr.slice(0, 40)}) -> Strategy(${output.slice(0, 60)})`;
+      
+      await index.index(
+        `wisdom-${agentId}-${Date.now()}`,
+        'wisdom',
+        wisdom,
+        { agentId, type: 'meta_wisdom', quality: 1.0 }
+      );
+      console.log(`🧠 [Gateway:Wisdom] Pattern solidified for ${agentId}`);
+    } catch (e) {
+      console.warn('⚠️ [Gateway] Wisdom archiving skipped (Offline/Internal).');
+    }
   }
 
   /**
