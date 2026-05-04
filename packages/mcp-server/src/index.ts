@@ -102,7 +102,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     if (name === "get_blackbox_logs") {
       const manifestPath = args?.manifestPath as string;
       const content = await fs.readFile(path.resolve(manifestPath), "utf-8");
-      const manifest = content.trim().startsWith('{') ? JSON.parse(content) : yaml.load(content);
+      let manifest;
+      try {
+        manifest = content.trim().startsWith('{') ? JSON.parse(content) : yaml.load(content);
+      } catch (e: any) {
+        throw new Error('Invalid format: ' + e.message);
+      }
       const logs = (manifest as any).black_box?.traces || [];
 
       return {
