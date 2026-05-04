@@ -118,6 +118,7 @@
     "stripe": "^17.0.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
+    "vite-node": "^6.0.0",
     "zod": "^4.4.1"
   },
   "devDependencies": {

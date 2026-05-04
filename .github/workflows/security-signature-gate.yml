@@ -24,7 +24,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: npm install -w packages/aix-core js-yaml --ignore-scripts || pnpm i
 
       - name: Parser + Security tests
         run: |

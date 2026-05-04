@@ -19,9 +19,9 @@
  *   --create-issue  Create GitHub issue if degrading
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -714,7 +714,8 @@ function main() {
 }
 
 // Run if executed directly
-if (require.main === module) {
+import { fileURLToPath } from 'url';
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   main();
 }
 
