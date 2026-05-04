@@ -211,30 +211,39 @@ calculate_usage_score() {
         --glob '!index.ts' \
         --glob '!index.d.ts' \
         "import.*\b$export_name\b" \
-        "$PROJECT_ROOT" 2>/dev/null | wc -l || echo 0)
+        "$PROJECT_ROOT" 2>/dev/null | wc -l || true)
     
     # Dynamic import() usage
     # استخدام import() الديناميكي
     dynamic_imports=$(rg -t ts -t tsx -t js \
         --glob '!node_modules' \
         "import\(.*$export_name" \
-        "$PROJECT_ROOT" 2>/dev/null | wc -l || echo 0)
+        "$PROJECT_ROOT" 2>/dev/null | wc -l || true)
     
     # Schema references
     # مراجع في الـ schemas
     schema_refs=$(rg -t json \
         --glob 'schemas/**' \
         "\"$export_name\"" \
-        "$PROJECT_ROOT" 2>/dev/null | wc -l || echo 0)
+        "$PROJECT_ROOT" 2>/dev/null | wc -l)
     
     # Documentation references
     # مراجع في التوثيق
     doc_refs=$(rg -t md \
         --glob 'docs/**' \
         "\b$export_name\b" \
-        "$PROJECT_ROOT" 2>/dev/null | wc -l || echo 0)
+        "$PROJECT_ROOT" 2>/dev/null | wc -l)
+
+    direct_imports=${direct_imports:-0}
+    dynamic_imports=${dynamic_imports:-0}
+    schema_refs=${schema_refs:-0}
+    doc_refs=${doc_refs:-0}
     
     # Calculate total score
+    direct_imports=${direct_imports:-0}
+    dynamic_imports=${dynamic_imports:-0}
+    schema_refs=${schema_refs:-0}
+    doc_refs=${doc_refs:-0}
     local total=$((direct_imports + dynamic_imports + schema_refs + doc_refs))
     
     echo "$total:$direct_imports:$dynamic_imports:$schema_refs:$doc_refs"
