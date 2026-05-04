@@ -1,64 +1,61 @@
-import { useState, useRef, useCallback } from 'react';
-import { VoiceState } from '../components/studio/VoiceOrb';
+import { useState, useCallback } from 'react';
+import { useVoiceRecording } from './useVoiceRecording';
+import { useVoicePlayback } from './useVoicePlayback';
+
+export interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
 
 export function useVoiceWizard() {
-  const [state, setState] = useState<VoiceState>('idle');
-  const [transcript, setTranscript] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
+  const { isListening, startListening, stopListening, error: recordingError } = useVoiceRecording();
+  const { isSpeaking, playAudio, stopAudio } = useVoicePlayback();
 
-  const mediaRecorder = useRef<MediaRecorder | null>(null);
-  const audioChunks = useRef<Blob[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  // We use `any` here as it's passed around as `any` in VoiceWizard.tsx
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [manifest, setManifest] = useState<any>(null);
 
-  const startListening = useCallback(async () => {
-    try {
-      setError(null);
-      setTranscript('');
-      // طلب صلاحية الميكروفون
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorder.current = new MediaRecorder(stream);
-      audioChunks.current = [];
+  const processAudio = async (audioBlob: Blob) => {
+      // In a real application, you would send the audioBlob to an API
+      // For this refactoring, we mock the processing to maintain the interface
+      setTimeout(() => {
+          setIsProcessing(false);
+          setMessages(prev => [...prev, { role: 'user', content: 'Mock user voice input' }]);
 
-      mediaRecorder.current.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunks.current.push(event.data);
-        }
-      };
+          setTimeout(() => {
+            setMessages(prev => [...prev, { role: 'assistant', content: 'Here is your generated agent manifest.' }]);
+            setManifest({
+              meta: { name: 'New Sovereign Agent' },
+              version: '1.0.0'
+            });
+            playAudio('mock-audio-url');
+          }, 1000);
+      }, 1000);
+  };
 
-      mediaRecorder.current.onstop = async () => {
-        setState('processing');
-        const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
+  const handleVoiceTurn = useCallback(async () => {
+    if (isListening) {
+      const audioBlob = await stopListening();
+      if (audioBlob) {
+        setIsProcessing(true);
         await processAudio(audioBlob);
-      };
-
-      mediaRecorder.current.start();
-      setState('listening');
-    } catch (err) {
-      console.error('Error accessing microphone:', err);
-      setError('تعذر الوصول إلى الميكروفون. يرجى التحقق من الصلاحيات.');
-      setState('idle');
-    }
-  }, []);
-
-  const stopListening = useCallback(() => {
-    if (mediaRecorder.current && state === 'listening') {
-      mediaRecorder.current.stop();
-      mediaRecorder.current.stream.getTracks().forEach(track => track.stop());
-    }
-  }, [state]);
-
-  // دالة للتبديل بين التسجيل والإيقاف (تُربط بضغطة الكرة)
-  const toggleRecording = useCallback(() => {
-    if (state === 'idle' || state === 'done') {
+      }
+    } else {
+      stopAudio();
       startListening();
-    } else if (state === 'listening') {
-      stopListening();
     }
-  }, [state, startListening, stopListening]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isListening, startListening, stopListening, stopAudio]);
 
   return {
-    state,
-    transcript,
-    error,
-    toggleRecording
+    handleVoiceTurn,
+    isListening,
+    isSpeaking,
+    isProcessing,
+    manifest,
+    messages,
+    error: recordingError
   };
 }
