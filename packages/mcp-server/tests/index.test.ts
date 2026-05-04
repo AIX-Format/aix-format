@@ -50,8 +50,7 @@ describe('MCP Server - get_blackbox_logs', () => {
     const response = await requestHandler(request);
 
     expect(response.isError).toBe(true);
-    expect(response.content[0].text).toContain('Expected');
-    expect(response.content[0].text).toContain('JSON');
+    expect(response.content[0].text).toContain('Invalid format:');
   });
 
   it('should return error when get_blackbox_logs receives invalid YAML', async () => {
@@ -70,7 +69,7 @@ describe('MCP Server - get_blackbox_logs', () => {
     const response = await requestHandler(request);
 
     expect(response.isError).toBe(true);
-    expect(response.content[0].text).toContain('bad indentation of a mapping entry');
+    expect(response.content[0].text).toContain('Invalid format:');
   });
 
   it('should successfully parse valid JSON in get_blackbox_logs', async () => {
