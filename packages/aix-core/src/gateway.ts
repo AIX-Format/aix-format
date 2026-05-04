@@ -150,7 +150,10 @@ export class Gateway extends EventEmitter {
       }
 
       // 🚀 QUANTUM TOPOLOGY: Initialize Structural Integrity Check
-      await this.verifyTopology(agentId);
+      const topologySane = await this.verifyTopology(agentId);
+      if (!topologySane) {
+        throw new Error(`[Gateway:Topology] Execution HALTED for ${agentId}: Integrity Breach or Structural Collapse.`);
+      }
 
       // Sovereign Routing: Use SwarmRouter to select model dynamically
       const router = new SwarmRouter();
@@ -317,8 +320,16 @@ export class Gateway extends EventEmitter {
    * 🛡️ Sovereign Topology Guard (Quantum Topology)
    * Verifies and heals the structural shape of agent interactions.
    */
-  private async verifyTopology(agentId: string) {
+  private async verifyTopology(agentId: string): Promise<boolean> {
     const trustChain = getTrustChain();
+    
+    // 🛡️ RULE 3: Strict Code Integrity Guard
+    const codeSane = await trustChain.verifyCodeIntegrity();
+    if (!codeSane) {
+      console.error(`🚨 [Gateway:Topology] CRITICAL: Code integrity breach detected. HALTING.`);
+      return false;
+    }
+
     const status = await trustChain.detectTampering(agentId);
     
     if (status.tampered) {
@@ -327,6 +338,7 @@ export class Gateway extends EventEmitter {
       
       if (healed > 0) {
         console.log(`✅ [Gateway:Topology] Successfully healed ${healed} structural nodes.`);
+        return true;
       }
       
       if (failures.length > 0) {
@@ -334,8 +346,10 @@ export class Gateway extends EventEmitter {
         // Tiered Error Handling: If healing fails, lower trust score
         const score = await trustChain.getScore(agentId);
         await kv.set(KEYS.agentTrustScore(agentId), Math.max(0, score - 2));
+        return false;
       }
     }
+    return true;
   }
 
   private async recordMetaLoopAction(agentId: string, input: any, output: string) {
@@ -352,6 +366,12 @@ export class Gateway extends EventEmitter {
     const currentScore = await trustChain.getScore(agentId);
     const newScore = Math.min(10, currentScore + (curiosityReward * 0.05));
     await kv.set(KEYS.agentTrustScore(agentId), newScore);
+
+    // 🌀 RULE 6: Global Topological Warning (Collective Learning)
+    if (output.toLowerCase().includes('error') || output.toLowerCase().includes('failed')) {
+      const pattern = `[GLOBAL_WARN]: Failure in ${agentId} execution pattern detected. High entropy failure.`;
+      await kv.lpush('topology:warnings', { pattern, timestamp: Date.now(), source: agentId });
+    }
 
     // Layer 4: Wisdom Archive
     if (output.length > 50) {

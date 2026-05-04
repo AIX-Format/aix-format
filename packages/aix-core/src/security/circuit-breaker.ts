@@ -54,19 +54,35 @@ export class CircuitBreaker {
   }
 
   private onSuccess() {
-    this.failureCount = 0;
-    this.state = CircuitState.CLOSED;
-    this.lastFailureTime = null;
+    // 🚀 TURBOQUANT: Leaky Bucket Recovery
+    // Instead of resetting to 0, we decrease failureCount gradually to maintain "structural memory"
+    if (this.failureCount > 0) this.failureCount--;
+    
+    if (this.failureCount === 0) {
+      this.state = CircuitState.CLOSED;
+      this.lastFailureTime = null;
+    }
   }
 
   private onFailure() {
     this.failureCount++;
     this.lastFailureTime = Date.now();
+    
+    // 🛡️ Proactive Trip: If failures happen too fast (High Frequency), trip earlier
+    const densityFactor = this.calculateDensityFactor();
+    const effectiveThreshold = Math.max(1, this.config.failureThreshold - densityFactor);
 
-    if (this.failureCount >= this.config.failureThreshold) {
+    if (this.failureCount >= effectiveThreshold) {
       this.state = CircuitState.OPEN;
-      console.error(`🚨 [CircuitBreaker:${this.config.name}] TRIP! Entering OPEN state.`);
+      console.error(`🚨 [CircuitBreaker:${this.config.name}] TRIP! Effective Threshold (${effectiveThreshold}) reached.`);
     }
+  }
+
+  private calculateDensityFactor(): number {
+    if (!this.lastFailureTime) return 0;
+    const timeSinceLast = Date.now() - this.lastFailureTime;
+    // If failures are within 2 seconds of each other, increase density factor
+    return timeSinceLast < 2000 ? 1 : 0;
   }
 
   private shouldAttemptRecovery(): boolean {

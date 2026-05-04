@@ -100,17 +100,25 @@ export async function indexEntity(id: string, type: string, text: string, metada
   const visibility = metadata.visibility || 'public';
   const embedding = await generateEmbedding(text);
 
-  const entry = {
-    id,
-    type,
-    visibility,
-    name: metadata.name || id,
-    snippet: metadata.description || text.slice(0, 200),
-    // 🚀 TURBOQUANT: Quantize embedding to reduce storage (Float32 to Int8 simulation)
-    embedding: embedding.map(v => Math.round(v * 127) / 127), 
-    metadata,
-    updatedAt: Date.now()
-  };
+    // 🚀 TURBOQUANT: Topological Merging
+    // Search for existing entry with same type and similar name/content to merge
+    const existing = await this.findTopologicalTwin(type, metadata.name || id);
+    if (existing) {
+      console.log(`🌀 [SemanticIndex] Merging into Topological Twin: ${existing.id}`);
+      return this.mergeWithTwin(existing, text, metadata);
+    }
+
+    const entry = {
+      id,
+      type,
+      visibility,
+      name: metadata.name || id,
+      snippet: metadata.description || text.slice(0, 200),
+      // 🚀 TURBOQUANT: Quantize embedding to reduce storage (Float32 to Int8 simulation)
+      embedding: embedding.map(v => Math.round(v * 127) / 127), 
+      metadata,
+      updatedAt: Date.now()
+    };
 
   await kv.set(`wikibrain:index:${id}`, entry);
 
@@ -151,7 +159,29 @@ export class SemanticIndex {
   }
 
   async index(id: string, type: string, text: string, metadata: any = {}): Promise<void> {
+    const existing = await this.findTopologicalTwin(type, metadata.name || id);
+    if (existing) {
+      console.log(`🌀 [SemanticIndex] Merging into Topological Twin: ${existing.id}`);
+      await this.mergeWithTwin(existing, text, metadata);
+      return;
+    }
     await indexEntity(id, type, text, metadata);
+  }
+
+  private async findTopologicalTwin(type: string, name: string): Promise<any | null> {
+    const allKeys = await kv.lrange<string>('wikibrain:index_keys', 0, -1);
+    for (const key of allKeys) {
+      const existing = await kv.get<any>(`wikibrain:index:${key}`);
+      if (existing && existing.type === type && existing.name === name) return existing;
+    }
+    return null;
+  }
+
+  private async mergeWithTwin(existing: any, newText: string, newMetadata: any): Promise<void> {
+    existing.snippet = `[EVOLVED]: ${existing.snippet.slice(0, 100)} | ${newText.slice(0, 100)}`;
+    existing.metadata = { ...existing.metadata, ...newMetadata, evolved: true };
+    existing.updatedAt = Date.now();
+    await kv.set(`wikibrain:index:${existing.id}`, existing);
   }
 }
 

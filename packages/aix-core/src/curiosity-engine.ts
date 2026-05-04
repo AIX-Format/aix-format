@@ -140,7 +140,19 @@ export class CuriosityEngine {
       });
     }
 
-    return totalReward;
+    // Calculate Decay Factor (RULE 7: Genuine Curiosity Only)
+    const usageCount = await this.getActionUsageCount(agentId, action);
+    const decayFactor = Math.max(0.1, 1 / (1 + usageCount * 0.5));
+    
+    const finalReward = totalReward * decayFactor;
+
+    // Record total curiosity score with decay
+    if (finalReward > 0) {
+      const currentScore = await kv.get<number>(KEYS.agentCuriosityScore(agentId)) || 0;
+      await kv.set(KEYS.agentCuriosityScore(agentId), currentScore + finalReward);
+    }
+
+    return finalReward;
   }
 
   /**

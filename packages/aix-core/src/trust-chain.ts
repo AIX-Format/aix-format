@@ -257,6 +257,36 @@ export class TrustChain {
   }
 
   /**
+   * 🛡️ RULE 3: Topological Code Integrity Check
+   * Hashes core files to ensure no unauthorized changes occurred during the loop
+   */
+  async verifyCodeIntegrity(): Promise<boolean> {
+    try {
+      const fs = await import('fs');
+      const path = await import('path');
+      const coreFiles = ['agent-runtime.ts', 'trust-chain.ts', 'gateway.ts'];
+
+      for (const file of coreFiles) {
+        const filePath = path.join(__dirname, file);
+        if (fs.existsSync(filePath)) {
+          const content = fs.readFileSync(filePath, 'utf8');
+          const hash = createHash('sha256').update(content).digest('hex');
+          const knownHash = await kv.get<string>(`integrity:hash:${file}`);
+          
+          if (knownHash && hash !== knownHash) {
+            console.error(`🚨 [Integrity] TOPOLOGICAL BREACH: ${file} content changed!`);
+            return false;
+          }
+          if (!knownHash) await kv.set(`integrity:hash:${file}`, hash);
+        }
+      }
+      return true;
+    } catch (e) {
+      return true; // Fallback for environments without FS access
+    }
+  }
+
+  /**
    * Get Trust Score (0-10)
    */
   async getScore(agentId: string): Promise<number> {

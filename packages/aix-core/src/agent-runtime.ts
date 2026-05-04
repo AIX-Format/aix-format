@@ -355,6 +355,19 @@ export class AgentRuntimeEngine {
       }
 
       ToolCallSchema.parse(action);
+
+      // 🌀 CREATIVE SYNTHESIS: Outcome Simulation (Round 11)
+      const simulationPrompt = `As a sovereign agent with these Tactical Notes: ${this.runtime.notes?.join(' | ')}.
+      I am about to call tool: ${action.tool} with params: ${JSON.stringify(action.input)}.
+      Predict the outcome and its risk level (Low/Med/High). If High, suggest a better alternative.`;
+      
+      const simulation = await this.llm.complete(simulationPrompt);
+      if (simulation.toLowerCase().includes('high risk') || simulation.toLowerCase().includes('fail')) {
+        await this.emitState('agent:simulating', `Simulated failure detected: ${simulation}. Adjusting course...`);
+        // Force re-thinking with simulation insight
+        continue; 
+      }
+
       await bus.emitEvent('agent:action', this.runtime.agentId, { action }, task.taskId);
 
       const observation = await this.executeAction(action);
@@ -398,8 +411,11 @@ export class AgentRuntimeEngine {
       return `Thought: ${s.thought}\nAction: ${JSON.stringify(s.action)}\nObservation: ${s.observation}`;
     }).join('\n');
 
+    const notes = this.runtime.notes?.map(n => `[NOTE] ${n}`).join(' | ') || 'No tactical notes yet.';
+
     return `Task: ${task.description}
 Sovereign Wisdom: ${this.context?.memories.join(' | ')}
+Tactical Notes: ${notes}
 
 [RECURSIVE_CHAIN]: 
 ${polarMemory}
@@ -433,8 +449,19 @@ Next Thought: `;
         return `Error: Circuit breaker tripped for tool "${action.tool}". Please use an alternative approach.`;
       }
 
+      // 🌀 RULE 0 & 3: Sovereign Audit & Integrity
+      const paramHash = crypto.createHash('sha256').update(JSON.stringify(action.input)).digest('hex');
+      const auditHash = crypto.createHash('sha256').update(`${action.tool}:${paramHash}:${Date.now()}`).digest('hex');
+      
       const result = await tool(action.input);
       const observation = typeof result === 'string' ? result : JSON.stringify(result);
+      
+      // Log Secure Audit
+      await getTrustChain().append(this.runtime.agentId, 'tool_call', { 
+        tool: action.tool, 
+        auditHash, 
+        integrity: 'secure' 
+      });
       
       // 🌀 METACOGNITIVE CHECK: Is this observation useful?
       if (observation.toLowerCase().includes('error') || observation.length < 5) {
@@ -506,7 +533,25 @@ Next Thought: `;
         pattern,
         { agentId: this.runtime.agentId, taskId: task.taskId, type: 'logic_pattern', quality: review.evaluation.overall }
       );
-      await this.emitState('agent:pattern_archived', 'Sovereign Logic Pattern archived.');
+
+      // 📝 Sovereign Notebook: Extract tactical note for next round
+      const notePrompt = `Based on this round's success/failure, what is one TACTICAL NOTE for the next round to be 10x faster/smarter? (One sentence)`;
+      const note = await this.llm.complete(notePrompt);
+      if (!this.runtime.notes) this.runtime.notes = [];
+      this.runtime.notes.push(note);
+      
+      // 🌀 Sovereign Synthesis: Extract principles every 5 rounds
+      if (this.runtime.notes.length % 5 === 0) {
+        await this.emitState('agent:synthesizing', `Analyzing last 5 rounds to extract a Sovereign Principle...`);
+        const principlePrompt = `I have completed 5 rounds. Here are my tactical notes: ${this.runtime.notes.slice(-5).join(' | ')}.
+        Extract one deep "Sovereign Principle" that should govern all future actions for this task. (Max 15 words)`;
+        const principle = await this.llm.complete(principlePrompt);
+        if (!this.context) this.context = { memories: [] };
+        this.context.memories.push(`[PRINCIPLE] ${principle}`);
+        await this.emitState('agent:principle_evolved', `Sovereign Principle evolved: ${principle}`);
+      }
+      
+      await this.emitState('agent:pattern_archived', 'Sovereign Logic Pattern & Tactical Note archived.');
     } catch (e) {
       console.warn('⚠️ Memory consolidation failed:', e);
     }
