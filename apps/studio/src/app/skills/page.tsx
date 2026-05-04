@@ -244,4 +244,3 @@ export default function SkillsCatalogPage() {
   );
 }
 
-function.displayName = 'function';

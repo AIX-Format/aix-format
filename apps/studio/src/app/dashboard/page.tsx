@@ -384,4 +384,3 @@ export default function DashboardPage() {
 
 // Made with Moe Abdelaziz
 
-function.displayName = 'function';

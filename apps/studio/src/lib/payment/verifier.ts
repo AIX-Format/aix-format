@@ -291,8 +291,6 @@ async function markPaymentUsed(
   try {
     // TODO: Implement database storage
     // For now, log only (not production-ready)
-
-    });
     
     // In production, store in database:
     // await db.usedPayments.create({

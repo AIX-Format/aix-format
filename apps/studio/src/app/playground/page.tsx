@@ -331,4 +331,3 @@ func main() {
   );
 }
 
-function.displayName = 'function';

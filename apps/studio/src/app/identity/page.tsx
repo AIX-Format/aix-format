@@ -277,4 +277,3 @@ export default function IdentityPage() {
   );
 }
 
-function.displayName = 'function';

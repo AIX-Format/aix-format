@@ -159,4 +159,3 @@ export default function NetworkStatusPage() {
   );
 }
 
-function.displayName = 'function';

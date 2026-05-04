@@ -562,4 +562,3 @@ export default function AgentBuilderPage() {
   );
 }
 
-function.displayName = 'function';

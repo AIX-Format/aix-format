@@ -319,4 +319,3 @@ export default function AnalyticsHubPage() {
   );
 }
 
-function.displayName = 'function';

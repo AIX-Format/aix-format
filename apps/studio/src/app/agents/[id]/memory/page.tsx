@@ -412,4 +412,3 @@ export default function WikiBrainExplorer() {
   );
 }
 
-function.displayName = 'function';

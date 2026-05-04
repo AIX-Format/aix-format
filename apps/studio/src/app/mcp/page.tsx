@@ -256,4 +256,3 @@ export default function MCPRegistryPage() {
   );
 }
 
-function.displayName = 'function';

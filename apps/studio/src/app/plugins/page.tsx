@@ -232,4 +232,3 @@ export default function PluginDirectoryPage() {
   );
 }
 
-function.displayName = 'function';

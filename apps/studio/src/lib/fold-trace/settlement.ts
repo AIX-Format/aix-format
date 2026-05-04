@@ -72,8 +72,6 @@ export async function recordFoldTrace(record: FoldTraceRecord): Promise<void> {
 async function storeFoldTrace(record: FoldTraceRecord): Promise<void> {
   // TODO: Implement database storage
   // For now, log only (not production-ready)
-
-  });
   
   // In production, store in database:
   // await db.foldTrace.create({

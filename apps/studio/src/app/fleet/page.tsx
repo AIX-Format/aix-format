@@ -203,4 +203,3 @@ export default function MissionControlPage() {
   );
 }
 
-function.displayName = 'function';

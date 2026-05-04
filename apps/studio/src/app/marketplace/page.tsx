@@ -157,4 +157,3 @@ export default function MarketplacePage() {
   );
 }
 
-function.displayName = 'function';

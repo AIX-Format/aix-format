@@ -113,4 +113,3 @@ export default function MyAgentsPage() {
   );
 }
 
-function.displayName = 'function';

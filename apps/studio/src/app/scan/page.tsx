@@ -251,4 +251,3 @@ export default function ScanPage() {
   );
 }
 
-function.displayName = 'function';

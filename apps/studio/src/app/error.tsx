@@ -54,4 +54,3 @@ export default function Error({
   );
 }
 
-function.displayName = 'function';

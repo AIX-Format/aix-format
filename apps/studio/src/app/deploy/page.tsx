@@ -504,4 +504,3 @@ function ResultCard({ label, value, icon, onCopy, copied }: { label: string; val
   );
 }
 
-function.displayName = 'function';

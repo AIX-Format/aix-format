@@ -252,8 +252,6 @@ export async function recordPaymentAttempt(
 ): Promise<void> {
   try {
     // TODO: Implement analytics recording
-
-    });
   } catch (error) {
     console.error('[Record Payment Error]', error);
   }
