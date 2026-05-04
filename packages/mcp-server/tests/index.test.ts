@@ -34,6 +34,26 @@ describe('MCP Server - get_blackbox_logs', () => {
     await import('../src/index.js');
   });
 
+  it('should return error when get_blackbox_logs receives non-existent file path', async () => {
+    // Mock fs.readFile to throw an error
+    vi.mocked(fs.readFile).mockRejectedValue(new Error('ENOENT: no such file or directory'));
+
+    const request = {
+      params: {
+        name: "get_blackbox_logs",
+        arguments: {
+          manifestPath: "non-existent.json"
+        }
+      }
+    };
+
+    const response = await requestHandler(request);
+
+    expect(response.isError).toBe(true);
+    expect(response.content[0].text).toContain('Error:');
+    expect(response.content[0].text).toContain('ENOENT');
+  });
+
   it('should return error when get_blackbox_logs receives invalid JSON', async () => {
     // Mock fs.readFile to return invalid JSON
     vi.mocked(fs.readFile).mockResolvedValue('{ "invalid": "json" ');
