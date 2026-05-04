@@ -63,7 +63,7 @@ export interface TrustChainEntry {
   timestamp: number;
   action: string;
   actor: string; // DID
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
   previousHash: string;
   hash: string;
   signature?: string;
@@ -77,7 +77,7 @@ class TrustChainManager {
    * Append action to TrustChain
    * RULE 3: Every action must be logged
    */
-  append(action: string, actor: string, payload: Record<string, any>): TrustChainEntry {
+  append(action: string, actor: string, payload: Record<string, unknown>): TrustChainEntry {
     const entry: TrustChainEntry = {
       id: secureId('trust', 16),
       timestamp: Date.now(),
@@ -91,7 +91,7 @@ class TrustChainManager {
     // Compute hash
     entry.hash = this.computeHash(entry);
     this.lastHash = entry.hash;
-    
+
     // Store entry
     this.chain.push(entry);
 
@@ -192,7 +192,6 @@ class CircuitBreakerImpl {
    */
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     if (this.state === CircuitState.OPEN) {
-      // Check if we should try half-open
       if (Date.now() - this.lastFailureTime > this.options.resetTimeout) {
         this.state = CircuitState.HALF_OPEN;
       } else {
@@ -292,7 +291,7 @@ const KEY_PAIR = nacl.sign.keyPair(); // In production, load from secure vault
 /**
  * Sign tool response to prevent cache poisoning
  */
-export function signToolResponse(response: any): string {
+export function signToolResponse(response: unknown): string {
   const message = JSON.stringify(response);
   const messageUint8 = decodeUTF8(message);
   const signature = nacl.sign.detached(messageUint8, KEY_PAIR.secretKey);
@@ -302,7 +301,7 @@ export function signToolResponse(response: any): string {
 /**
  * Verify tool response signature
  */
-export function verifyToolResponse(response: any, signature: string, publicKey: string): boolean {
+export function verifyToolResponse(response: unknown, signature: string, publicKey: string): boolean {
   try {
     const message = JSON.stringify(response);
     const messageUint8 = decodeUTF8(message);
@@ -333,10 +332,10 @@ export function checkDeadHand(lastActiveAt: string, limitDays: number): boolean 
  */
 export function calculateBehavioralEntropy(responseTimes: number[]): number {
   if (responseTimes.length < 5) return 0;
-  
+
   const avg = responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
   const variance = responseTimes.reduce((a, b) => a + Math.pow(b - avg, 2), 0) / responseTimes.length;
-  
+
   return Math.min(1, Math.sqrt(variance) / 100);
 }
 
