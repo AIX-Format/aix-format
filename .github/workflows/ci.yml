@@ -23,14 +23,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'pnpm'
-          cache-dependency-path: pnpm-lock.yaml
+          cache-dependency-path: apps/studio/package-lock.json
 
       - name: Install dependencies
-        run: pnpm install --ignore-scripts
+        run: npm install --ignore-scripts
 
       - name: TypeScript check
         run: npx tsc --noEmit
@@ -55,11 +58,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - run: pnpm install --ignore-scripts
+      - run: npm install --ignore-scripts
       - run: npm test --if-present
 
   # ─────────────────────────────────────────
@@ -75,12 +81,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
 
       - name: Install Vercel CLI
-        run: pnpm install -g vercel@latest
+        run: npm install -g vercel@latest
 
       - name: Pull Vercel Environment
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
