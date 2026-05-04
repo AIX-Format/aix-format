@@ -46,25 +46,34 @@ export {
 // AIX - Main API function
 export { aix, type AixOptions, type AixResult, type SwarmPattern, type AixSwarmOptions } from './aix';
 
+// Sentinel - Self-improvement engine
+export { AxiomSentinel, sentinel } from './sentinel';
+
 /**
  * Initialize all core components
+ * Made with Moe Abdelaziz
  */
 export async function initializeCore() {
   const { getGateway } = await import('./gateway');
   const { getExpectationEngine } = await import('./expectation-engine');
   const { getTrustChain } = await import('./trust-chain');
   const { getBus } = await import('./bus');
+  const { sentinel } = await import('./sentinel');
 
   const gateway = getGateway();
   const expectationEngine = getExpectationEngine();
   const trustChain = getTrustChain();
   const bus = getBus();
+  
+  // Start the self-improvement watcher
+  await sentinel.start();
 
   return {
     gateway,
     expectationEngine,
     trustChain,
-    bus
+    bus,
+    sentinel
   };
 }
 
@@ -83,4 +92,4 @@ export async function resetCore() {
   resetBus();
 }
 
-// Made with Moe Abdelaziz + AI Team (Junie, Claude, v0, Cursor, Jules, Vercel AI)
+// Built with Moe Abdelaziz — AIX Sovereign Infrastructure v2.1

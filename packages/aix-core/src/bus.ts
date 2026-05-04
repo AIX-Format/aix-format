@@ -1,63 +1,59 @@
+import { EventEmitter } from 'events';
+import { randomBytes } from 'crypto';
+import { kv } from './storage/adapter';
+import { KEYS } from './storage/keys';
+
 /**
- * 4-Ring Bus Architecture
- * Central event bus for pet → expectation → gateway → trust-chain flow
+ * Sovereign 4-Ring Bus Architecture
+ * Central event stream for pet → expectation → gateway → trust-chain flow
+ * 
+ * Made with Moe Abdelaziz
  */
 
-import { EventEmitter } from 'events';
+export type BusRing = 'pet' | 'expectation' | 'gateway' | 'trust' | 'mind';
 
 export type BusEventType = 
-  | 'pet:spawn'
-  | 'pet:run'
-  | 'pet:complete'
-  | 'pet:error'
-  | 'expectation:set'
-  | 'expectation:step'
-  | 'expectation:timeout'
-  | 'expectation:complete'
-  | 'gateway:spawn'
-  | 'gateway:run'
-  | 'gateway:pay'
-  | 'gateway:error'
-  | 'trust:verify'
-  | 'trust:lineage'
-  | 'trust:pow'
-  | 'trust:error';
+  | 'pet:spawn' | 'pet:run' | 'pet:complete' | 'pet:error'
+  | 'expectation:set' | 'expectation:step' | 'expectation:timeout' | 'expectation:complete'
+  | 'gateway:spawn' | 'gateway:run' | 'gateway:pay' | 'gateway:error'
+  | 'trust:verify' | 'trust:lineage' | 'trust:pow' | 'trust:error'
+  | 'agent:started' | 'agent:thought' | 'agent:action' | 'agent:observation';
 
 export interface BusEvent {
-  type: BusEventType;
+  id: string;
+  type: BusEventType | string;
   agentId: string;
   taskId?: string;
   data: any;
   timestamp: number;
-  ring: 'pet' | 'expectation' | 'gateway' | 'trust';
+  ring: BusRing;
+  auditHash?: string;
 }
 
 export interface BusSubscription {
   id: string;
-  type: BusEventType | 'all';
+  type: string | 'all';
   handler: (event: BusEvent) => void | Promise<void>;
 }
 
-/**
- * Bus class - 4-Ring Event Bus
- */
 export class Bus extends EventEmitter {
   private subscriptions: Map<string, BusSubscription> = new Map();
-  private eventHistory: BusEvent[] = [];
   private maxHistorySize = 1000;
 
   constructor() {
     super();
-    this.setMaxListeners(100); // Allow many subscribers
+    this.setMaxListeners(200);
   }
 
   /**
-   * Emit event to bus
+   * Emit event to bus and persist to Redis (RULE 3)
    */
-  emitEvent(type: BusEventType, agentId: string, data: any, taskId?: string): void {
+  async emitEvent(type: BusEventType | string, agentId: string, data: any, taskId?: string): Promise<string> {
     const ring = this.getRingFromEventType(type);
+    const eventId = `evt_${randomBytes(8).toString('hex')}`;
     
     const event: BusEvent = {
+      id: eventId,
       type,
       agentId,
       taskId,
@@ -66,43 +62,33 @@ export class Bus extends EventEmitter {
       ring
     };
 
-    // Add to history
-    this.eventHistory.push(event);
-    if (this.eventHistory.length > this.maxHistorySize) {
-      this.eventHistory.shift();
-    }
+    // RULE 3: Persist to Redis Stream/List for sovereign history
+    await kv.lpush(KEYS.agentBusHistory(agentId), JSON.stringify(event));
+    await kv.ltrim(KEYS.agentBusHistory(agentId), 0, this.maxHistorySize);
 
-    // Emit to EventEmitter
+    // Local Emit
     super.emit(type, event);
     super.emit('all', event);
+
+    return eventId;
   }
 
   /**
-   * Subscribe to events
+   * Secure Subscription (RULE 2)
    */
-  subscribe(type: BusEventType | 'all', handler: (event: BusEvent) => void | Promise<void>): string {
-    const id = `sub-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  subscribe(type: string | 'all', handler: (event: BusEvent) => void | Promise<void>): string {
+    const id = `sub_${randomBytes(6).toString('hex')}`;
     
-    const subscription: BusSubscription = {
-      id,
-      type,
-      handler
-    };
-
+    const subscription: BusSubscription = { id, type, handler };
     this.subscriptions.set(id, subscription);
     this.on(type, handler);
 
     return id;
   }
 
-  /**
-   * Unsubscribe from events
-   */
   unsubscribe(subscriptionId: string): boolean {
     const subscription = this.subscriptions.get(subscriptionId);
-    if (!subscription) {
-      return false;
-    }
+    if (!subscription) return false;
 
     this.off(subscription.type, subscription.handler);
     this.subscriptions.delete(subscriptionId);
@@ -110,145 +96,33 @@ export class Bus extends EventEmitter {
   }
 
   /**
-   * Get event history
+   * Get sovereign history from Redis
    */
-  getHistory(filter?: {
-    type?: BusEventType;
-    agentId?: string;
-    ring?: 'pet' | 'expectation' | 'gateway' | 'trust';
-    since?: number;
-  }): BusEvent[] {
-    let events = [...this.eventHistory];
-
-    if (filter) {
-      if (filter.type) {
-        events = events.filter(e => e.type === filter.type);
-      }
-      if (filter.agentId) {
-        events = events.filter(e => e.agentId === filter.agentId);
-      }
-      if (filter.ring) {
-        events = events.filter(e => e.ring === filter.ring);
-      }
-      if (filter.since !== undefined) {
-        events = events.filter(e => e.timestamp >= filter.since!);
-      }
-    }
-
-    return events;
+  async getSovereignHistory(agentId: string, limit = 100): Promise<BusEvent[]> {
+    const data = await kv.lrange<string>(KEYS.agentBusHistory(agentId), 0, limit - 1);
+    return data.map(d => JSON.parse(d));
   }
 
-  /**
-   * Get ring from event type
-   */
-  private getRingFromEventType(type: BusEventType): 'pet' | 'expectation' | 'gateway' | 'trust' {
+  private getRingFromEventType(type: string): BusRing {
     if (type.startsWith('pet:')) return 'pet';
     if (type.startsWith('expectation:')) return 'expectation';
     if (type.startsWith('gateway:')) return 'gateway';
     if (type.startsWith('trust:')) return 'trust';
-    return 'gateway'; // default
+    if (type.startsWith('agent:')) return 'mind';
+    return 'gateway';
   }
 
-  /**
-   * Get active subscriptions count
-   */
-  getSubscriptionCount(): number {
-    return this.subscriptions.size;
-  }
-
-  /**
-   * Clear event history
-   */
-  clearHistory(): void {
-    this.eventHistory = [];
-  }
-
-  /**
-   * Reset bus state (for testing)
-   */
   reset(): void {
     this.removeAllListeners();
     this.subscriptions.clear();
-    this.eventHistory = [];
-  }
-
-  /**
-   * Get bus statistics
-   */
-  getStats(): {
-    subscriptions: number;
-    historySize: number;
-    eventsByRing: Record<string, number>;
-    eventsByType: Record<string, number>;
-  } {
-    const eventsByRing: Record<string, number> = {
-      pet: 0,
-      expectation: 0,
-      gateway: 0,
-      trust: 0
-    };
-
-    const eventsByType: Record<string, number> = {};
-
-    for (const event of this.eventHistory) {
-      eventsByRing[event.ring]++;
-      eventsByType[event.type] = (eventsByType[event.type] || 0) + 1;
-    }
-
-    return {
-      subscriptions: this.subscriptions.size,
-      historySize: this.eventHistory.length,
-      eventsByRing,
-      eventsByType
-    };
   }
 }
 
-/**
- * Singleton instance
- */
 let busInstance: Bus | null = null;
 
-/**
- * Get bus instance
- */
 export function getBus(): Bus {
-  if (!busInstance) {
-    busInstance = new Bus();
-  }
+  if (!busInstance) busInstance = new Bus();
   return busInstance;
 }
 
-/**
- * Reset bus instance (for testing)
- */
-export function resetBus(): void {
-  if (busInstance) {
-    busInstance.reset();
-    busInstance = null;
-  }
-}
-
-/**
- * Helper: Wait for specific event
- */
-export function waitForEvent(
-  bus: Bus,
-  type: BusEventType,
-  timeout = 5000
-): Promise<BusEvent> {
-  return new Promise((resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      bus.unsubscribe(subscriptionId);
-      reject(new Error(`Timeout waiting for event: ${type}`));
-    }, timeout);
-
-    const subscriptionId = bus.subscribe(type, (event) => {
-      clearTimeout(timeoutId);
-      bus.unsubscribe(subscriptionId);
-      resolve(event);
-    });
-  });
-}
-
-// Made with Bob
+// Made with Moe Abdelaziz
