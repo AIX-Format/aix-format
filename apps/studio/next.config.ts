@@ -1,13 +1,7 @@
 import type { NextConfig } from "next";
 import path from "node:path";
-import bundleAnalyzer from '@next/bundle-analyzer';
 // @ts-ignore
 import packageJson from "./package.json";
-
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-  openAnalyzer: true,
-});
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -71,6 +65,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBundleAnalyzer(nextConfig);
+export default nextConfig;
 
 // Made with Moe Abdelaziz
