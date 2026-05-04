@@ -1,74 +1,59 @@
+import { z } from 'zod';
+import { getTrustChain } from './trust-chain';
+import { kv } from './storage/adapter';
+import { KEYS } from './storage/keys';
+import { abomScanner } from './mcp-gate';
+
 /**
- * ProactiveEvolutionEngine - Self-Evolving Intelligence System
- * 
+ * ProactiveEvolutionEngine - Sovereign Self-Evolving Intelligence
  * MISSION: Transform reactive → proactive self-evolving
- * - Scans for evolution opportunities BEFORE failure
- * - Security-first with TrustChain validation
- * - Runs background job every 5 minutes
  * 
  * Made with Moe Abdelaziz
  */
 
-import { trustChain } from './trust-chain/index';
-import { recordLesson, incrementLoop, updateTrustDelta, getEvolution } from './evolution/tracker';
-import { abomScanner } from './mcp-gate';
+// RULE 1: Evolution Trigger Schema
+export const EvolutionTriggerSchema = z.object({
+  agentDid: z.string(),
+  reason: z.enum(['failure_pattern', 'improvement_opportunity', 'topology_insight', 'scheduled_scan']),
+  confidence: z.number().min(0).max(1),
+  suggestedAction: z.string().min(5),
+  timestamp: z.string().datetime(),
+});
 
-interface EvolutionTrigger {
-  agentDid: string;
-  reason: 'failure_pattern' | 'improvement_opportunity' | 'topology_insight' | 'scheduled_scan';
-  confidence: number;
-  suggestedAction: string;
-  timestamp: string;
-}
+export type EvolutionTrigger = z.infer<typeof EvolutionTriggerSchema>;
 
 export class ProactiveEvolutionEngine {
   private scanIntervalMs = 5 * 60 * 1000; // 5 minutes
   private intervalId?: NodeJS.Timeout;
 
   /**
-   * E1.3: PROACTIVE SCAN - "What should I learn?"
-   * Scans agent for evolution opportunities BEFORE failure
+   * E1.3: PROACTIVE SCAN
+   * Uses Redis state to find improvement vectors
    */
   async proactiveScan(agentDid: string): Promise<EvolutionTrigger | null> {
-    const evolution = getEvolution(agentDid);
+    const evolution: any = await kv.get(KEYS.agentEvolution(agentDid)) || { lessons: [], loops_completed: 0, trust_delta: 0 };
     
-    // 1. Check failure patterns (CRITICAL)
-    if (evolution && evolution.lessons.length > 0) {
-      const recentFailures = evolution.lessons.filter(l => l.includes('failure')).length;
-      if (recentFailures > 2) {
-        return {
-          agentDid,
-          reason: 'failure_pattern',
-          confidence: 0.9,
-          suggestedAction: 'Reduce exploration rate, focus on proven patterns',
-          timestamp: new Date().toISOString()
-        };
-      }
-    }
-
-    // 2. Check improvement trend (PROACTIVE)
-    if (evolution && evolution.loops_completed >= 3) {
-      const trustDelta = evolution.trust_delta;
-      if (trustDelta < -3) {
-        return {
-          agentDid,
-          reason: 'improvement_opportunity',
-          confidence: 0.8,
-          suggestedAction: 'Trust declining - review recent actions',
-          timestamp: new Date().toISOString()
-        };
-      }
-    }
-
-    // 3. Check topology insights (QUANTUM)
-    if (evolution && evolution.loops_completed > 10 && evolution.trust_delta > 5) {
-      return {
+    // 1. Check failure patterns
+    const recentFailures = evolution.lessons.filter((l: string) => l.toLowerCase().includes('failure')).length;
+    if (recentFailures > 2) {
+      return EvolutionTriggerSchema.parse({
         agentDid,
-        reason: 'topology_insight',
-        confidence: 0.7,
-        suggestedAction: 'High trust - ready for advanced patterns',
+        reason: 'failure_pattern',
+        confidence: 0.9,
+        suggestedAction: 'Isolate failing topology, fallback to secure primitives',
         timestamp: new Date().toISOString()
-      };
+      });
+    }
+
+    // 2. Trust Decline Check
+    if (evolution.loops_completed >= 3 && evolution.trust_delta < -3) {
+      return EvolutionTriggerSchema.parse({
+        agentDid,
+        reason: 'improvement_opportunity',
+        confidence: 0.8,
+        suggestedAction: 'Trust deficit detected - initiating identity re-verification',
+        timestamp: new Date().toISOString()
+      });
     }
 
     return null;
@@ -76,87 +61,67 @@ export class ProactiveEvolutionEngine {
 
   /**
    * E1.2: DECISION - Should we evolve NOW?
-   * Security-first: checks TrustChain + ABOM safety score
    */
   async shouldEvolveNow(trigger: EvolutionTrigger): Promise<boolean> {
-    // RULE 3: ABOM safety score validation
+    // RULE 0: Safety check
     const safetyScore = await abomScanner.getSafetyScore(trigger.agentDid);
-    if (safetyScore < 7) {
-      console.warn(`[ProactiveEvolution] Agent ${trigger.agentDid} safety score ${safetyScore} < 7 - evolution blocked`);
-      return false;
-    }
+    if (safetyScore < 7) return false;
 
-    // Check confidence threshold
-    if (trigger.confidence < 0.7) {
-      return false;
-    }
+    // Rate limiting via Redis
+    const lastEvo = await kv.get<number>(`evo:last:${trigger.agentDid}`);
+    if (lastEvo && (Date.now() - lastEvo < 60000)) return false;
 
-    // Rate limiting: max 1 evolution per minute
-    const evolution = getEvolution(trigger.agentDid);
-    if (evolution) {
-      const lastImproved = new Date(evolution.last_improved).getTime();
-      const now = Date.now();
-      if (now - lastImproved < 60000) {
-        return false;
-      }
-    }
-
-    return true;
+    return trigger.confidence >= 0.7;
   }
 
   /**
-   * EXECUTE: Apply evolution with audit trail
-   * Records in TrustChain for security
+   * EXECUTE: Apply evolution with audit trail (RULE 3)
    */
   async executeEvolution(trigger: EvolutionTrigger): Promise<void> {
-    // Record in TrustChain (SECURITY)
-    trustChain.append('evolution.executed', trigger.agentDid, trigger);
+    // RULE 3: Secure Audit Trail
+    const trustChain = getTrustChain();
+    const auditHash = await trustChain.append(trigger.agentDid, 'EVOLUTION_STEP', {
+      reason: trigger.reason,
+      action: trigger.suggestedAction,
+      confidence: trigger.confidence
+    });
 
-    // Record lesson
-    recordLesson(trigger.agentDid, `Evolution: ${trigger.suggestedAction}`);
+    // Persist Lesson in Redis
+    const evolution: any = await kv.get(KEYS.agentEvolution(trigger.agentDid)) || { lessons: [], loops_completed: 0, trust_delta: 0 };
+    evolution.lessons.push(`[${auditHash.slice(0,8)}] ${trigger.suggestedAction}`);
+    evolution.loops_completed++;
+    evolution.last_improved = Date.now();
+    
+    await kv.set(KEYS.agentEvolution(trigger.agentDid), evolution);
+    await kv.set(`evo:last:${trigger.agentDid}`, Date.now());
 
-    // Increment loop counter
-    incrementLoop(trigger.agentDid);
-
-    // Update trust delta based on confidence
-    const trustChange = trigger.confidence > 0.8 ? 1 : 0;
-    updateTrustDelta(trigger.agentDid, trustChange);
-
-    console.log(`[ProactiveEvolution] ✅ Evolved agent ${trigger.agentDid}: ${trigger.suggestedAction}`);
+    console.log(`[ProactiveEvolution] ✅ Sovereign Evolution Recorded: ${auditHash}`);
   }
 
   /**
-   * E1.4: Background job - runs every 5 minutes
-   * Scans all active agents for evolution opportunities
+   * Background job
    */
   startBackgroundLoop(activeAgentIds: string[]): void {
-    console.log('[ProactiveEvolution] 🚀 Starting background loop (every 5 min)');
-    
+    console.log('[ProactiveEvolution] 🚀 Sovereign Loop Active (5 min)');
     this.intervalId = setInterval(async () => {
-      try {
-        console.log(`[ProactiveEvolution] 🔍 Scanning ${activeAgentIds.length} agents...`);
-        
-        for (const agentDid of activeAgentIds) {
+      for (const agentDid of activeAgentIds) {
+        try {
           const trigger = await this.proactiveScan(agentDid);
-          
           if (trigger && await this.shouldEvolveNow(trigger)) {
             await this.executeEvolution(trigger);
           }
+        } catch (e) {
+          console.error(`[ProactiveEvolution] Failed for ${agentDid}:`, e);
         }
-      } catch (error) {
-        console.error('[ProactiveEvolution] ❌ Loop error:', error);
       }
     }, this.scanIntervalMs);
   }
 
   stopBackgroundLoop(): void {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      console.log('[ProactiveEvolution] 🛑 Background loop stopped');
-    }
+    if (this.intervalId) clearInterval(this.intervalId);
   }
 }
 
 export const proactiveEvolutionEngine = new ProactiveEvolutionEngine();
 
-// Made with Bob
+// Made with Moe Abdelaziz

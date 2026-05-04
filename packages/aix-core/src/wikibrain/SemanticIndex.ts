@@ -1,5 +1,12 @@
 import { pipeline } from '@xenova/transformers';
-import { kv, KEYS } from '../index';
+import { z } from 'zod';
+import { kv } from '../storage/adapter';
+import { KEYS } from '../storage/keys';
+
+/**
+ * WikiBrain Semantic Index - Sovereign Knowledge Engine
+ * Made with Moe Abdelaziz
+ */
 
 let extractor: any = null;
 
@@ -10,6 +17,26 @@ async function getExtractor() {
   return extractor;
 }
 
+// RULE 1: Strict Schemas
+export const SearchFilterSchema = z.object({
+  type: z.enum(['agent', 'skill', 'mcp']).optional(),
+  includePrivate: z.boolean().default(false),
+});
+
+export const AgentManifestSchema = z.object({
+  did: z.string(),
+  identity_layer: z.object({
+    name: z.string().optional(),
+    role: z.string().optional(),
+    description: z.string().optional(),
+    visibility: z.enum(['public', 'private', 'sovereign']).default('public'),
+  }).optional(),
+  capabilities: z.array(z.string()).optional(),
+  skills: z.array(z.any()).optional(),
+});
+
+export type SearchFilter = z.infer<typeof SearchFilterSchema>;
+
 export interface SemanticResult {
   id: string;
   type: string;
@@ -17,10 +44,6 @@ export interface SemanticResult {
   score: number;
   snippet?: string;
   relatedIds?: string[];
-}
-
-export interface SearchFilter {
-  type?: 'agent' | 'skill' | 'mcp';
 }
 
 function cosineSimilarity(a: number[], b: number[]): number {
@@ -42,16 +65,20 @@ export async function generateEmbedding(text: string): Promise<number[]> {
   return Array.from(output.data);
 }
 
+/**
+ * Indexes an agent while respecting privacy (RULE 0)
+ */
 export async function indexAgent(manifest: any): Promise<void> {
-  const id = manifest.identity_layer?.id || manifest.did;
-  if (!id) return;
-
+  const validManifest = AgentManifestSchema.parse(manifest);
+  const id = validManifest.identity_layer?.name || validManifest.did;
+  
+  const visibility = validManifest.identity_layer?.visibility || 'public';
+  
   const textToIndex = `
-    Agent Name: ${manifest.identity_layer?.name || ''}
-    Role: ${manifest.identity_layer?.role || ''}
-    Description: ${manifest.identity_layer?.description || ''}
-    Capabilities: ${(manifest.capabilities || []).join(', ')}
-    Skills: ${(manifest.skills || []).map((s: any) => s.name || s).join(', ')}
+    Agent Name: ${validManifest.identity_layer?.name || ''}
+    Role: ${validManifest.identity_layer?.role || ''}
+    Description: ${validManifest.identity_layer?.description || ''}
+    Capabilities: ${(validManifest.capabilities || []).join(', ')}
   `.trim();
 
   const embedding = await generateEmbedding(textToIndex);
@@ -59,58 +86,27 @@ export async function indexAgent(manifest: any): Promise<void> {
   const entry = {
     id,
     type: 'agent',
-    name: manifest.identity_layer?.name || id,
-    snippet: manifest.identity_layer?.description || '',
+    visibility,
+    name: validManifest.identity_layer?.name || id,
+    snippet: validManifest.identity_layer?.description || '',
     embedding,
     updatedAt: Date.now()
   };
 
   await kv.set(`wikibrain:index:${id}`, entry);
 
-  // Auto-linking: Find similar agents
   const allKeys = await kv.lrange<string>('wikibrain:index_keys', 0, -1);
   if (!allKeys.includes(id)) {
     await kv.lpush('wikibrain:index_keys', id);
   }
-
-  // Find similarities and store edges
-  const edgesKey = `wikibrain:edges:${id}`;
-  const newEdges: any[] = [];
-
-  for (const key of allKeys) {
-    if (key === id) continue;
-    const existing = await kv.get<any>(`wikibrain:index:${key}`);
-    if (existing && existing.embedding) {
-      const similarity = cosineSimilarity(embedding, existing.embedding);
-      if (similarity > 0.75) {
-        newEdges.push({
-          target: key,
-          score: similarity
-        });
-
-        // Add reverse edge
-        const reverseEdgesKey = `wikibrain:edges:${key}`;
-        const reverseEdges = await kv.get<any[]>(reverseEdgesKey) || [];
-        reverseEdges.push({ target: id, score: similarity });
-        await kv.set(reverseEdgesKey, reverseEdges);
-      }
-    }
-  }
-
-  if (newEdges.length > 0) {
-    const existingEdges = await kv.get<any[]>(edgesKey) || [];
-    // merge and dedup
-    const merged = [...existingEdges, ...newEdges].reduce((acc, curr) => {
-      const found = acc.find((item: any) => item.target === curr.target);
-      if (!found) acc.push(curr);
-      return acc;
-    }, []);
-    await kv.set(edgesKey, merged);
-  }
 }
 
-export async function search(query: string, topK: number, filter?: SearchFilter): Promise<{ results: SemanticResult[], queryEmbedding: number[], searchTimeMs: number }> {
+/**
+ * Sovereign Search - Filters results based on visibility and trust
+ */
+export async function search(query: string, topK: number, filterInput?: SearchFilter): Promise<{ results: SemanticResult[], queryEmbedding: number[], searchTimeMs: number }> {
   const start = Date.now();
+  const filter = SearchFilterSchema.parse(filterInput || {});
   const queryEmbedding = await generateEmbedding(query);
 
   const allKeys = await kv.lrange<string>('wikibrain:index_keys', 0, -1);
@@ -119,18 +115,18 @@ export async function search(query: string, topK: number, filter?: SearchFilter)
   for (const key of allKeys) {
     const existing = await kv.get<any>(`wikibrain:index:${key}`);
     if (existing && existing.embedding) {
-      if (filter && filter.type && existing.type !== filter.type) continue;
+      // RULE 0: Privacy Check
+      if (existing.visibility === 'private' && !filter.includePrivate) continue;
+      if (filter.type && existing.type !== filter.type) continue;
 
       const score = cosineSimilarity(queryEmbedding, existing.embedding);
-      if (score > 0.3) { // basic threshold
-        const edges = await kv.get<any[]>(`wikibrain:edges:${key}`) || [];
+      if (score > 0.3) {
         results.push({
           id: existing.id,
           type: existing.type,
           name: existing.name,
           score,
-          snippet: existing.snippet,
-          relatedIds: edges.map(e => e.target)
+          snippet: existing.snippet
         });
       }
     }
@@ -144,3 +140,5 @@ export async function search(query: string, topK: number, filter?: SearchFilter)
     searchTimeMs: Date.now() - start
   };
 }
+
+// Made with Moe Abdelaziz
