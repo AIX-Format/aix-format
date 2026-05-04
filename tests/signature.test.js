@@ -61,6 +61,23 @@ test('Build Provenance Signing and Verification', async (t) => {
     });
   });
 
+
+  await t.test('verifyBuildProvenance should throw if given an invalid public key', () => {
+    const { publicKey: rsaKey } = crypto.generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+    });
+    const rsaPem = rsaKey.export({ type: 'spki', format: 'pem' });
+    const signature = signBuildProvenance(provenanceData, privateKeyPem);
+
+    assert.throws(() => {
+      verifyBuildProvenance(provenanceData, signature, rsaPem);
+    }, /Expected ed25519/);
+
+    assert.throws(() => {
+      verifyBuildProvenance(provenanceData, signature, 'not-a-key');
+    });
+  });
+
   await t.test('Successfully verify a valid signature', () => {
     const signature = signBuildProvenance(provenanceData, privateKeyPem);
     const isValid = verifyBuildProvenance(provenanceData, signature, publicKeyPem);
@@ -165,6 +182,50 @@ test('Manifest Verification General Cases', async (t) => {
     const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519');
     const privateKeyPem = privateKey.export({ type: 'pkcs8', format: 'pem' });
     const publicKeyPem = publicKey.export({ type: 'spki', format: 'pem' });
+
+
+    await t.test('signManifest should throw if given an invalid private key', () => {
+        const manifest = {
+            meta: { id: 'did:axiom:test-no-prov', version: '1.0.0', name: 'No Prov Agent' },
+            security: {}
+        };
+        const { privateKey: rsaKey } = crypto.generateKeyPairSync('rsa', {
+            modulusLength: 2048,
+        });
+        const rsaPem = rsaKey.export({ type: 'pkcs8', format: 'pem' });
+
+        assert.throws(() => {
+            signManifest(manifest, rsaPem);
+        }, /Expected ed25519/);
+
+        assert.throws(() => {
+            signManifest(manifest, 'not-a-key');
+        });
+    });
+
+    await t.test('verifyManifest should throw if given an invalid public key', () => {
+        const manifest = {
+            meta: { id: 'did:axiom:test-no-prov', version: '1.0.0', name: 'No Prov Agent' },
+            security: {}
+        };
+        const signed = signManifest(manifest, privateKeyPem);
+        manifest.security = {
+            checksum: { algorithm: 'sha256', value: signed.checksum },
+            signature: signed.signature
+        };
+        const { publicKey: rsaKey } = crypto.generateKeyPairSync('rsa', {
+            modulusLength: 2048,
+        });
+        const rsaPem = rsaKey.export({ type: 'spki', format: 'pem' });
+
+        assert.throws(() => {
+            verifyManifest(manifest, rsaPem);
+        }, /Expected ed25519/);
+
+        assert.throws(() => {
+            verifyManifest(manifest, 'not-a-key');
+        });
+    });
 
     await t.test('Manifest without build provenance', () => {
         const manifest = {
