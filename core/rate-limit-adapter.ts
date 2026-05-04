@@ -1,4 +1,5 @@
-import { kv as upstashKv, NS } from './storage/redis';
+import { kv as upstashKv } from '../packages/aix-core/src/storage/adapter';
+import { NS } from './storage/keys';
 
 /**
  * AIXTokenBucket
