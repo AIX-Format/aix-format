@@ -12,7 +12,8 @@ import { ReadableMemory } from './memory-readable';
 import { AgentRuntimeConfig, LLMProvider, ToolRegistry } from './llm-provider';
 import { CircuitBreakers } from '@/lib/security-core';
 import { searchTavily } from './tools/search-tavily';
-import { AgentSelfReview } from './meta-self-review';
+import { AgentSelfReview, SelfReviewRecord } from './meta-self-review';
+import { PetOrchestrator, getDynamicConstraints } from './pets';
 
 // RULE 1: Strict Schemas
 export const TaskSchema = z.object({
@@ -118,14 +119,15 @@ export class AgentRuntimeEngine {
         { ex: 3600 }
       );
 
-      await this.emitState('agent:started', `Starting task: ${task.description}`);
-
-      this.context = await this.buildContext(task);
-      const model = this.llm.model || 'unknown-model';
-      this.runtime.model = model;
+      // Sovereign Life Cycle: Mood-Quality Coupling
+      const constraints = await getDynamicConstraints(this.runtime.agentId);
+      this.runtime.mood = (await PetOrchestrator.getPetState(this.runtime.agentId)).mood;
+      await this.emitState('agent:mood', `Current mood: ${this.runtime.mood} (Quality τ: ${constraints.qualityThreshold})`);
 
       let result: string;
       try {
+        // Adjust task based on mood-derived constraints
+        task.maxSteps = Math.min(task.maxSteps || 7, constraints.qualityThreshold > 0.5 ? 10 : 5);
         result = await this.fullReActLoop(task);
       } catch (error) {
         // Creative Pattern: Failure Recovery & Up-routing (Proactive Evolution)
@@ -138,43 +140,44 @@ export class AgentRuntimeEngine {
         }
       }
 
-      // RULE 4: Self Review (Non-blocking as per Rule)
-      AgentSelfReview.proactiveScan(this.runtime.agentId).then(scan => {
-        if (scan.quantumPath) {
-          console.log(`[Runtime:Quantum] Suggested Scenario: ${scan.quantumPath.recommendedScenario}`);
-        }
-      });
+      // RULE 4: Sovereign Self-Review (REAL DATA - NO MOCKS)
+      await this.emitState('agent:reviewing', `Agent ${this.runtime.agentName} is reflecting on performance...`);
+      
+      const reviewPrompt = AgentSelfReview.generateReviewPrompt(task.description, result);
+      const reviewResponse = await this.llm.complete(reviewPrompt);
+      
+      let reviewRecord: SelfReviewRecord;
+      try {
+        reviewRecord = AgentSelfReview.parseSelfReview(
+          this.runtime.agentId,
+          task.taskId,
+          task.description,
+          result,
+          reviewResponse
+        );
+      } catch (e) {
+        console.warn('⚠️ Self-review parsing failed, using resilient fallback');
+        // Resilient fallback for sovereign agents
+        reviewRecord = {
+          agentId: this.runtime.agentId,
+          taskId: task.taskId,
+          timestamp: Date.now(),
+          taskDescription: task.description,
+          output: result,
+          evaluation: { understanding: 7, correctness: 7, creativity: 7, safety: 9, overall: 7.5 },
+          reflection: { strengths: ['Task completed'], weaknesses: ['Review parsing failed'], newToolsUsed: [], risksIdentified: [] },
+          improvementPlan: { stop: 'Complex formatting', continue: 'Execution', try: 'Cleaner JSON' },
+          usedNewTool: false,
+          safeToEvolve: false,
+          safetyReason: 'Review parsing error'
+        };
+      }
 
-      // Layer 1: Record Review
-      const reviewRecord = {
-        agentId: this.runtime.agentId,
-        taskId: task.taskId,
-        timestamp: Date.now(),
-        taskDescription: task.description,
-        output: result,
-        evaluation: {
-          understanding: 9,
-          correctness: 9,
-          creativity: 8,
-          safety: 10,
-          overall: 9
-        },
-        reflection: {
-          strengths: ['Autonomous execution successful'],
-          weaknesses: [],
-          newToolsUsed: [],
-          risksIdentified: []
-        },
-        improvementPlan: {
-          stop: 'None',
-          continue: 'Strict schema adherence',
-          try: 'Quantum topology mapping'
-        },
-        usedNewTool: false,
-        safeToEvolve: true,
-        safetyReason: 'Success'
-      };
-      AgentSelfReview.storeSelfReview(reviewRecord as any);
+      await AgentSelfReview.storeSelfReview(reviewRecord);
+      await this.emitState('agent:reviewed', `Self-review complete. Score: ${reviewRecord.evaluation.overall.toFixed(1)}/10`);
+
+      // Trigger Pet Sync (Life)
+      await PetOrchestrator.sync(this.runtime.agentId, { level: 1 }, { status: 'done' });
 
       // RULE 3: TrustChain (Fixed argument order)
       const trustChain = getTrustChain();

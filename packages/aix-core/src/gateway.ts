@@ -15,6 +15,8 @@ import { mcpGate } from './mcp-gate';
 import { runTask } from './agent-runtime';
 import { getTrustChain } from './trust-chain';
 import { FailureLearning } from './wikibrain/failure-learning';
+import { SwarmRouter } from './SwarmRouter';
+import { GroqProvider } from './llm-provider';
 
 export interface AgentAction {
   agentId: string;
@@ -147,12 +149,17 @@ export class Gateway extends EventEmitter {
         throw new Error(`Agent not found: ${agentId}`);
       }
 
+      // Sovereign Routing: Use SwarmRouter to select model dynamically
+      const router = new SwarmRouter();
+      const selectedModel = await router.routeWithLLM(taskDescription, agentId);
+      this.emit('agent:routed', { agentId, model: selectedModel });
+
       // Execute
       const result = await runTask(agentId, agent.name || agentId, {
         taskId: `task-${crypto.randomBytes(4).toString('hex')}`,
         description: taskDescription,
       }, {
-        llm: agent.config.llm || { model: 'groq:llama-3.3-70b-versatile' }, // Default to high-power
+        llm: new GroqProvider(process.env.GROQ_API_KEY!, selectedModel),
         tools: agent.config.tools || {}
       });
 
@@ -304,45 +311,11 @@ export class Gateway extends EventEmitter {
    * Layers: 0 (Curiosity), 1 (Review), 2 (Patterns), 3 (Mode), 4 (Wisdom)
    */
   private async recordMetaLoopAction(agentId: string, input: any, output: string) {
-    const taskId = `task-${crypto.randomBytes(4).toString('hex')}-${Date.now()}`;
-    const taskDescription = typeof input === 'string' ? input : JSON.stringify(input);
-
     // Layer 0: Curiosity Reward
     await CuriosityEngine.calculateCuriosityReward(agentId, 'run', { params: input, success: true });
 
-    // Layer 1 & 2: Self-Review + Pattern Recognition
-    // In a real scenario, we might call an LLM here to generate the review.
-    // For now, we use a structured auto-review based on execution success.
-    const review = {
-      agentId,
-      taskId,
-      timestamp: Date.now(),
-      taskDescription,
-      output,
-      evaluation: {
-        understanding: 10,
-        correctness: 10,
-        creativity: 8,
-        safety: 10,
-        overall: 9.5
-      },
-      reflection: {
-        strengths: ['Autonomous execution verified'],
-        weaknesses: [],
-        newToolsUsed: [],
-        risksIdentified: []
-      },
-      improvementPlan: {
-        stop: 'None',
-        continue: 'Sovereign pattern',
-        try: 'Quantum topology'
-      },
-      usedNewTool: false,
-      safeToEvolve: true,
-      safetyReason: 'Rule compliance high'
-    };
-
-    await AgentSelfReview.storeSelfReview(review as any);
+    // Layer 1 & 2: Self-Review handled by agent-runtime.ts
+    console.log(`[Gateway:MetaLoop] Execution recorded for agent ${agentId}`);
   }
 
   /**

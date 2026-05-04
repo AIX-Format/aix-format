@@ -115,27 +115,42 @@ export class SwarmRouter {
     /**
      * Intelligent Routing with LLM decision making
      * 🌀 RULE 5: Meta-Loop active layers
+     * 🔬 Research: Harvard SCORE τ-coupling
      */
-    public async routeWithLLM(taskDescription: string): Promise<string> {
+    public async routeWithLLM(taskDescription: string, agentId?: string): Promise<string> {
         return this.breaker.execute(async () => {
             const apiKey = process.env.GROQ_API_KEY;
             if (!apiKey) throw new Error('GROQ_API_KEY missing');
 
-            const lowerTask = taskDescription.toLowerCase();
             let selectedModel = 'llama-3.1-8b-instant'; // Default small
+            let qualityThreshold = 0.5;
+
+            // Connect to Living Gateway Mood if agentId provided
+            if (agentId) {
+                const { getDynamicConstraints } = await import('./pets');
+                const constraints = await getDynamicConstraints(agentId);
+                qualityThreshold = constraints.qualityThreshold;
+                
+                console.log(`[SwarmRouter:Life] Agent ${agentId} Quality Threshold τ: ${qualityThreshold}`);
+            }
+
+            const lowerTask = taskDescription.toLowerCase();
             
-            // Routing Logic
-            if (lowerTask.includes('analyze') || lowerTask.includes('code')) {
+            // Living Routing Logic based on τ
+            if (qualityThreshold >= 0.7 || lowerTask.includes('analyze') || lowerTask.includes('code')) {
                 selectedModel = 'llama-3.3-70b-versatile';
+            } else if (qualityThreshold <= 0.2) {
+                selectedModel = 'llama-3.1-8b-instant'; // Forced economy mode
             }
 
             const llm = new GroqProvider(apiKey, selectedModel);
             
             // Log decision to TrustChain (RULE 3)
             const trustChain = getTrustChain();
-            await trustChain.append('ROUTING_DECISION', 'swarm-router', {
+            await trustChain.append('ROUTING_DECISION', agentId || 'swarm-router', {
                 task: taskDescription,
                 model: selectedModel,
+                qualityThreshold,
                 timestamp: Date.now()
             });
 
