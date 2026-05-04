@@ -1,7 +1,7 @@
 # 🔍 AIX v1.3 Schema Deep Dive: The Anatomy of Trust
 
-🇬🇧 A technical breakdown of the AIX v1.3.0 manifest structure and its impact on security scanning.
-🇦🇪 تحليل تقني لهيكل بيان AIX v1.3.0 وتأثيره على المسح الأمني.
+🇬🇧 A technical breakdown of the AIX v0.369.0 manifest structure and its impact on security scanning.
+🇦🇪 تحليل تقني لهيكل بيان AIX v0.369.0 وتأثيره على المسح الأمني.
 
 ---
 

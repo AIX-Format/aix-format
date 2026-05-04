@@ -1,4 +1,4 @@
-# AIX Voice Wizard Protocol (v1.3.0)
+# AIX Voice Wizard Protocol (v0.369.0)
 
 The Voice Wizard is a "Zero Cost" conversational architect designed to onboard non-technical users into the AIX Sovereign ecosystem. It transforms verbal intent into production-grade sovereign agent manifests.
 
@@ -24,7 +24,7 @@ The wizard operates as a 4-layer asynchronous pipeline:
 
 4.  **Manifest Constructor**:
     - **Endpoint**: `/api/voice-wizard/generate-manifest`.
-    - **Logic**: Converts collected conversational data into a production-grade AIX v1.3.0 manifest.
+    - **Logic**: Converts collected conversational data into a production-grade AIX v0.369.0 manifest.
     - **Validation**: Multi-layer validation via `ManifestBuilder` and `validateSovereignManifest`.
     - **Features**:
       - Automatic DID generation
@@ -50,7 +50,7 @@ Sessions are persisted in Redis using the `aix:wizard:session:{sessionId}` names
 
 ### POST /api/voice-wizard/generate-manifest
 
-Converts collected voice wizard data into a validated AIX v1.3.0 manifest.
+Converts collected voice wizard data into a validated AIX v0.369.0 manifest.
 
 **Request Body:**
 ```json
@@ -71,7 +71,7 @@ Converts collected voice wizard data into a validated AIX v1.3.0 manifest.
 ```json
 {
   "success": true,
-  "manifest": { /* Complete AIX v1.3.0 manifest */ },
+  "manifest": { /* Complete AIX v0.369.0 manifest */ },
   "warnings": [],
   "risk_score": 0,
   "metadata": {

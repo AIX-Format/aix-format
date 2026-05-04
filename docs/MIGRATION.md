@@ -144,7 +144,7 @@ console.log(agent.getCapabilities());  // string[] - includes 'meta_arbiter' if 
 
 ## Changelog
 
-### v1.3.0 (2026-04-29)
+### v0.369.0 (2026-04-29)
 - feat: unified bundled `schemas/aix.schema.json` (supersedes aix-v1, axiom-aix, aix-enhanced)
 - feat: JSON Schema Draft 2020-12 upgrade
 - feat: `$defs` block with SemVer, ISODateTime, UUIDv4, AxiomDID, PublicKey, Signature, MetaArbiterConfig

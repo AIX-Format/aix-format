@@ -74,14 +74,14 @@ This release introduces the **Universal Agent Passport** - transforming AIX Form
 - **Package Version**: 1.3.0 → 1.4.0
 - **Package Description**: Updated to reflect Universal Agent Passport positioning
 - **README Title**: "Sovereign Agent Standard" → "Universal Agent Passport"
-- **Core Identity**: Maintained at v1.3.0 (stable)
+- **Core Identity**: Maintained at v0.369.0 (stable)
 - **Payment Layer**: New at v1.0.0
 
 ### Version Matrix
 ```
-AIX Core Format:    v1.3.0 (Identity + MCP + ABOM)
+AIX Core Format:    v0.369.0 (Identity + MCP + ABOM)
 AIX Payment Layer:  v1.0.0 (HTTP 402 + Multi-Chain + DeFi)
-AIX Passport:       v1.4.0 (Complete Integration)
+AIX Passport:       v0.369.0 (Complete Integration)
 ```
 
 ### Feature Flags
@@ -130,7 +130,7 @@ FEATURES = {
 - Immutable audit logs on-chain
 
 ### Breaking Changes
-None. All changes are backward compatible with v1.3.0 agents.
+None. All changes are backward compatible with v0.369.0 agents.
 
 ---
 

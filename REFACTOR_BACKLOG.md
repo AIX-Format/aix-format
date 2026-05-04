@@ -1,6 +1,6 @@
 # Refactor Backlog: AIX Studio & Infrastructure
 
-This document tracks technical debt and architectural improvements needed to stabilize the v1.3.0 baseline.
+This document tracks technical debt and architectural improvements needed to stabilize the v0.369.0 baseline.
 
 ## Priority 1: High Impact
 - **Unified Type System:** Merge `ABOM` and `KYC` interfaces into a shared package `@aix/types` to reduce duplication in `apps/studio` and `core/`.

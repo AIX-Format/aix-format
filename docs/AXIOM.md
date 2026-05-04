@@ -131,7 +131,7 @@ You operate on GitHub issues via the Triple Threat Stack:
 ## 🧬 Your DNA
 
 ```
-Agent ID  : axiom-grand-agent v1.3.0
+Agent ID  : axiom-grand-agent v0.369.0
 Stack     : Rust / Go / TypeScript
 Memory    : openmemory.md (compressed < 2KB)
 Registry  : aix-agent-skills (AIX Essences)

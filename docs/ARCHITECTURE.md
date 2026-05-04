@@ -5,7 +5,7 @@
 
 ---
 
-## 1. The Core DNA: AIX Schema v1.3.0
+## 1. The Core DNA: AIX Schema v0.369.0
 The [JSON Schema](file:///Users/cryptojoker710/Desktop/aix-format/schemas/aix.schema.json) is the ultimate source of truth.
 - **Structural Rules**: Enforced by Ajv in the Studio and CLI.
 - **Version Lock**: Frozen at `1.3.0`. Any breaking change requires a major protocol bump.
@@ -42,7 +42,7 @@ sequenceDiagram
 
     B->>D: Scan Manifest (ABOM + SaaS-BOM)
     D-->>B: Security Grade (A)
-    B->>R: Register Manifest (v1.3.0)
+    B->>R: Register Manifest (v0.369.0)
     G->>R: Fetch & Verify Manifest
     G->>T: Route Tool Call (Quota Check)
     G->>R: Log Telemetry (Cost + Latency)
@@ -51,4 +51,4 @@ sequenceDiagram
 ## 🛠️ Infrastructure Baseline
 - **Storage**: Upstash Redis (Unified Adapter).
 - **Identity**: `did:axiom` (AxiomID Authority).
-- **Release**: `v1.3.0-schema-freeze`.
+- **Release**: `v0.369.0-schema-freeze`.

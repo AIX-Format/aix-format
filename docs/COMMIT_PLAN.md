@@ -1,17 +1,17 @@
-# 🎯 Commit Plan for AIX Format v1.4.0
+# 🎯 Commit Plan for AIX Format v0.369.0
 
 ## Current Status
 
 **Branch**: main  
 **Uncommitted Changes**: 6 files  
-**Target Version**: v1.4.0 - Universal Agent Passport
+**Target Version**: v0.369.0 - Universal Agent Passport
 
 ---
 
 ## 📋 Files to Commit
 
 ### Modified Files (2)
-1. `README.md` - Updated to v1.4.0 with Universal Agent Passport section
+1. `README.md` - Updated to v0.369.0 with Universal Agent Passport section
 2. `package.json` - Version bump 1.3.0 → 1.4.0
 
 ### New Files (4)
@@ -33,16 +33,16 @@
 
 **Message**:
 ```
-feat(core): add version tracking system and bump to v1.4.0
+feat(core): add version tracking system and bump to v0.369.0
 
-- Add comprehensive version.ts with AIX Core v1.3.0, Payment v1.0.0, Passport v1.4.0
+- Add comprehensive version.ts with AIX Core v0.369.0, Payment v1.0.0, Passport v0.369.0
 - Include feature flags for payment layer, DeFi, and platform adapters
 - Add supported chains configuration (Base, Solana, Ethereum, Pi Network)
 - Add fiat providers configuration (Stripe, PayPal)
 - Bump package.json version from 1.3.0 to 1.4.0
 - Update package description to reflect Universal Agent Passport positioning
 
-BREAKING CHANGE: None (backward compatible with v1.3.0)
+BREAKING CHANGE: None (backward compatible with v0.369.0)
 ```
 
 ### Commit 2: Documentation - Universal Agent Passport
@@ -53,10 +53,10 @@ BREAKING CHANGE: None (backward compatible with v1.3.0)
 
 **Message**:
 ```
-docs(readme): update to v1.4.0 Universal Agent Passport
+docs(readme): update to v0.369.0 Universal Agent Passport
 
 - Update title from "Sovereign Agent Standard" to "Universal Agent Passport"
-- Add version matrix (Core v1.3.0, Payment v1.0.0, Passport v1.4.0)
+- Add version matrix (Core v0.369.0, Payment v1.0.0, Passport v0.369.0)
 - Add comprehensive payment layer section with:
   - HTTP 402 integration
   - Multi-chain wallet support (Base, Solana, Ethereum, Pi Network)
@@ -156,7 +156,7 @@ Release Guide (docs/RELEASE_GUIDE.md):
 - Post-release monitoring and success criteria
 - 6-phase rollout plan with metrics
 
-Supports v1.4.0 release process and establishes best practices for future releases.
+Supports v0.369.0 release process and establishes best practices for future releases.
 ```
 
 ---
@@ -167,23 +167,23 @@ Supports v1.4.0 release process and establishes best practices for future releas
 ```bash
 # Commit 1: Version system
 git add packages/aix-core/src/version.ts package.json
-git commit -m "feat(core): add version tracking system and bump to v1.4.0
+git commit -m "feat(core): add version tracking system and bump to v0.369.0
 
-- Add comprehensive version.ts with AIX Core v1.3.0, Payment v1.0.0, Passport v1.4.0
+- Add comprehensive version.ts with AIX Core v0.369.0, Payment v1.0.0, Passport v0.369.0
 - Include feature flags for payment layer, DeFi, and platform adapters
 - Add supported chains configuration (Base, Solana, Ethereum, Pi Network)
 - Add fiat providers configuration (Stripe, PayPal)
 - Bump package.json version from 1.3.0 to 1.4.0
 - Update package description to reflect Universal Agent Passport positioning
 
-BREAKING CHANGE: None (backward compatible with v1.3.0)"
+BREAKING CHANGE: None (backward compatible with v0.369.0)"
 
 # Commit 2: README update
 git add README.md
-git commit -m "docs(readme): update to v1.4.0 Universal Agent Passport
+git commit -m "docs(readme): update to v0.369.0 Universal Agent Passport
 
 - Update title from \"Sovereign Agent Standard\" to \"Universal Agent Passport\"
-- Add version matrix (Core v1.3.0, Payment v1.0.0, Passport v1.4.0)
+- Add version matrix (Core v0.369.0, Payment v1.0.0, Passport v0.369.0)
 - Add comprehensive payment layer section with HTTP 402, multi-chain, DeFi
 - Add platform interoperability section
 - Add economic model and security features
@@ -217,7 +217,7 @@ git commit -m "docs(process): add PR review and release guide
 ### Step 2: Create Git Tag
 ```bash
 # Create annotated tag
-git tag -a v1.4.0 -m "Release v1.4.0: Universal Agent Passport
+git tag -a v0.369.0 -m "Release v0.369.0: Universal Agent Passport
 
 Major feature release introducing payment layer and platform interoperability.
 
@@ -230,14 +230,14 @@ Key Features:
 - Version tracking system
 
 Version Matrix:
-- AIX Core: v1.3.0
+- AIX Core: v0.369.0
 - AIX Payment Layer: v1.0.0
-- AIX Universal Passport: v1.4.0
+- AIX Universal Passport: v0.369.0
 
 Economic Model: \$25M Year 1 revenue, 60% margin
 Target: 10K agents, 100K daily transactions
 
-Backward compatible with v1.3.0"
+Backward compatible with v0.369.0"
 ```
 
 ### Step 3: Push to GitHub
@@ -246,12 +246,12 @@ Backward compatible with v1.3.0"
 git push origin main
 
 # Push tag
-git push origin v1.4.0
+git push origin v0.369.0
 ```
 
 ### Step 4: Create GitHub Release
 1. Go to: https://github.com/StarwarsUniverse89/ibm-aix-core/releases/new
-2. Select tag: `v1.4.0`
+2. Select tag: `v0.369.0`
 3. Use release notes from `docs/RELEASE_GUIDE.md`
 4. Attach strategic plan PDF (optional)
 5. Publish release
@@ -284,7 +284,7 @@ git push origin v1.4.0
 
 ### Week 1 Targets
 - ✅ All commits merged to main
-- ✅ v1.4.0 tag created
+- ✅ v0.369.0 tag created
 - ✅ GitHub release published
 - 🎯 100+ GitHub stars
 - 🎯 10+ community members

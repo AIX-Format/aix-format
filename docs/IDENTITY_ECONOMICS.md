@@ -1,4 +1,4 @@
-# AIX Identity & Economics Architecture (v1.3.0)
+# AIX Identity & Economics Architecture (v0.369.0)
 
 This document outlines the sovereign modular architecture for identity verification and economic settlement within the AIX ecosystem.
 

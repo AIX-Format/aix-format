@@ -1,8 +1,8 @@
 # 🚀 AIX Format Release Guide
 
-## Current Status: Pre-Release (v1.4.0)
+## Current Status: Pre-Release (v0.369.0)
 
-AIX Format v1.4.0 is ready for initial GitHub release and NPM package publication.
+AIX Format v0.369.0 is ready for initial GitHub release and NPM package publication.
 
 ---
 
@@ -16,27 +16,27 @@ AIX Format v1.4.0 is ready for initial GitHub release and NPM package publicatio
 git checkout main
 git pull origin main
 
-# Create annotated tag for v1.4.0
-git tag -a v1.4.0 -m "Release v1.4.0: Universal Agent Passport"
+# Create annotated tag for v0.369.0
+git tag -a v0.369.0 -m "Release v0.369.0: Universal Agent Passport"
 
 # Push tag to GitHub
-git push origin v1.4.0
+git push origin v0.369.0
 ```
 
 #### 1.2 Create GitHub Release
 1. Go to: https://github.com/StarwarsUniverse89/ibm-aix-core/releases/new
-2. Select tag: `v1.4.0`
-3. Release title: `v1.4.0 - Universal Agent Passport`
+2. Select tag: `v0.369.0`
+3. Release title: `v0.369.0 - Universal Agent Passport`
 4. Copy release notes from template below
 
 #### 1.3 Release Notes Template
 
 ```markdown
-# 🚀 AIX Format v1.4.0 - Universal Agent Passport
+# 🚀 AIX Format v0.369.0 - Universal Agent Passport
 
 **Release Date**: May 2, 2026  
 **Type**: Major Feature Release  
-**Breaking Changes**: None (backward compatible with v1.3.0)
+**Breaking Changes**: None (backward compatible with v0.369.0)
 
 ## 🌟 What's New
 
@@ -67,9 +67,9 @@ AIX Format is now the **Universal Agent Passport** for the agentic payment econo
 ## 📊 Version Matrix
 
 ```
-AIX Core Format:        v1.3.0 (Identity + MCP + ABOM)
+AIX Core Format:        v0.369.0 (Identity + MCP + ABOM)
 AIX Payment Layer:      v1.0.0 (HTTP 402 + Multi-Chain + DeFi)
-AIX Universal Passport: v1.4.0 (Complete Integration)
+AIX Universal Passport: v0.369.0 (Complete Integration)
 ```
 
 ## 📚 Documentation
@@ -104,7 +104,7 @@ npm install @aix-format/core@1.4.0
 ```bash
 git clone https://github.com/StarwarsUniverse89/ibm-aix-core.git
 cd ibm-aix-core
-git checkout v1.4.0
+git checkout v0.369.0
 npm install
 ```
 
@@ -142,7 +142,7 @@ Apache License 2.0 - See [LICENSE](LICENSE) for details.
 
 ---
 
-**Full Changelog**: https://github.com/StarwarsUniverse89/ibm-aix-core/compare/v1.3.0...v1.4.0
+**Full Changelog**: https://github.com/StarwarsUniverse89/ibm-aix-core/compare/v0.369.0...v0.369.0
 ```
 
 ---
@@ -260,7 +260,7 @@ git push origin gh-pages
 ### 4.2 Announcement Template
 
 ```markdown
-🚀 Excited to announce AIX Format v1.4.0 - Universal Agent Passport!
+🚀 Excited to announce AIX Format v0.369.0 - Universal Agent Passport!
 
 AIX is now the first open standard enabling AI agents to:
 ✅ Transact across any platform (OpenClaw, Hermes, Kelos, IBM watsonx)
@@ -376,7 +376,7 @@ Built for IBM Hackathon 2026 🏆
 ## 🔄 Next Steps
 
 1. **Immediate** (This Week):
-   - [ ] Create v1.4.0 GitHub release
+   - [ ] Create v0.369.0 GitHub release
    - [ ] Publish announcement
    - [ ] Submit to IBM Hackathon
 
