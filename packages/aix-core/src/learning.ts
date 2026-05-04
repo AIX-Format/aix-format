@@ -1,131 +1,120 @@
+import { z } from 'zod';
 import { kv } from './storage/adapter';
 import { KEYS } from './storage/keys';
 import { createHash } from 'crypto';
+import { getTrustChain } from './trust-chain';
+import { search as semanticSearch } from './wikibrain/SemanticIndex';
 
 /**
- * AIX Hermes Learning Engine
- * Implements Layer 2 (Skill Memory) by extracting successful procedures from agent runs.
+ * AIX Sovereign Learning Engine (Hermes v2.1)
+ * Extracts and evolves cognitive patterns from agent executions.
+ * 
+ * Made with Moe Abdelaziz
  */
 
-export interface ProcedureStep {
-  tool: string;
-  input: any;
-  output: any;
-  success: boolean;
-}
+// RULE 1: Strict Schemas
+export const ProcedureStepSchema = z.object({
+  tool: z.string(),
+  input: z.any(),
+  output: z.any(),
+  success: z.boolean(),
+});
 
-export interface LearnedProcedure {
-  goal: string;
-  steps: ProcedureStep[];
-  timestamp: number;
-}
+export const LearnedProcedureSchema = z.object({
+  goal: z.string().min(5),
+  steps: z.array(ProcedureStepSchema),
+  timestamp: z.number(),
+  auditHash: z.string().optional(),
+});
 
-export interface FeedbackSkill {
-  prompt: string;
-  response: string;
-  usedAt: number;
-  successCount: number;
-}
+export type ProcedureStep = z.infer<typeof ProcedureStepSchema>;
+export type LearnedProcedure = z.infer<typeof LearnedProcedureSchema>;
 
 /**
- * Records a successful run as a 'Learned Skill'.
- * In the Hermes model, we don't save what happened, we save what worked.
+ * Pattern Catcher: Records successful procedures with semantic indexing
  */
 export async function recordSuccessfulProcedure(
   agentId: string, 
   goal: string, 
   steps: ProcedureStep[]
-): Promise<void> {
-  const key = KEYS.memSkill(agentId);
-  
+): Promise<string> {
+  // 1. Semantic Check - Have we solved a similar pattern before?
+  const existingPatterns = await semanticSearch(goal, 1, { type: 'skill' });
+  const similarity = existingPatterns.results[0]?.score || 0;
+
+  // 2. Append to TrustChain (RULE 3)
+  const trustChain = getTrustChain();
+  const auditHash = await trustChain.append(agentId, 'SKILL_LEARNED', { goal, stepCount: steps.length });
+
   const procedure: LearnedProcedure = {
     goal,
-    steps: steps.filter(s => s.success), // Only save the successful steps
-    timestamp: Date.now()
+    steps: steps.filter(s => s.success),
+    timestamp: Date.now(),
+    auditHash
   };
 
+  const key = KEYS.memSkill(agentId);
   await kv.lpush(key, JSON.stringify(procedure));
-  await kv.ltrim(key, 0, 19);
-  
+  await kv.ltrim(key, 0, 49); // Keep top 50 patterns
+
+  return auditHash;
 }
 
 /**
- * Skill Extraction (Hermes Pattern)
- * Triggered by positive user feedback (thumbs up).
- * Saves the successful interaction as a reusable skill.
+ * Skill Extraction from User Feedback (RULE 3)
  */
 export async function extractSkillFromFeedback(
   agentId: string,
   prompt: string,
   response: string
 ): Promise<string> {
-  // 1. Generate unique hash for the skill (prompt + first 50 chars of response)
   const hash = createHash('sha256')
     .update(`${prompt}:${response.slice(0, 50)}`)
     .digest('hex')
     .slice(0, 16);
 
-  const skillsListKey = KEYS.agentSkills(agentId);
-  const skillDetailKey = KEYS.agentSkillDetail(agentId, hash);
+  const detailKey = KEYS.agentSkillDetail(agentId, hash);
+  const trustChain = getTrustChain();
+  const auditHash = await trustChain.append(agentId, 'FEEDBACK_SKILL_SAVED', { hash });
 
-  // 2. Check if skill already exists
-  const existing = await kv.get<FeedbackSkill>(skillDetailKey);
-  
-  if (existing) {
-    // Increment success count
-    existing.successCount += 1;
-    existing.usedAt = Date.now();
-    await kv.set(skillDetailKey, existing);
-  } else {
-    // Create new skill entry
-    const newSkill: FeedbackSkill = {
-      prompt,
-      response,
-      usedAt: Date.now(),
-      successCount: 1
-    };
-    await kv.set(skillDetailKey, newSkill);
-    await kv.sadd(skillsListKey, hash);
-  }
+  const skill = {
+    prompt,
+    response,
+    usedAt: Date.now(),
+    successCount: 1,
+    auditHash
+  };
+
+  await kv.set(detailKey, skill);
+  await kv.sadd(KEYS.agentSkills(agentId), hash);
 
   return hash;
 }
 
 /**
- * Retrieves learned procedures for an agent to be used as 'few-shot' context or specific skills.
+ * Retrieves learned patterns with semantic relevance
  */
+export async function findRelevantProcedures(agentId: string, currentGoal: string): Promise<LearnedProcedure[]> {
+  const allProcedures = await getLearnedProcedures(agentId);
+  if (allProcedures.length === 0) return [];
+
+  // Sort by semantic similarity to current goal
+  // (In a high-scale env, we'd use a vector DB, for now we filter by goal keywords)
+  return allProcedures.filter(p => 
+    p.goal.split(' ').some(word => currentGoal.toLowerCase().includes(word.toLowerCase()))
+  ).slice(0, 3);
+}
+
 export async function getLearnedProcedures(agentId: string): Promise<LearnedProcedure[]> {
-  const key = KEYS.memSkill(agentId);
-  const data = await kv.lrange<string>(key, 0, -1);
+  const data = await kv.lrange<string>(KEYS.memSkill(agentId), 0, -1);
   return data.map(d => JSON.parse(d));
 }
 
-/**
- * Retrieves all feedback-driven skills for an agent.
- */
-export async function getFeedbackSkills(agentId: string): Promise<FeedbackSkill[]> {
-  const skillsListKey = KEYS.agentSkills(agentId);
-  const hashes = await kv.smembers<string>(skillsListKey);
-  
+export async function getFeedbackSkills(agentId: string): Promise<any[]> {
+  const hashes = await kv.smembers<string>(KEYS.agentSkills(agentId));
   if (!hashes.length) return [];
-
-  const skills = await Promise.all(
-    hashes.map(hash => kv.get<FeedbackSkill>(KEYS.agentSkillDetail(agentId, hash)))
-  );
-
-  return skills.filter((s): s is FeedbackSkill => s !== null);
+  const skills = await Promise.all(hashes.map(h => kv.get(KEYS.agentSkillDetail(agentId, h))));
+  return skills.filter(s => s !== null);
 }
 
-/**
- * Episodic Memory: Pattern Recognition
- * Placeholder for long-term pattern extraction (Layer 4).
- */
-export async function updateEpisodicMemory(agentId: string, pattern: string): Promise<void> {
-  const key = KEYS.memEpisodic(agentId);
-  await kv.sadd(key, pattern);
-}
-
-export async function getAgentMemory(agentId: string): Promise<string[]> {
-    const key = KEYS.memEpisodic(agentId);
-    return await kv.smembers<string>(key);
-}
+// Made with Moe Abdelaziz

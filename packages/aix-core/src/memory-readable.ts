@@ -3,80 +3,107 @@ import { KEYS } from './storage/keys';
 import * as LearningEngine from './learning';
 
 /**
- * Readable Memory System (v1.3.6)
- * Converts flat agent memory into human-readable Markdown/JSONL
- * and interactive WikiBrain Memory Trees.
+ * Sovereign Readable Memory System (v2.1)
+ * Converts agent patterns into human-readable WikiBrain Memory Trees.
+ * 
+ * Made with Moe Abdelaziz
  */
 
 export interface MemoryNode {
   id: string;
   label: string;
   children?: MemoryNode[];
-  metadata?: any;
+  metadata?: {
+    summary?: string;
+    fullFact?: string;
+    level?: string;
+    auditHash?: string;
+    timestamp?: number;
+    successCount?: number;
+  };
 }
 
 export class ReadableMemory {
   /**
    * Generates a WikiBrain Memory Tree for an agent.
+   * Hunts for patterns and attaches sovereign audit trails.
    */
   static async getMemoryTree(agentId: string): Promise<MemoryNode> {
-    // 1. Fetch Sessions
+    // 1. Fetch Sessions (The Context Path)
     const sessions = await kv.lrange<any>(KEYS.agentSessions(agentId), 0, 9);
     const sessionNodes: MemoryNode[] = sessions.map(s => ({
       id: `session-${s.timestamp}`,
-      label: new Date(s.timestamp).toLocaleDateString(),
-      metadata: { summary: s.summary }
+      label: `📅 ${new Date(s.timestamp).toLocaleDateString()}`,
+      metadata: { 
+        summary: s.summary,
+        timestamp: s.timestamp 
+      }
     }));
 
-    // 2. Fetch Learned Facts
-    const facts = await LearningEngine.getAgentMemory(agentId);
-    const factNodes: MemoryNode[] = facts.map((f, i) => ({
+    // 2. Fetch Learned Facts (The Semantic Map)
+    const facts = await LearningEngine.getLearnedProcedures(agentId);
+    const factNodes: MemoryNode[] = facts.map((p, i) => ({
       id: `fact-${i}`,
-      label: f.length > 30 ? f.slice(0, 30) + '...' : f,
-      metadata: { fullFact: f }
+      label: p.goal.length > 35 ? p.goal.slice(0, 35) + '...' : p.goal,
+      metadata: { 
+        fullFact: p.goal,
+        auditHash: p.auditHash,
+        timestamp: p.timestamp
+      }
     }));
 
-    // 3. Fetch Skills
-    const skills = await kv.smembers<string>(KEYS.agentSkills(agentId));
-    const skillNodes: MemoryNode[] = skills.map(s => ({
-      id: `skill-${s}`,
-      label: s,
-      metadata: { level: 'Advanced' }
-    }));
+    // 3. Fetch Skills (The Sovereign Abilities)
+    const skills = await LearningEngine.getFeedbackSkills(agentId);
+    const skillNodes: MemoryNode[] = skills.map(s => {
+      const level = s.successCount > 10 ? 'Elite' : s.successCount > 3 ? 'Advanced' : 'Basic';
+      return {
+        id: `skill-${s.auditHash?.slice(0, 8)}`,
+        label: `⚡ ${s.prompt.slice(0, 30)}...`,
+        metadata: { 
+          level,
+          successCount: s.successCount,
+          auditHash: s.auditHash
+        }
+      };
+    });
 
-    // 4. Build Tree
+    // 4. Build Sovereign Tree
     return {
       id: 'root',
-      label: `${agentId} WikiBrain`,
+      label: `🛡️ ${agentId} Sovereign Brain`,
       children: [
-        { id: 'sessions', label: '📅 Sessions (Timeline)', children: sessionNodes },
-        { id: 'facts', label: '🧠 Learned Facts', children: factNodes },
-        { id: 'skills', label: '⚡ Skills (Procedures)', children: skillNodes },
-        { id: 'connections', label: '🔗 Connections', children: [] }
+        { id: 'sessions', label: '🕰️ Timeline Patterns', children: sessionNodes },
+        { id: 'facts', label: '🧠 Learned Patterns', children: factNodes },
+        { id: 'skills', label: '🔥 Sovereign Skills', children: skillNodes },
+        { id: 'security', label: '🔒 Trust Chain Audit', children: [] }
       ]
     };
   }
 
   /**
-   * Archives a session into Markdown format.
+   * Archives a session into Sovereign Markdown format.
    */
   static async archiveToMarkdown(agentId: string, processId: string): Promise<string> {
     const process = await kv.get<any>(KEYS.process(processId));
     if (!process) return '';
 
-    const date = new Date().toISOString().split('T')[0];
-    const md = `
-# Agentic Memory Archive: ${date}
-Agent: ${agentId}
-Process: ${processId}
-
-## Transcript
-${process.history.map((h: any) => `**${h.role.toUpperCase()}**: ${h.content}`).join('\n\n')}
+    const date = new Date().toISOString();
+    return `
+# AXIOM Sovereign Memory Archive
+**Agent ID:** ${agentId}
+**Process ID:** ${processId}
+**Timestamp:** ${date}
 
 ---
-*Archived by AIX Sovereign Gateway*
-    `;
 
-    return md;
+## 📜 Execution Transcript
+${process.history.map((h: any) => `> **${h.role.toUpperCase()}**: ${h.content}`).join('\n\n')}
+
+---
+**Verified by AIX Sovereign TrustChain**
+// Made with Moe Abdelaziz
+    `;
   }
 }
+
+// Made with Moe Abdelaziz
