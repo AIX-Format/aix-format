@@ -300,19 +300,19 @@ classify_severity() {
     local is_burst="$3"
     
     # CRITICAL: >90 days with zero usage
-    if [ "$age_days" -ge "$CRITICAL_DAYS" ] && [ "$usage_total" -eq 0 ]; then
+    if [[ "$age_days" -ge "$CRITICAL_DAYS" ]] && [[ "$usage_total" -eq 0 ]]; then
         echo "CRITICAL"
         return
     fi
     
     # HIGH: <2 usage locations or burst commit with low usage
-    if [ "$usage_total" -lt "$HIGH_RISK_USAGE" ] || [ "$is_burst" = "true" ] && [ "$usage_total" -lt 5 ]; then
+    if [[ "$usage_total" -lt "$HIGH_RISK_USAGE" ]] || ([[ "$is_burst" == "true" ]] && [[ "$usage_total" -lt 5 ]]); then
         echo "HIGH"
         return
     fi
     
     # MEDIUM: Limited usage (2-5 locations)
-    if [ "$usage_total" -ge 2 ] && [ "$usage_total" -le 5 ]; then
+    if [[ "$usage_total" -ge 2 ]] && [[ "$usage_total" -le 5 ]]; then
         echo "MEDIUM"
         return
     fi
@@ -331,7 +331,7 @@ get_suggested_action() {
             echo "DELETE"
             ;;
         HIGH)
-            if [ "$usage_total" -eq 0 ]; then
+            if [[ "$usage_total" -eq 0 ]]; then
                 echo "DELETE"
             else
                 echo "DEPRECATE"
@@ -413,11 +413,11 @@ EOF
         --arg name "$export_name" \
         --arg type "$export_type" \
         --arg file "$export_file" \
-        --argjson age "$age_days" \
-        --argjson usage "$usage_total" \
+        --arg age "$age_days" \
+        --arg usage "$usage_total" \
         --arg breakdown "$usage_breakdown" \
         --arg action "$action" \
-        --arg burst "$is_burst" \
+        --argjson burst "$is_burst" \
         '{severity:$severity,name:$name,type:$type,file:$file,age:$age,usage:$usage,breakdown:$breakdown,action:$action,burst:$burst}')
     
     jq ".exports += [$json_entry]" "$JSON_REPORT" > "$JSON_REPORT.tmp" && mv "$JSON_REPORT.tmp" "$JSON_REPORT"
