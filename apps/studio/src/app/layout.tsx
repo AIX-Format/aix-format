@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope, Inter } from "next/font/google";
 import "./globals.css";
+import "./expert-animations.css";
 import Script from "next/script";
 import { Analytics } from '@vercel/analytics/next';
 

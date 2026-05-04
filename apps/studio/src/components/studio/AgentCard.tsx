@@ -36,44 +36,50 @@ export const AgentCard = memo(function AgentCard({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-      className="card group relative overflow-hidden p-0"
+      whileHover={{ y: -6, scale: 1.02 }}
+      transition={{
+        duration: 0.25,
+        ease: [0.16, 1, 0.3, 1],
+        layout: { duration: 0.2 }
+      }}
+      className="card group relative overflow-hidden p-0 h-full"
+      style={{ willChange: 'transform' }}
     >
       {/* Top accent bar */}
       <div
-        className="absolute top-0 left-0 right-0 h-[2px] opacity-60 group-hover:opacity-100 transition-opacity"
+        className="absolute top-0 left-0 right-0 h-[3px] opacity-70 group-hover:opacity-100 transition-opacity duration-300"
         style={{ background: `linear-gradient(90deg, transparent, ${color}, transparent)` }}
       />
 
       {/* Ambient background glow */}
       <div
-        className="absolute -top-20 -right-20 w-40 h-40 rounded-full blur-[60px] opacity-10 group-hover:opacity-20 transition-opacity duration-500"
+        className="absolute -top-24 -right-24 w-48 h-48 rounded-full blur-[80px] opacity-[0.08] group-hover:opacity-[0.15] transition-opacity duration-700"
         style={{ backgroundColor: color }}
       />
 
-      <div className="relative z-10 p-6 flex flex-col gap-5">
+      <div className="relative z-10 p-5 flex flex-col gap-4 h-full">
 
         {/* ── Top row ── */}
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-3">
           <div
-            className="w-12 h-12 rounded-2xl flex items-center justify-center border flex-shrink-0"
+            className="w-14 h-14 rounded-2xl flex items-center justify-center border flex-shrink-0 transition-transform duration-200 group-hover:scale-110"
             style={{
-              background:  `linear-gradient(135deg, ${color}18, ${color}30)`,
-              borderColor: `${color}30`,
-              boxShadow:   `0 0 16px ${color}20`,
+              background:  `linear-gradient(135deg, ${color}15, ${color}28)`,
+              borderColor: `${color}35`,
+              boxShadow:   `0 0 20px ${color}18`,
+              willChange: 'transform',
             }}
           >
-            <BrainCircuit className="w-6 h-6" style={{ color }} />
+            <BrainCircuit className="w-7 h-7" style={{ color }} />
           </div>
 
           <div className="flex items-center gap-2">
-            <span className={`flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] ${statusConfig.textColor}`}>
+            <span className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.08] ${statusConfig.textColor} transition-all duration-200`}>
               <span className={`status-dot ${statusConfig.dot}`} />
               {statusConfig.label}
             </span>
             <button
-              className="btn btn-ghost btn-sm w-7 h-7 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+              className="btn btn-ghost btn-sm w-8 h-8 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-white/[0.08]"
               aria-label="Agent options"
             >
               <MoreHorizontal className="w-4 h-4" />
@@ -82,35 +88,35 @@ export const AgentCard = memo(function AgentCard({
         </div>
 
         {/* ── Info ── */}
-        <div>
-          <h3 className="text-base font-display font-bold text-white tracking-tight leading-tight">{name}</h3>
-          <p className="text-[13px] text-[var(--color-on-surface-variant)] mt-0.5">{role}</p>
+        <div className="flex-shrink-0">
+          <h3 className="text-lg font-display font-bold text-white tracking-tight leading-tight mb-1">{name}</h3>
+          <p className="text-sm text-[var(--color-on-surface-variant)] leading-snug">{role}</p>
         </div>
 
         {/* ── Metrics ── */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white/[0.03] rounded-xl px-3 py-2.5 border border-white/[0.05]">
-            <p className="text-[10px] text-[var(--color-on-surface-faint)] uppercase tracking-wider mb-1">Success Rate</p>
+        <div className="grid grid-cols-2 gap-2.5 flex-shrink-0">
+          <div className="bg-white/[0.04] rounded-xl px-3 py-2 border border-white/[0.06] transition-colors duration-150 hover:bg-white/[0.06] hover:border-white/[0.10]">
+            <p className="text-[9px] text-[var(--color-on-surface-faint)] uppercase tracking-wider font-semibold mb-1">Success</p>
             <div className="flex items-center gap-1.5">
               <TrendingUp className="w-3.5 h-3.5 text-[var(--color-success)]" />
-              <span className="text-sm font-bold text-white tabular-nums">{successRate}%</span>
+              <span className="text-base font-bold text-white tabular-nums">{successRate}%</span>
             </div>
           </div>
-          <div className="bg-white/[0.03] rounded-xl px-3 py-2.5 border border-white/[0.05]">
-            <p className="text-[10px] text-[var(--color-on-surface-faint)] uppercase tracking-wider mb-1">Tasks Done</p>
+          <div className="bg-white/[0.04] rounded-xl px-3 py-2 border border-white/[0.06] transition-colors duration-150 hover:bg-white/[0.06] hover:border-white/[0.10]">
+            <p className="text-[9px] text-[var(--color-on-surface-faint)] uppercase tracking-wider font-semibold mb-1">Tasks</p>
             <div className="flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5 text-[var(--color-accent)]" />
-              <span className="text-sm font-bold text-white tabular-nums">{tasksCompleted.toLocaleString()}</span>
+              <span className="text-base font-bold text-white tabular-nums">{tasksCompleted.toLocaleString()}</span>
             </div>
           </div>
         </div>
 
         {/* ── Footer ── */}
-        <div className="flex items-center justify-between pt-4 border-t border-white/[0.05] mt-auto">
-          <div>
-            <p className="text-[10px] text-[var(--color-on-surface-faint)] uppercase tracking-wider">Cost / Task</p>
-            <p className="text-lg font-bold text-white mt-0.5 flex items-center gap-1">
-              <span style={{ color }} className="text-base">π</span>
+        <div className="flex items-center justify-between pt-3 border-t border-white/[0.06] mt-auto">
+          <div className="flex-shrink-0">
+            <p className="text-[9px] text-[var(--color-on-surface-faint)] uppercase tracking-wider font-semibold mb-0.5">Cost / Task</p>
+            <p className="text-xl font-bold text-white flex items-center gap-1.5">
+              <span style={{ color }} className="text-lg">π</span>
               <span className="tabular-nums">{price}</span>
             </p>
           </div>
@@ -122,14 +128,14 @@ export const AgentCard = memo(function AgentCard({
             CSS transitions are GPU-composited and never touch the React tree.
           */}
           <button
-            className="agent-card-hire-btn btn btn-sm rounded-xl"
+            className="agent-card-hire-btn btn btn-sm rounded-xl px-4 py-2 text-sm font-semibold"
             style={{
               // CSS custom properties so the :hover rule in globals.css can read them
               ["--agent-color" as string]: color,
             } as React.CSSProperties}
             aria-label={`Hire ${name}`}
           >
-            Hire Agent
+            Hire
           </button>
         </div>
 
