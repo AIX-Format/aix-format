@@ -1,11 +1,11 @@
-# 🧬 AIX Format (Universal Agent Passport) v1.4.0
+# 🧬 AIX Format (Universal Agent Passport) v0.369.0
 
 🇬🇧 **AIX Format** is the industry-first open standard for **Sovereign AI Agents** and the **Universal Agent Passport** for the agentic payment economy. It converges Cryptographic Identity (DIDs), the Model Context Protocol (MCP), HTTP 402 payments, and multi-chain settlement into a single, immutable `.aix` manifest. This protocol is designed for the 10x Moonshot era of autonomous, self-governing machine ecosystems.
 
 **Latest Versions**:
-- 🧬 **AIX Core Format**: v1.3.0 (Identity + MCP + ABOM)
+- 🧬 **AIX Core Format**: v0.369.0 (Identity + MCP + ABOM)
 - 💳 **AIX Payment Layer**: v1.0.0 (HTTP 402 + Multi-Chain + DeFi)
-- 🌐 **Universal Passport**: v1.4.0 (Complete Integration)
+- 🌐 **Universal Passport**: v0.369.0 (Complete Integration)
 
 🇦🇪 **تنسيق AIX** هو أول معيار مفتوح في الصناعة لـ **الوكلاء الذكيين السياديين**. يقوم بدمج الهوية التشفيرية (DIDs)، بروتوكول سياق النموذج (MCP)، والمدفوعات الدقيقة الأصلية في بيان `.aix` واحد غير قابل للتغيير. تم تصميم هذا البروتوكول لعصر "Moonshot" للأنظمة الآلية ذاتية الحكم.
 
@@ -60,11 +60,11 @@
 
 ---
 
-### 💳 Universal Agent Passport (v1.4.0) | جواز الوكيل العالمي
+### 💳 Universal Agent Passport (v0.369.0) | جواز الوكيل العالمي
 
 🇬🇧 **The Payment Economy Revolution**:
 
-AIX Format v1.4.0 introduces the **Universal Agent Passport** - enabling agents to transact across any platform, any blockchain, any payment rail.
+AIX Format v0.369.0 introduces the **Universal Agent Passport** - enabling agents to transact across any platform, any blockchain, any payment rail.
 
 #### 🌟 Key Features
 
@@ -146,7 +146,7 @@ aix deploy --platform ibm-watsonx
 
 🇦🇪 **ثورة الاقتصاد الدفعي**:
 
-يقدم تنسيق AIX v1.4.0 **جواز الوكيل العالمي** - مما يمكّن الوكلاء من التعامل عبر أي منصة، أي بلوكشين، أي نظام دفع.
+يقدم تنسيق AIX v0.369.0 **جواز الوكيل العالمي** - مما يمكّن الوكلاء من التعامل عبر أي منصة، أي بلوكشين، أي نظام دفع.
 
 | **Agent Builder** | **باني الوكلاء** | ✅ Live | **مباشر** | [Guide](docs/BUILDER_GUIDE.md) |
 | **MCP Registry** | **سجل MCP** | ✅ Live | **مباشر** | [Registry](docs/MCP_GATEWAY.md) |

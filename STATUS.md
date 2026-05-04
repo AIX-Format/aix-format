@@ -10,7 +10,7 @@
 
 ---
 
-## 🎯 Current Status: **Pre-release v0.2.1**
+## 🎯 Current Status: **Pre-release v0.369.0**
 
 **Reality Check:** This is an actively evolving project bridging cyber-physical robotics with web-based M2M economies.
 
@@ -52,12 +52,12 @@
 
 ## 📊 Path to v1.0
 
-### Current: v0.2.1 (Pre-release)
+### Current: v0.369.0 (Pre-release)
 
 | Milestone | Status | Users | Timeline |
 |-----------|--------|-------|----------|
-| **v0.2.0** | ✅ Complete | 0 | Oct 13-14 (37 hours) |
-| **v0.2.1** | ✅ Complete | 5 | April 27 (UX/UI & KYC Upgrade) |
+| **v0.369.0** | ✅ Complete | 0 | Oct 13-14 (37 hours) |
+| **v0.369.0** | ✅ Complete | 5 | April 27 (UX/UI & KYC Upgrade) |
 | **v0.3.0** | ⏳ Next | 10 early adopters | Week 1-2 |
 | **v0.5.0** | ⏳ Planned | 50 beta users | Week 3-4 |
 | **v1.0.0** | 🎯 Target | 100+ validated | Week 9-12 |
@@ -121,7 +121,7 @@ AIX/
 
 ### Immediate (This Week)
 
-1. **Ship v0.2.1** ✅ (You're here!)
+1. **Ship v0.369.0** ✅ (You're here!)
    - Studio UX upgrades (Voice Orb, Wizard, Quantum Topology)
    - Push to GitHub with honest versioning
 

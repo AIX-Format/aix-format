@@ -1,7 +1,7 @@
 {
   "name": "aix-format",
-  "version": "1.4.0",
-  "description": "AIX (Artificial Intelligence eXchange) - Universal Agent Passport for the agentic payment economy. Sovereign Protocol v1.4 with Identity (v1.3), Payment Layer (v1.0), HTTP 402, Multi-Chain, and Platform Adapters.",
+  "version": "0.369.0",
+  "description": "AIX (Artificial Intelligence eXchange) - Universal Agent Passport for the agentic payment economy. Sovereign Protocol v0.369.0 with Identity (v0.369.0), Payment Layer (v1.0), HTTP 402, Multi-Chain, and Platform Adapters.",
   "main": "core/parser.js",
   "types": "types/parser.d.ts",
   "type": "module",
@@ -124,7 +124,8 @@
     "@vitest/coverage-v8": "^3.0.0",
     "ajv": "^8.12.0",
     "json-schema-to-typescript": "^15.0.4",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vitest": "^4.1.5"
   },
   "packageManager": "pnpm@10.23.0+sha512.21c4e5698002ade97e4efe8b8b4a89a8de3c85a37919f957e7a0f30f38fbc5bbdd05980ffe29179b2fb6e6e691242e098d945d1601772cad0fef5fb6411e2a4b"
 }

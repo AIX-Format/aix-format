@@ -1,6 +1,6 @@
 {
   "name": "@aix/core",
-  "version": "1.3.0",
+  "version": "0.369.0",
   "description": "AIX unified storage adapter - core Redis/Session storage utilities",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

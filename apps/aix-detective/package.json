@@ -1,6 +1,6 @@
 {
   "name": "aix-detective",
-  "version": "1.0.0",
+  "version": "0.369.0",
   "description": "Security auditing tool for AIX agent packages.",
   "type": "module",
   "main": "index.js",
