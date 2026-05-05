@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { kv, KEYS } from './storage';
 import { health } from './health';
 import { AgentSelfReview } from './brain';
-import { LLMProvider, AgentRuntimeConfig, ToolRegistry } from './llm-provider';
+import { LLMProvider, AgentRuntimeConfig, ToolRegistry } from './llm';
 import { SovereignEntity } from './base';
 import { MCPGate } from './mcp-gate';
 import { 
@@ -141,11 +141,12 @@ export class AgentRuntimeEngine extends SovereignEntity {
       this.step++;
       const prompt = this.buildPrompt(task);
       const response = await this.llm.complete(prompt, ['Observation:']);
-
-      // FIX: case-insensitive + markdown-stripped Final Answer detection
-      const finalAnswerMatch = response.match(/\*{0,2}final answer:\*{0,2}\s*(.+)/i);
-      if (finalAnswerMatch) {
-        return finalAnswerMatch[1].trim();
+      // HARDENED: Robust Final Answer detection (handles markdown, extra colons, varying case)
+      const finalAnswerRegex = /(?:final answer|answer)[:\s*]+([\s\S]+)/i;
+      const match = response.match(finalAnswerRegex);
+      
+      if (match) {
+        return match[1].trim();
       }
 
       const actionMatch = response.match(/Action:\s*(\{[\s\S]*?\})/);
