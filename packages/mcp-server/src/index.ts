@@ -131,7 +131,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const manifest = content.trim().startsWith('{') ? JSON.parse(content) : yaml.load(content);
       const abom = (manifest as any).abom;
       const traces = (manifest as any).black_box?.traces || [];
-      const isCompliant = abom && traces.length > 0 && traces.every((t: any) => t.signature);
+      const isCompliant = !!abom && traces.length > 0 && traces.every((t: any) => t.signature);
 
       return {
         content: [
