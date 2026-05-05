@@ -81,9 +81,10 @@ export class Gateway extends EventEmitter {
       const router = new SwarmRouter();
       const model = await router.getDecisionModel(taskDescription);
       
-      const result = await runTask(agentId, agentId, {
-        taskId: `task-${crypto.randomBytes(4).toString('hex')}`,
+      const result = await runTask(agentId, 'sovereign-agent', {
+        taskId: `task-${Date.now()}`,
         description: taskDescription,
+        maxSteps: 7
       }, {
         llm: new GroqProvider(process.env.GROQ_API_KEY!, model),
         tools: this.agents.get(agentId)?.config.tools || {}
@@ -93,8 +94,8 @@ export class Gateway extends EventEmitter {
       const reward = await CuriosityEngine.calculateReward(agentId, taskDescription);
       await health.incrementTrust(agentId, reward * 0.05);
 
-      if (result.success && result.result?.length > 50) {
-        await archiveWisdom(agentId, input, result.result, this.octokit);
+      if (result.success && result.result && result.result.length > 50) {
+        await archiveWisdom(agentId, taskDescription, result.result, this.octokit);
       }
 
       this.emit('agent:completed', { agentId, result });

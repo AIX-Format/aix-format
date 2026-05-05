@@ -34,11 +34,14 @@ export const KEYS = {
   integrityHash: (file: string) => `integrity:hash:${file}`,
   
   // Brain & Learning
-  agentSkills: (agentId: string) => `agent:${agentId}:skills`,
-  agentSkillDetail: (agentId: string, hash: string) => `agent:${agentId}:skill:${hash}`,
+
   
   // Execution
   aixActionResult: (agentId: string) => `aix:action:result:${agentId}`,
+  agentSelfReview: (agentId: string, taskId: string) => `agent:review:${agentId}:${taskId}`,
+  agentSelfReviewHistory: (agentId: string) => `agent:review_history:${agentId}`,
+  agentSkills: (agentId: string) => `agent:skills:${agentId}`,
+  agentSkillDetail: (agentId: string, hash: string) => `agent:skill:${agentId}:${hash}`,
   aixEvents: (channel: string) => `aix:events:${channel}`,
 };
 

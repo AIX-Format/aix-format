@@ -64,8 +64,8 @@ export async function getRelevantProcedures(agentId: string, currentGoal: string
     const { search: semanticSearch } = await import('./wikibrain/SemanticIndex');
     const semanticResults = await semanticSearch(currentGoal, 3, { type: 'skill' });
     
-    if (semanticResults.results.length > 0) {
-      return semanticResults.results.map(r => r.metadata as LearnedProcedure);
+    if (semanticResults.length > 0) {
+      return semanticResults.map((r: any) => r.metadata as LearnedProcedure);
     }
   } catch { /* Fallback */ }
 
