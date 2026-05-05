@@ -17,7 +17,7 @@
 - **Go**: Reserved for high-speed Swarm Routing and Circuit Breaking.
 - **TypeScript**: The logic layer for Agentic Loops and Metadata.
 - **Rust**: The immutable Core for the TrustChain and DNA storage.
-
+Always keep rules up to date with the current state of the project.
 ---
 **AIX_IDENTITY_VERIFIED: TRUE**
 // Made with Moe Abdelaziz

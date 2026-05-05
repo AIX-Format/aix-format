@@ -257,34 +257,7 @@ func NewSwarmRouter() *SwarmRouter {
 	return r
 }
 
-// 📡 ListenForResonance starts a background loop to catch QUANTUM_BURST events.
-func (r *SwarmRouter) ListenForResonance(ctx context.Context) {
-	if !r.ResonanceEnabled {
-		log.Printf("[LTM] 💤 Resonance disabled by flag.\n")
-		return
-	}
-
-	pubsub := r.bus.Redis.Subscribe(ctx, "aix:ring:2:QUANTUM_BURST")
-	defer pubsub.Close()
-
-	log.Printf("[LTM] 📡 Listening for Quantum Resonance pulses...\n")
-
-	for {
-		msg, err := pubsub.ReceiveMessage(ctx)
-		if err != nil {
-			return
-		}
-
-		var event AIXMemoryEvent
-		if err := json.Unmarshal([]byte(msg.Payload), &event); err == nil {
-			r.mu.Lock()
-			// Apply 1.5x boost for 60 seconds
-			r.quantumBoosts[event.AgentID] = time.Now().Add(60 * time.Second)
-			r.mu.Unlock()
-			log.Printf("[LTM] ⚡ Quantum Resonance Detected from Agent %s!\n", event.AgentID)
-		}
-	}
-}
+// ListenForResonance removed: obsolete and broken. Use StartResonanceListener instead.
 
 func (r *SwarmRouter) StartResonanceListener(ctx context.Context, busClient interface {
 	SubscribeToRing(ctx context.Context, ring int, handler func(any))
@@ -359,13 +332,7 @@ func (r *SwarmRouter) scoreAgent(agent AgentNode, task TaskDescriptor) (float64,
 		rawScore += capWeight
 	}
 
-	// 🔬 Quantum Resonance Multiplier (AIX-369)
-	r.mu.RLock()
-	if exp, ok := r.quantumBoosts[agent.ID]; ok && time.Now().Before(exp) {
-		rawScore *= 1.5
-		log.Printf("[LTM] ⚡ Applying 1.5x Quantum Boost to agent %s\n", agent.ID)
-	}
-	r.mu.RUnlock()
+	// (First Resonance check removed to fix double-boost bug)
 	avgCapScore := rawScore / float64(len(task.RequiredCapabilities))
 	
 	finalScore := avgCapScore*(float64(agent.TrustLevel)*0.2) + float64(task.Priority)*0.1

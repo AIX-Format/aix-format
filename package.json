@@ -39,7 +39,8 @@
     "health:check": "vite-node scripts/health-score.ts && node scripts/health-trend.js",
     "health:fix": "node scripts/auto-issue-generator.js",
     "health:full": "npm run health:check && npm run health:fix",
-    "health:report": "cat .generated/HEALTH_REPORT.md"
+    "health:report": "cat .generated/HEALTH_REPORT.md",
+    "memory:watch": "vite-node scripts/protect-openmemory.ts"
   },
   "keywords": [
     "ai",

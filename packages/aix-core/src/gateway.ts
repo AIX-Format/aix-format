@@ -60,6 +60,9 @@ export class SovereignGateway extends EventEmitter {
       if (!clearance.allowed) {
         throw new Error(`CLEARANCE_DENIED: ${clearance.reason}`);
       }
+      
+      // 🧩 Sovereign Breadcrumbs (AIX-3)
+      console.log(`[SovereignBreadcrumb] Identity Confirmed (تم تأكيد الهوية) | User: ${userId} | Agent: ${agentId}`);
 
       // 3. Audit Start (Rust Event Store)
       await this.rust.eventStore.publish(BusEventSchema.parse({

@@ -172,10 +172,11 @@ func (c *Client) emit(ctx context.Context, event BusEvent) error {
 // SubscribeToRing allows Go services (like SwarmRouter) to listen to the TS Meta-Loop.
 // This closes the Quantum Topology loop!
 func (c *Client) SubscribeToRing(ctx context.Context, ring int, handler func(BusEvent)) {
-	pubsub := c.rdb.Subscribe(ctx, fmt.Sprintf("aix:ring:%d", ring))
+	pattern := fmt.Sprintf("aix:ring:%d:*", ring)
+	pubsub := c.rdb.PSubscribe(ctx, pattern)
 	defer pubsub.Close()
 
-	log.Printf("[EventBus] Active Subscription on Ring %d Pulse Stream...\n", ring)
+	log.Printf("[EventBus] Active Pattern Subscription on Ring %d Pulse Stream (%s)...\n", ring, pattern)
 
 	ch := pubsub.Channel()
 	for msg := range ch {
