@@ -30,6 +30,19 @@ export const SovereignDashboard = () => {
   if (!data) return null;
   const { health, gear, auditTrail } = data;
 
+  const isLocked = typeof window !== 'undefined' && !localStorage.getItem('axiom-id');
+  const isGlitching = health < 95;
+
+  if (isLocked) {
+    return (
+      <div className={`bg-white/5 backdrop-blur-3xl p-12 rounded-[40px] border ${isGlitching ? 'border-red-500 animate-pulse' : 'border-red-500/20'} text-center`}>
+        <div className="text-4xl mb-4">🔒</div>
+        <h2 className="text-xl font-bold text-red-500 uppercase tracking-widest">Sovereign Node Locked</h2>
+        <p className="text-white/40 text-sm mt-2">Authentication via AxiomID Required to View Topological Health.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0a0c] text-white p-8 font-['Inter']">
       {/* 🌌 Header - Made with Soul */}

@@ -11,17 +11,21 @@ import { Gateway } from '../../../../../../packages/aix-core/src/gateway';
  */
 export async function GET(req: NextRequest) {
   const gateway = new Gateway();
+  const topologyStatus = await gateway.verifyTopology('system-check');
   
-  const status = {
-    health: 98.7, // In a real system, this would be calculated from verifyTopology()
-    gear: gateway.getSovereignGear('general'),
-    auditTrail: [
-      { time: '04:31', event: 'SOVEREIGN_GEAR_ACTIVATED', level: 'info' },
-      { time: '04:32', event: 'UNIFIED_BOM_RATIFIED', level: 'success' },
-      { time: '04:34', event: 'PATH_INTEGRITY_VERIFIED', level: 'warning' }
-    ],
-    timestamp: new Date().toISOString()
-  };
+  // Real health calculation based on topology score and recent trust chain events
+  const health = topologyStatus.score;
+  
+  // Simulation of pulling from TrustChain (Real implementation would use getTrustChain().getRecentEvents())
+  const auditTrail = [
+    { time: new Date().toLocaleTimeString(), event: 'TOPOLOGY_SCAN_COMPLETED', level: health === 100 ? 'success' : 'warning' },
+    { time: new Date().toLocaleTimeString(), event: `SHA256_HASH: ${topologyStatus.hash.slice(0, 8)}...`, level: 'info' }
+  ];
 
-  return NextResponse.json(status);
+  return NextResponse.json({
+    health,
+    gear: gateway.getSovereignGear('general'),
+    auditTrail,
+    timestamp: new Date().toISOString()
+  });
 }
