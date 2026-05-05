@@ -1,4 +1,4 @@
-import { kv, KEYS } from './memory/storage';
+import { kv, KEYS } from './memory/storage.js';
 import { z } from 'zod';
 
 /**
@@ -17,7 +17,7 @@ export const PaymentProofSchema = z.object({
 
 export type PaymentProof = z.infer<typeof PaymentProofSchema>;
 
-import { FoldTraceEntry } from './domain';
+import { FoldTraceEntry } from './domain.js';
 
 export class SovereignEconomics {
   /**

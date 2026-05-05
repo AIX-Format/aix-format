@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { kv, KEYS } from './memory/storage';
-import { CircuitBreaker } from './infra';
-import { health } from './health';
-import { OrchestrationPlan, OrchestrationStep, OrchestrationPlanSchema, BusEventSchema } from './domain';
+import { kv, KEYS } from './memory/storage.js';
+import { CircuitBreaker } from './infra.js';
+import { health } from './health.js';
+import { OrchestrationPlan, OrchestrationStep, OrchestrationPlanSchema, BusEventSchema } from './domain.js';
 import { getRustBridge } from '@aix/rust-core/src/bridge';
 
 /**

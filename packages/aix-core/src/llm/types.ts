@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CircuitBreaker } from '../infra';
+import { CircuitBreaker } from '../infra.js';
 
 /**
  * 🌌 AIX LLM Types

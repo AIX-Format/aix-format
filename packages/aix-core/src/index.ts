@@ -3,30 +3,30 @@
  * Made with Moe Abdelaziz
  */
 
-export * from './memory/storage';
-export * from './health';
-export * from './brain';
-export * from './curiosity';
-export * from './rate-limit';
-export * from './harness.config';
-export * from './economics';
-export * from './treasury';
-export * from './registry';
-export * from './identity';
-export * from './gateway';
-export * from './agent-runtime';
-export * from './llm';
-export * from './security';
-export * from './wikibrain/SemanticIndex';
-export * from './infra';
-export * from './mcp-gate';
-export * from './swarm';
-export * from './scanner';
-export * from './validation';
-export * from './domain';
+export * from './memory/storage.js';
+export * from './health.js';
+export * from './brain.js';
+export * from './curiosity.js';
+export * from './rate-limit.js';
+export * from './harness.config.js';
+export * from './economics.js';
+export * from './treasury.js';
+export * from './registry.js';
+export * from './identity.js';
+export * from './gateway.js';
+export * from './agent-runtime.js';
+export * from './llm.js';
+export * from './security.js';
+export * from './wikibrain/SemanticIndex.js';
+export * from './infra.js';
+export * from './mcp-gate.js';
+export * from './swarm.js';
+export * from './scanner.js';
+export * from './validation.js';
+export * from './domain.js';
 export { getRustBridge } from '@aix/rust-core/src/bridge';
 
-import { SovereignGateway } from './gateway';
+import { SovereignGateway } from './gateway.js';
 let gatewayInstance: SovereignGateway | null = null;
 
 export function getGateway(config?: any): SovereignGateway {

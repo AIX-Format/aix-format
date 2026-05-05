@@ -1,4 +1,4 @@
-import { kv, KEYS } from './memory/storage';
+import { kv, KEYS } from './memory/storage.js';
 
 /**
  * AIXTokenBucket

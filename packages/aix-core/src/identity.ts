@@ -1,6 +1,6 @@
-import { kv, KEYS } from './memory/storage';
+import { kv, KEYS } from './memory/storage.js';
 import { getRustBridge } from '@aix/rust-core/src/bridge';
-import { BusEventSchema } from './domain';
+import { BusEventSchema } from './domain.js';
 import crypto from 'crypto';
 
 /**

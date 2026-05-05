@@ -1,4 +1,4 @@
-import { Breadcrumbs } from '../memory/breadcrumbs';
+import { Breadcrumbs } from '../memory/breadcrumbs.js';
 import * as path from 'path';
 
 /**

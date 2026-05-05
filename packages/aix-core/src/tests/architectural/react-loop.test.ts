@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { AgentRuntimeEngine, AgentTask } from '../../agent-runtime';
-import { MockProvider } from '../../llm';
+import { AgentRuntimeEngine, AgentTask } from '../../agent-runtime.js';
+import { MockProvider } from '../../llm.js';
 
 describe('AIX ReAct Loop - Architectural Integrity', () => {
   it('should correctly terminate when a Final Answer is provided in markdown', async () => {

@@ -1,5 +1,5 @@
-import { bus } from '../core/bus';
-import { AIX_CONFIG } from '../core/config';
+import { bus } from '../core/bus.js';
+import { AIX_CONFIG } from '../core/config.js';
 
 /**
  * 📡 AIX MEMORY PUBLISHER

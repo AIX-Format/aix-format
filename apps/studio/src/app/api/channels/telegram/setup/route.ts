@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ChannelManager, kv, KEYS } from "@aix-core/storage";
+import { kv, KEYS } from "@aix-core/memory/storage";
+import { ChannelManager } from "@aix-core/network/channel-manager";
 
 /**
  * POST /api/channels/telegram/setup

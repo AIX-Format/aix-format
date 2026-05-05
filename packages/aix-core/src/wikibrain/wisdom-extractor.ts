@@ -4,8 +4,8 @@
  * Made with Moe Abdelaziz
  */
 
-import { kv } from '../memory/storage';
-import { SemanticIndex } from './SemanticIndex';
+import { kv } from '../memory/storage.js';
+import { SemanticIndex } from './SemanticIndex.js';
 
 export class WisdomExtractor {
   private static index = new SemanticIndex();

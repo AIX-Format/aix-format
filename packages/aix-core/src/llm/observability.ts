@@ -1,4 +1,4 @@
-import { LLMProvider } from './types';
+import { LLMProvider } from './types.js';
 
 /**
  * 👁️ AIX Observability - Langfuse Wrapper

@@ -1,14 +1,14 @@
 import { EventEmitter } from 'events';
-import { health } from './health';
-import { CuriosityEngine } from './curiosity';
-import { archiveWisdom, AgentSelfReview } from './brain';
-import { AgentRuntimeEngine } from './agent-runtime';
-import { GroqProvider } from './llm';
-import { mcpGate } from './mcp-gate';
-import { SovereignEconomics } from './economics';
-import { getHarness } from './harness.config';
-import { getRustBridge } from '@aix/rust-core/src/bridge';
-import { AgentRequest, AgentRequestSchema, GatewayResponse, GatewayResponseSchema, BusEventSchema } from './domain';
+import { health } from './health.js';
+import { CuriosityEngine } from './curiosity.js';
+import { archiveWisdom, AgentSelfReview } from './brain.js';
+import { AgentRuntimeEngine } from './agent-runtime.js';
+import { GroqProvider, ToolRegistry } from './llm/index.js';
+import { mcpGate } from './mcp-gate.js';
+import { SovereignEconomics } from './economics.js';
+import { getHarness } from './harness.config.js';
+import { getRustBridge } from '@aix/rust-core/src/bridge.js';
+import { AgentRequest, AgentRequestSchema, GatewayResponse, GatewayResponseSchema, BusEventSchema } from './domain.js';
 import { Octokit } from '@octokit/rest';
 import crypto from 'crypto';
 
@@ -31,7 +31,7 @@ import crypto from 'crypto';
 export class SovereignGateway extends EventEmitter {
   private octokit?: Octokit;
   private economics = new SovereignEconomics();
-  private rust = getRustBridge();
+  private _rust: any = null;
   private harness = getHarness();
 
   constructor(config: { githubToken?: string } = {}) {
@@ -41,20 +41,34 @@ export class SovereignGateway extends EventEmitter {
     }
   }
 
+  private get rust() {
+    if (!this._rust) {
+      try {
+        this._rust = getRustBridge();
+      } catch (e) {
+        console.warn('⚠️ [SovereignGateway] Rust Bridge not available. Falling back to TS core.');
+        return null;
+      }
+    }
+    return this._rust;
+  }
+
   /**
    * Official Execute Entry
    */
-  async execute(requestInput: unknown): Promise<GatewayResponse> {
+  async execute(options: {
+    agentId: string;
+    task: string;
+    userId?: string;
+    tools?: any;
+    provider?: any;
+  }): Promise<GatewayResponse> {
     const startTime = Date.now();
     const requestId = crypto.randomUUID();
-    let agentIdForPenalty: string | undefined;
+    const { agentId, task, userId = 'anonymous', tools = {}, provider: customProvider } = options;
+    let agentIdForPenalty: string | undefined = agentId;
 
     try {
-      // 1. Parse and Validate Request
-      const request = AgentRequestSchema.parse(requestInput);
-      const { agentId, task, userId = 'anonymous', tools = {} } = request;
-      agentIdForPenalty = agentId;
-
       // 2. Harness Pre-flight (Auth, Rate-Limit, 402 Payment)
       const clearance = await this.harness.checkClearance(agentId, userId);
       if (!clearance.allowed) {
@@ -82,9 +96,19 @@ export class SovereignGateway extends EventEmitter {
       await mcpGate({ tool: 'gateway.execute', params: { task } }, agentId);
 
       // 5. Runtime Execution (Task Flow)
-      // Note: In a real prod env, provider/model would come from agent manifest
-      const provider = new GroqProvider(process.env.GROQ_API_KEY || '', 'llama-3.3-70b-versatile');
-      const engine = new AgentRuntimeEngine(agentId, 'sovereign', provider, tools as any);
+      const provider = customProvider || new GroqProvider(process.env.GROQ_API_KEY || '', 'llama-3.3-70b-versatile');
+      
+      // Strict Tool Mapping — No more 'as any'
+      const mappedTools: ToolRegistry = {};
+      if (tools) {
+        for (const [name, fn] of Object.entries(tools)) {
+          if (typeof fn === 'function') {
+            mappedTools[name] = fn as (input: any) => Promise<string>;
+          }
+        }
+      }
+
+      const engine = new AgentRuntimeEngine(agentId, 'sovereign', provider, mappedTools);
 
       const runtimeResult = await engine.run({
         taskId: requestId,
@@ -92,15 +116,18 @@ export class SovereignGateway extends EventEmitter {
         maxSteps: 10
       });
 
-      // 6. Self-Review & Critic Pattern
-      // Note: Full review record is created inside engine.run, this is just for registry/summary
+      // 6. Self-Review & Critic Pattern (The Ethical Mirror)
+      console.log('🧠 [SovereignGateway] Initiating Self-Reflection...');
+      
+      const evaluation = await this.performSelfReview(provider, task, runtimeResult.result || '');
+      
       const reviewRecord = {
         agentId,
         taskId: requestId,
         timestamp: Date.now(),
         taskDescription: task,
         output: runtimeResult.result || '',
-        evaluation: { understanding: 10, correctness: 10, creativity: 10, safety: 10, overall: 10 },
+        evaluation,
         reflection: { strengths: [], weaknesses: [], newToolsUsed: [], risksIdentified: [] },
         improvementPlan: { stop: '', continue: '', try: '' }
       };
@@ -115,19 +142,22 @@ export class SovereignGateway extends EventEmitter {
 
       // 8. Wisdom Flow (Hermes Learning - Distilled)
       if (runtimeResult.success && runtimeResult.result) {
-        await AgentSelfReview.distill(reviewRecord, task, JSON.stringify(runtimeResult.result));
+        // Background distillation to ensure responsiveness
+        AgentSelfReview.distill(reviewRecord, task, JSON.stringify(runtimeResult.result), this.octokit)
+          .catch(e => console.warn('⚠️ [SovereignGateway] Background distillation failed:', e));
       }
 
       // 9. Audit Success (Rust Event Store)
       const duration = Date.now() - startTime;
-      const summary = `Agent finished task ${runtimeResult.success ? 'successfully' : 'with error'}. Output length: ${runtimeResult.result?.length ?? 0}`;
-      await this.rust.eventStore.publish(BusEventSchema.parse({
-        type: 'TaskCompleted',
-        agent_id: agentId,
-        task_id: requestId,
-        result: runtimeResult.success ? 'success' : 'failure',
-        timestamp: Date.now(),
-      }));
+      if (this.rust) {
+        await this.rust.eventStore.publish(BusEventSchema.parse({
+          type: 'TaskCompleted',
+          agent_id: agentId,
+          task_id: requestId,
+          result: runtimeResult.success ? 'success' : 'failure',
+          timestamp: Date.now(),
+        }));
+      }
 
       return GatewayResponseSchema.parse({
         success: true,
@@ -158,6 +188,32 @@ export class SovereignGateway extends EventEmitter {
           cost: 0
         }
       });
+    }
+  }
+
+  /**
+   * 🔬 [The Ethical Mirror]: Evaluates the output honestly using the LLM.
+   */
+  private async performSelfReview(provider: any, task: string, output: string) {
+    try {
+      const response = await provider.generateResponse([
+        { role: 'system', content: 'You are the AIX Critic. Evaluate the following task output. Return a JSON with understanding, correctness, creativity, safety, and overall scores (0-10).' },
+        { role: 'user', content: `Task: ${task}\nOutput: ${output}` }
+      ]);
+      
+      const content = response.content;
+      const scores = JSON.parse(content.match(/\{.*\}/s)?.[0] || '{"overall": 5}');
+      
+      return {
+        understanding: scores.understanding || 5,
+        correctness: scores.correctness || 5,
+        creativity: scores.creativity || 5,
+        safety: scores.safety || 5,
+        overall: scores.overall || 5
+      };
+    } catch (err) {
+      console.warn('⚠️ [SovereignGateway] Self-Review failed. Using conservative scores.');
+      return { understanding: 5, correctness: 5, creativity: 5, safety: 5, overall: 5 };
     }
   }
 }

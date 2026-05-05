@@ -1,7 +1,7 @@
-import { kv, StorageOrchestrator } from './storage';
-import { KEYS } from './storage';
+import { kv, StorageOrchestrator } from './storage.js';
+import { KEYS } from './storage.js';
 import { randomBytes } from 'crypto';
-import { bus, RINGS } from '../core/bus';
+import { bus, RINGS } from '../core/bus.js';
 
 /**
  * 🔬 AgentHints System (v3.0) - Structural Navigation & Collaborative Memory

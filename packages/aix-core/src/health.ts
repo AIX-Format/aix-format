@@ -1,6 +1,6 @@
-import { kv, KEYS } from './memory/storage';
-import { generateHash, verifySignature as cryptoVerify } from './infra';
-import { getRustBridge } from '@aix/rust-core/src/bridge';
+import { kv, KEYS } from './memory/storage.js';
+import { generateHash, verifySignature as cryptoVerify } from './infra.js';
+import { getRustBridge } from '@aix/rust-core/src/bridge.js';
 import { createHash } from 'crypto';
 import fs from 'fs';
 import path from 'path';
@@ -11,11 +11,23 @@ import path from 'path';
  * Made with Moe Abdelaziz
  */
 
-import { ActionRecord } from './domain';
+import { ActionRecord } from './domain.js';
 
 export class SovereignHealthService {
   private static instance: SovereignHealthService;
-  private rust = getRustBridge();
+  private _rust: any = null;
+
+  private get rust() {
+    if (!this._rust) {
+      try {
+        this._rust = getRustBridge();
+      } catch (e) {
+        console.warn('⚠️ [Health] Rust Bridge not available.');
+        return null;
+      }
+    }
+    return this._rust;
+  }
   
   private constructor() {}
 
@@ -31,7 +43,7 @@ export class SovereignHealthService {
   async getTrustScore(agentId: string): Promise<number> {
     try {
       // 1. Try Rust Trust Chain (Cryptographic)
-      const rustScore = await this.rust.trustChain.getTrustScore(agentId);
+      const rustScore = this.rust ? await this.rust.trustChain.getTrustScore(agentId) : null;
       if (rustScore !== null) return rustScore / 10; // Scale to 0-10
     } catch { /* Fallback to Redis */ }
 
@@ -52,7 +64,7 @@ export class SovereignHealthService {
 
   async incrementTrust(agentId: string, amount: number, reason = 'Performance'): Promise<void> {
     try {
-      await this.rust.trustChain.reward(agentId, Math.round(amount * 10), reason, 'n/a');
+      if (this.rust) await this.rust.trustChain.reward(agentId, Math.round(amount * 10), reason, 'n/a');
     } catch { /* Fallback to Redis */ }
 
     const current = await this.getTrustScore(agentId);
@@ -64,7 +76,7 @@ export class SovereignHealthService {
 
   async decrementTrust(agentId: string, amount: number, reason = 'Security Violation'): Promise<void> {
     try {
-      await this.rust.trustChain.penalize(agentId, Math.round(amount * 10), reason, 'n/a');
+      if (this.rust) await this.rust.trustChain.penalize(agentId, Math.round(amount * 10), reason, 'n/a');
     } catch { /* Fallback to Redis */ }
 
     const current = await this.getTrustScore(agentId);
@@ -152,8 +164,8 @@ export class SovereignHealthService {
 
     // 3. Rust Bridge check
     try {
-      const rustScore = await this.rust.trustChain.getTrustScore('system');
-      checks.rustBridge = { status: 'ok', systemTrust: rustScore };
+      const rustScore = this.rust ? await this.rust.trustChain.getTrustScore('system') : null;
+      checks.rustBridge = { status: this.rust ? 'ok' : 'missing', systemTrust: rustScore };
     } catch {
       checks.rustBridge = { status: 'error' };
     }

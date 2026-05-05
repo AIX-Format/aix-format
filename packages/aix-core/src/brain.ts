@@ -1,5 +1,5 @@
-import { kv, KEYS } from './memory/storage';
-import { generateHash } from './infra';
+import { kv, KEYS } from './memory/storage.js';
+import { generateHash } from './infra.js';
 import { Octokit } from '@octokit/rest';
 
 /**
@@ -8,7 +8,7 @@ import { Octokit } from '@octokit/rest';
  * Made with Moe Abdelaziz
  */
 
-import { SelfEvaluation, SelfReviewRecord } from './domain';
+import { SelfEvaluation, SelfReviewRecord } from './domain.js';
 
 export class AgentSelfReview {
   static async store(record: SelfReviewRecord) {
@@ -25,11 +25,11 @@ export class AgentSelfReview {
   /**
    * Distills wisdom from a high-quality self-review.
    */
-  static async distill(record: SelfReviewRecord, task: string, result: string): Promise<boolean> {
+  static async distill(record: SelfReviewRecord, task: string, result: string, octokit?: Octokit): Promise<boolean> {
     const WISDOM_THRESHOLD = 8.5; // Overall score is 0-10
     if (record.evaluation.overall >= WISDOM_THRESHOLD) {
       console.log(`✨ [Brain] High quality review (${record.evaluation.overall}). Distilling wisdom...`);
-      await archiveWisdom(record.agentId, record.taskDescription, result);
+      await archiveWisdom(record.agentId, record.taskDescription, result, octokit);
       return true;
     }
     return false;
@@ -48,7 +48,7 @@ export interface LearnedProcedure {
  */
 export async function getRelevantProcedures(agentId: string, currentGoal: string, allProcedures: LearnedProcedure[]): Promise<LearnedProcedure[]> {
   try {
-    const { search: semanticSearch } = await import('./wikibrain/SemanticIndex');
+    const { search: semanticSearch } = await import('./wikibrain/SemanticIndex.js');
     const semanticResults = await semanticSearch(currentGoal, 3, { type: 'skill' });
     
     if (semanticResults.length > 0) {
@@ -92,7 +92,7 @@ export async function archiveWisdom(agentId: string, input: any, output: string,
   for (let i = 0; i < MAX_RETRIES; i++) {
     try {
       // 1. Semantic Indexing
-      const { SemanticIndex } = await import('./wikibrain/SemanticIndex');
+      const { SemanticIndex } = await import('./wikibrain/SemanticIndex.js');
       const index = new SemanticIndex();
       await index.index(`wisdom-${agentId}-${Date.now()}`, 'wisdom', wisdomSnippet, { agentId, type: 'meta_wisdom' });
 

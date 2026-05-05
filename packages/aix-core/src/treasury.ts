@@ -1,4 +1,4 @@
-import { kv, KEYS } from './memory/storage';
+import { kv, KEYS } from './memory/storage.js';
 import { getRustBridge } from '@aix/rust-core/src/bridge';
 import { 
   TreasuryEvent, 
@@ -9,7 +9,7 @@ import {
   FoldTraceEntry,
   FoldTraceSchema,
   BusEventSchema
-} from './domain';
+} from './domain.js';
 import crypto from 'crypto';
 
 /**

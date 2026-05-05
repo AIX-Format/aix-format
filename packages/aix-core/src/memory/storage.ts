@@ -1,6 +1,6 @@
 import { Redis } from '@upstash/redis';
 import * as crypto from 'crypto';
-import { AIX_CONFIG } from '../core/config';
+import { AIX_CONFIG } from '../core/config.js';
 
 /**
  * 🗄️ SOVEREIGN_STORAGE
@@ -46,6 +46,8 @@ export const KEYS = {
   agentSkills: (agentId: string) => `agent:skills:${agentId}`,
   agentSkillDetail: (agentId: string, hash: string) => `agent:skill:${agentId}:${hash}`,
   aixEvents: (channel: string) => `aix:events:${channel}`,
+  agentChannelsTelegram: (agentId: string) => `agent:channels:telegram:${agentId}`,
+  agentChannelsWhatsapp: (agentId: string) => `agent:channels:whatsapp:${agentId}`,
 };
 
 // --- REDIS ADAPTER ---
@@ -63,8 +65,9 @@ export class StorageOrchestrator {
   private static instance: StorageOrchestrator;
   
   private constructor() {
+    // No error throw, we use memory fallback if missing
     if (!process.env.UPSTASH_REDIS_REST_URL) {
-      throw new Error('🚨 [Storage] UPSTASH_REDIS_REST_URL is missing. Sovereign storage requires real Redis.');
+      console.warn('⚠️ [Storage] UPSTASH_REDIS_REST_URL is missing. Using Sovereign Memory (In-Memory Fallback).');
     }
   }
 
