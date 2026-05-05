@@ -1,6 +1,8 @@
-import { AbomScanner } from './scanner';
-import { ValidationResult, AgentManifest, BusEventSchema } from './domain';
+import { AbomScanner } from '../scanner';
+import { ValidationResult, AgentManifest, BusEventSchema } from '../domain';
 import { getRustBridge } from '@aix/rust-core/src/bridge';
+
+export * from './trust-chain';
 
 export class SovereignSecurityService {
   private rust = getRustBridge();
