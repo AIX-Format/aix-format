@@ -18,6 +18,9 @@ export const NS = {
   EXECUTION: 'execution:',
   BUS: 'bus:',
   RATE: 'rate:',
+  HINTS: 'hints:',
+  GRAPH: 'graph:',
+  TIER1: 'tier1:',
 } as const;
 
 /**
@@ -93,6 +96,15 @@ export const KEYS = {
   // Rate limiting keys
   rate: (key: string) => `${NS.RATE}${key}`,
   rateLimit: (identifier: string) => `${NS.RATE}limit:${identifier}`,
+
+  // 🔬 Creative Engineering: AgentHints & Structural Navigation (2026)
+  fileHint: (filePath: string) => `${NS.HINTS}file:${Buffer.from(filePath).toString('base64')}`,
+  dependencyNode: (nodeId: string) => `${NS.GRAPH}node:${nodeId}`,
+  structuralMap: (scope: string) => `${NS.GRAPH}map:${scope}`,
+  
+  // 📜 Tiered Memory (Constitution)
+  constitution: () => `${NS.TIER1}core`,
+  specializedKnowledge: (agentRole: string) => `${NS.TIER1}knowledge:${agentRole}`,
 } as const;
 
 /**

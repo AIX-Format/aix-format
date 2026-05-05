@@ -172,10 +172,20 @@ func (c *Client) emit(ctx context.Context, event BusEvent) error {
 // SubscribeToRing allows Go services (like SwarmRouter) to listen to the TS Meta-Loop.
 // This closes the Quantum Topology loop!
 func (c *Client) SubscribeToRing(ctx context.Context, ring int, handler func(BusEvent)) {
-	// TODO for Jules AI: Implement Redis Pub/Sub or List blocking pop (BLPOP) here.
-	// This will allow SwarmRouter to hear "QUANTUM_BURST" and dynamically multiply
-	// the agent's TrustLevel / Score by 1.5x for 5 minutes!
-	log.Printf("[EventBus] Subscribed to Ring %d pulses...\n", ring)
+	pubsub := c.rdb.Subscribe(ctx, fmt.Sprintf("aix:ring:%d", ring))
+	defer pubsub.Close()
+
+	log.Printf("[EventBus] Active Subscription on Ring %d Pulse Stream...\n", ring)
+
+	ch := pubsub.Channel()
+	for msg := range ch {
+		var event BusEvent
+		if err := json.Unmarshal([]byte(msg.Payload), &event); err != nil {
+			log.Printf("[EventBus] Error unmarshaling ring %d event: %v", ring, err)
+			continue
+		}
+		handler(event)
+	}
 }
 
 func truncate(s string, n int) string {

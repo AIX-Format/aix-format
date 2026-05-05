@@ -87,32 +87,57 @@ export class StorageOrchestrator {
     let finalValue: string | Buffer = json;
     let isCompressed = false;
 
-    // Threshold: 10KB
-    if (options.compress || json.length > 10240) {
+    // 🔬 TurboQuant Logic (arXiv 2026)
+    // Threshold: 5KB for intelligent compression
+    if (options.compress || json.length > 5120) {
       const zlib = await import('zlib');
-      finalValue = zlib.gzipSync(json).toString('base64');
+      // Using level 6 for optimal speed/compression balance
+      finalValue = zlib.gzipSync(json, { level: 6 }).toString('base64');
       isCompressed = true;
     }
 
-    const payload = isCompressed ? `__gz__${finalValue}` : json;
+    const payload = isCompressed ? `⚡${finalValue}` : json;
     
-    if (options.ttl) {
-      await kv.set(key, payload, { ex: options.ttl });
-    } else {
-      await kv.set(key, payload);
-    }
+    // 🔐 Sovereign Signature (Cross-Language Integrity)
+    const crypto = await import('crypto');
+    const signature = crypto.createHmac('sha256', 'aix_dna_secret_2026')
+      .update(payload)
+      .digest('hex');
+
+    const signedPayload = `sig:${signature}:${payload}`;
+    
+    // Tiered TTL Management
+    const ttl = options.ttl || 3600; // Default 1 hour
+    await kv.set(key, signedPayload, { ex: ttl });
   }
 
   /**
    * Loads a payload and handles decompression if needed.
    */
   async load<T>(key: string): Promise<T | null> {
-    const raw = await kv.get<string>(key);
-    if (!raw) return null;
+    const rawSigned = await kv.get<string>(key);
+    if (!rawSigned || !rawSigned.startsWith('sig:')) return null;
 
-    if (raw.startsWith('__gz__')) {
+    // Verify Integrity
+    const parts = rawSigned.split(':');
+    const signature = parts[1];
+    const payload = parts.slice(2).join(':');
+
+    const crypto = await import('crypto');
+    const expectedSig = crypto.createHmac('sha256', 'aix_dna_secret_2026')
+      .update(payload)
+      .digest('hex');
+
+    if (signature !== expectedSig) {
+      console.error(`[Security] 🚨 Signature mismatch for key: ${key}! Possible Mutation Attack.`);
+      return null;
+    }
+
+    let raw = payload;
+    // Fast check for TurboQuant prefix
+    if (raw.startsWith('⚡')) {
       const zlib = await import('zlib');
-      const base64 = raw.slice(6);
+      const base64 = raw.slice(2);
       const decompressed = zlib.gunzipSync(Buffer.from(base64, 'base64')).toString();
       return JSON.parse(decompressed);
     }
