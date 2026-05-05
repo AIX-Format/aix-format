@@ -7,8 +7,14 @@ import { runTask } from './agent-runtime';
 import { GroqProvider } from './llm-provider';
 import { mcpGate } from './mcp-gate';
 import { SwarmRouter } from './swarm';
+import { economics } from './economics';
 import { Octokit } from '@octokit/rest';
 import crypto from 'crypto';
+
+export * from './rate-limit';
+export * from './harness.config';
+export * from './economics';
+export * from './gateway';
 
 /**
  * 🛰️ AIX GATEWAY
@@ -32,7 +38,7 @@ export class Gateway extends EventEmitter {
    * Primary execution gate for agents.
    * Ensures safety, integrity, and manages the meta-loop.
    */
-  async run(agentId: string, taskDescription: string, force = false) {
+  async run(agentId: string, taskDescription: string, force = false, userId: string = 'anonymous') {
     console.log(`🚀 [Gateway] Initiating execution for ${agentId}`);
 
     // ⚡ [Conditional Evolution Trick]
@@ -73,10 +79,13 @@ export class Gateway extends EventEmitter {
         tools: {} // Tool discovery would go here
       });
 
-      // 4. Post-flight Meta-Loop & Settlement
       const reward = await CuriosityEngine.calculateReward(agentId, taskDescription);
       console.log(`💰 [Settlement] Learning Reward: ${reward.toFixed(4)}`);
       await health.incrementTrust(agentId, reward * 0.05);
+
+      // 5. FoldTrace Economic Settlement (Real 402)
+      const cost = 0.005; // Base invocation cost in PI
+      await economics.settleTask(agentId, userId, cost);
 
       if (result.success && result.result && result.result.length > 50) {
         console.log(`🧠 [WikiBrain] Archiving wisdom for ${agentId}`);

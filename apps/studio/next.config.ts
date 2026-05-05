@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 import path from "node:path";
 // @ts-ignore
 import packageJson from "./package.json";
+import bundleAnalyzer from "@next/bundle-analyzer";
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -59,6 +64,7 @@ const nextConfig: NextConfig = {
           { key: "Content-Type", value: "text/plain; charset=utf-8" },
           { key: "Cache-Control", value: "public, max-age=86400" },
           { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Content-Security-Policy", value: "frame-ancestors 'self' https://app-cdn.minepi.com https://pi-blockchain.net https://*.pi;" },
         ],
       },
     ];
@@ -71,6 +77,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);
 
 // Made with Moe Abdelaziz

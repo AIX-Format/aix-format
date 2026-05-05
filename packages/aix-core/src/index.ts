@@ -9,6 +9,7 @@ export * from './brain';
 export * from './curiosity';
 export * from './rate-limit';
 export * from './harness.config';
+export * from './economics';
 export * from './gateway';
 export * from './agent-runtime';
 export * from './llm-provider';
