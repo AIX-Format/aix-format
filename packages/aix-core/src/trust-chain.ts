@@ -170,16 +170,18 @@ export class TrustChain {
 
     // Store the action and update the tail of the chain (Resilient Strategy)
     try {
-      await kv.set(`trust:action:${auditHash}`, actionRecord);
-      await kv.set(`trust:last_action:${agentId}`, auditHash);
-      
-      // Log to Pulse (Nervous System Bus)
-      await kv.set(KEYS.aixEvents(`trust:${agentId}`), {
-        type: 'TRUST_APPEND',
-        agentId,
-        action,
-        auditHash
-      });
+      // 🚀 [SPEED]: Parallel persistence
+      await Promise.all([
+        kv.set(`trust:action:${auditHash}`, actionRecord),
+        kv.set(`trust:last_action:${agentId}`, auditHash),
+        // Log to Pulse (Nervous System Bus)
+        kv.set(KEYS.aixEvents(`trust:${agentId}`), {
+          type: 'TRUST_APPEND',
+          agentId,
+          action,
+          auditHash
+        })
+      ]);
     } catch (error) {
       console.warn(`⚠️ [Sovereign-Fallback] DB Offline. Audit stored in-memory: ${auditHash}`);
     }

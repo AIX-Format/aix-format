@@ -135,6 +135,19 @@ export class Gateway extends EventEmitter {
         });
       }
 
+      // 🌀 [PR #108]: Security Meta-Loop Behavioral Verification
+      const securityCheck = await SecurityMetaLoop.verifyBehavior(agentId);
+      if (!securityCheck.isSecure) {
+        this.emit('security:alert', {
+          agentId,
+          threatLevel: securityCheck.threatLevel,
+          details: securityCheck.details
+        });
+        if (securityCheck.threatLevel > 8) {
+          throw new Error(`CRITICAL SECURITY BREACH: ${securityCheck.details.join('; ')}`);
+        }
+      }
+
       // Predict failure probability
       const taskDescription = typeof input === 'string' ? input : JSON.stringify(input);
       const failurePrediction = await CuriosityEngine.predictFailure(agentId, taskDescription);
@@ -411,6 +424,7 @@ export class Gateway extends EventEmitter {
     await getTrustChain().append(agentId, 'COGNITIVE_ALARM', { reason, severity: 'high' });
     console.error(alarmMessage);
   }
+  private async recordMetaLoopAction(agentId: string, input: any, output: string) {
     // 🌀 RULE 7: CuriosityEngine Feed
     const inputEntropy = typeof input === 'string' ? input.length : JSON.stringify(input).length;
     const curiosityReward = await CuriosityEngine.calculateCuriosityReward(agentId, 'run', { 
@@ -437,6 +451,7 @@ export class Gateway extends EventEmitter {
     }
     
     console.log(`[Gateway:MetaLoop] Curiosity Reward (${curiosityReward.toFixed(2)}) applied to Trust for ${agentId}`);
+  }
   }
 
   /**

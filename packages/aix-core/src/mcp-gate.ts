@@ -1,17 +1,15 @@
-import { trustChain } from './trust-chain/index'
-import { scanAgent } from '../../../core/abom-scanner'
+import { getTrustChain } from './trust-chain';
+import { AbomScanner } from './security/abom-scanner';
 
-// محاكاة للـ abomScanner المطلوبة
+const trustChain = getTrustChain();
+
 export const abomScanner = {
   getSafetyScore: async (agentDid: string) => {
-    // محاكاة لجلب بيانات الوكيل، في الحقيقة يتم جلبها من الـ manifest أو DB
-    const agent = { 
-      identity_layer: { id: agentDid },
-      abom: { integrity_hash: 'mock-hash' }, // لإعطاء نتيجة معقولة
-      kyc_tier: 'verified'
-    };
-    const result = scanAgent(agent);
-    return result.score / 10; // تحويل من 0-100 إلى 0-10
+    // In a real sovereign world, we fetch the config from the Registry
+    // For now, we use a default config for the scan
+    const mockConfig = { tools: [{ name: 'terminal' }, { name: 'fetch' }] }; 
+    const result = AbomScanner.scan(mockConfig);
+    return result.score;
   }
 }
 
