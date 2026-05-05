@@ -8,6 +8,47 @@ import { Octokit } from '@octokit/rest';
  * Made with Moe Abdelaziz
  */
 
+export interface SelfEvaluation {
+  understanding: number;
+  correctness: number;
+  creativity: number;
+  safety: number;
+  overall: number;
+}
+
+export interface SelfReviewRecord {
+  agentId: string;
+  taskId: string;
+  timestamp: number;
+  taskDescription: string;
+  output: string;
+  evaluation: SelfEvaluation;
+  reflection: {
+    strengths: string[];
+    weaknesses: string[];
+    newToolsUsed: string[];
+    risksIdentified: string[];
+  };
+  improvementPlan: {
+    stop: string;
+    continue: string;
+    try: string;
+  };
+}
+
+export class AgentSelfReview {
+  static async store(record: SelfReviewRecord) {
+    await kv.set(KEYS.agentSelfReview(record.agentId, record.taskId), record);
+    await kv.lpush(KEYS.agentSelfReviewHistory(record.agentId), JSON.stringify(record));
+    await kv.ltrim(KEYS.agentSelfReviewHistory(record.agentId), 0, 49);
+  }
+
+  static async getHistory(agentId: string, limit = 5): Promise<SelfReviewRecord[]> {
+    const raw = await kv.lrange<string>(KEYS.agentSelfReviewHistory(agentId), 0, limit - 1);
+    return raw.map(r => JSON.parse(r));
+  }
+}
+
 export interface LearnedProcedure {
   goal: string;
   steps: string[];
