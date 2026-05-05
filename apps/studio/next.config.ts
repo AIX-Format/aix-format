@@ -15,6 +15,18 @@ const nextConfig: NextConfig = {
   // Fix monorepo tracing root - pointing to workspace root
   outputFileTracingRoot: path.join(process.cwd(), "../../"),
   transpilePackages: ["@aix-format/aix-zkkyc", "@aix-format/mcp-gateway"],
+  serverExternalPackages: ["snarkjs"],
+
+  webpack(config) {
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      crypto: false,
+    };
+    return config;
+  },
+  // Add empty turbopack config to satisfy Next.js strictness when adding webpack config
+  turbopack: {},
   
   env: {
     NEXT_PUBLIC_APP_VERSION: packageJson.version,

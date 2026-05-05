@@ -20,3 +20,9 @@ test('canonicalization rejects circular references', () => {
   obj.self = obj;
   assert.throws(() => canonicalizeForSigning(obj), /CANON_CIRCULAR_REFERENCE/);
 });
+
+test('canonicalization rejects circular references', () => {
+  const obj = { a: 1 };
+  obj.self = obj;
+  assert.throws(() => canonicalizeForSigning(obj), /CANON_CIRCULAR_REFERENCE/);
+});
