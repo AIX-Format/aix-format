@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DeployRequest, DeploymentRecord, Manifest } from '@/lib/types';
 import { getRegistry, updateRegistryEntry } from '@/lib/registry';
-import { scanAgent } from '../../../../../../core/abom-scanner';
+import { AbomScanner } from '@aix-core';
 
 export async function POST(req: NextRequest) {
   let body: DeployRequest | null = null;
@@ -48,16 +48,16 @@ export async function POST(req: NextRequest) {
 async function performAbomScan(entry: any, yaml: string) {
   const { parseYamlSafe } = await import('@/lib/utils');
   const yamlObj = parseYamlSafe(yaml) as Partial<Manifest>;
-  const report = scanAgent(yamlObj);
+  const report = AbomScanner.scan(yamlObj);
   
   entry.abom = {
-    risk_level: report.grade === 'A' ? 'low' : report.grade === 'B' ? 'medium' : 'high',
-    timestamp: report.timestamp,
+    risk_level: report.tier,
+    timestamp: new Date().toISOString(),
     bom_format: 'AIX-NATIVE',
-    score: report.score
+    score: 100 - report.riskScore
   };
   
-  if (report.score < 50) throw new Error(`ABOM Score too low (${report.score})`);
+  if (report.riskScore > 50) throw new Error(`ABOM Risk too high (${report.riskScore})`);
 }
 
 /**

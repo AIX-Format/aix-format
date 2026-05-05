@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server';
 // @ts-ignore
 import packageJson from '../../../../package.json';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { AIXTokenBucket } from '@aix-core';
 
 export async function GET(req: Request) {
   const ip = req.headers.get('x-forwarded-for') ?? 'unknown';
   const rateLimitKey = `well-known:${ip}`;
   
   // Max 10 requests/minute per IP
-  const allowed = await checkRateLimit(rateLimitKey, 10, 60);
+  const bucket = new AIXTokenBucket();
+  const { allowed } = await bucket.consume(rateLimitKey, 1, 10); // 1 token per req, capacity 10
   if (!allowed) {
     return NextResponse.json({ error: 'Rate limited' }, { status: 429 });
   }
