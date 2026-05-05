@@ -149,6 +149,52 @@ export const GatewayResponseSchema = z.object({
 });
 export type GatewayResponse = z.infer<typeof GatewayResponseSchema>;
 
+// --- ECONOMICS & TREASURY CONTRACTS ---
+export const PaymentRequestSchema = z.object({
+  amount: z.number().positive(),
+  currency: z.enum(['PI', 'USDC', 'SOL', 'USD', 'EUR']),
+  merchantId: z.string(),
+  reason: z.string().optional(),
+});
+export type PaymentRequest = z.infer<typeof PaymentRequestSchema>;
+
+export const SettlementSchema = z.object({
+  transactionId: z.string(),
+  status: z.enum(['pending', 'success', 'failed']),
+  rail: z.enum(['x402', 'stripe_acp', 'paypal_ap2', 'internal', 'pi_network', 'escrow']),
+  amount: z.number(),
+  currency: z.string(),
+  timestamp: z.string(),
+  auditHash: z.string().optional(),
+});
+export type Settlement = z.infer<typeof SettlementSchema>;
+
+export const FoldTraceSchema = z.object({
+  id: z.string(),
+  agentId: z.string(),
+  userId: z.string(),
+  operation: z.string(),
+  amount: z.number(),
+  currency: z.string(),
+  timestamp: z.number(),
+  split: z.object({
+    author: z.number(),
+    stakers: z.number(),
+    protocol: z.number(),
+  }),
+});
+export type FoldTraceEntry = z.infer<typeof FoldTraceSchema>;
+
+export const TreasuryEventSchema = z.object({
+  type: z.enum(['usage', 'cost', 'revenue', 'rebalance', 'settlement', 'refund']),
+  agentId: z.string(),
+  amount: z.number(),
+  currency: z.string(),
+  metadata: z.record(z.any()).optional(),
+  timestamp: z.number(),
+});
+export type TreasuryEvent = z.infer<typeof TreasuryEventSchema>;
+
 // --- VALIDATION & SECURITY CONTRACTS ---
 export const ValidationErrorSchema = z.object({
   rule: z.string(),

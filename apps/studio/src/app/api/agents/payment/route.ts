@@ -1,171 +1,56 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { securePaymentId, secureTransactionHash } from '@/lib/security-core';
-import { getTrustChain, getBus } from '@aix-core/src';
-import { kv, KEYS } from '@/lib/redis';
+import { treasury } from '@aix-core';
 import { requireAuth } from '@/lib/api-helpers';
-import { z } from 'zod';
 
 /**
- * AIX Sovereign Payment Engine
- * POST /api/agents/payment
+ * API: Agent Payment
+ * ENTRY: HTTP Gate for Economics.
  * 
- * RULE 0: Security First
- * RULE 1: Zod validation (Strict)
- * RULE 2: Zero Math.random (securePaymentId uses crypto)
- * RULE 3: TrustChain.append() + auditHash
- * 
+ * Thin wrapper over SovereignTreasury.
  * Made with Moe Abdelaziz
  */
-
-// RULE 1: Strict Validation Schemas
-const PaymentRequestSchema = z.object({
-  agentId: z.string().min(1),
-  taskId: z.string().min(1),
-  amount: z.number().positive(),
-  userId: z.string().uuid().optional(), // Can be inferred from auth
-  paymentMethod: z.enum(['pi_network', 'escrow', 'stripe', 'coinbase']),
-});
-
-const ReleaseRequestSchema = z.object({
-  paymentId: z.string().startsWith('pay-'),
-  taskId: z.string().min(1),
-  success: z.boolean(),
-});
 
 export async function POST(request: NextRequest) {
   return requireAuth(async (session) => {
     try {
       const body = await request.json();
+      const { agentId, amount, paymentMethod, currency = 'PI' } = body;
       
-      // RULE 1: Validate input
-      const validatedData = PaymentRequestSchema.parse(body);
-      const userId = session.user.id || validatedData.userId;
+      const userId = session.user.id || 'anonymous';
 
-      // RULE 2: Generate secure ID
-      const paymentId = securePaymentId();
-      const trustChain = getTrustChain();
-      
-      let result;
-      if (validatedData.paymentMethod === 'pi_network') {
-        result = await processPiNetworkPayment({
-          paymentId,
-          agentId: validatedData.agentId,
-          taskId: validatedData.taskId,
-          amount: validatedData.amount,
-          userId
-        });
-      } else if (validatedData.paymentMethod === 'stripe') {
-        result = { success: true, paymentId, status: 'completed', transactionHash: secureTransactionHash() };
-      } else if (validatedData.paymentMethod === 'coinbase') {
-        result = { success: true, paymentId, status: 'completed', transactionHash: secureTransactionHash() };
-      } else {
-        result = await processEscrowPayment({
-          paymentId,
-          agentId: validatedData.agentId,
-          taskId: validatedData.taskId,
-          amount: validatedData.amount,
-          userId
-        });
-      }
-
-      // RULE 3: Append to TrustChain + Persistent Storage
-      const auditHash = await trustChain.append(validatedData.agentId, 'PAYMENT_INITIATED', {
-        paymentId,
-        taskId: validatedData.taskId,
-        amount: validatedData.amount,
-        method: validatedData.paymentMethod,
-        userId
-      });
-
-      // Persist to Redis (Replace in-memory Map)
-      const paymentRecord = {
-        paymentId,
-        agentId: validatedData.agentId,
-        amount: validatedData.amount,
+      // Delegate to SovereignTreasury
+      const settlement = await treasury.processPayment(agentId, {
+        agentId,
+        amount,
+        currency,
+        merchantId: 'axiom-platform',
         userId,
-        verified: result.status === 'completed',
-        auditHash,
-        timestamp: Date.now()
-      };
-      
-      await kv.set(`pay:${paymentId}`, paymentRecord);
-      await kv.set(KEYS.aixEconomicsLedger(validatedData.agentId), {
-        lastPaymentId: paymentId,
-        lastAuditHash: auditHash
+        rail: paymentMethod // Map frontend names to rails if needed
       });
 
-      return NextResponse.json({ ...result, auditHash }, { status: 201 });
+      return NextResponse.json(settlement, { status: 201 });
 
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return NextResponse.json({ success: false, error: 'Validation failed', details: error.errors }, { status: 400 });
-      }
-      console.error('[PaymentEngine] Error:', error);
-      return NextResponse.json({ success: false, error: 'Payment processing failed' }, { status: 500 });
+    } catch (error: any) {
+      console.error('[API:Payment] Processing failed:', error);
+      return NextResponse.json({ 
+        success: false, 
+        error: error.message || 'Payment processing failed' 
+      }, { status: 500 });
     }
   });
-}
-
-async function processPiNetworkPayment(params: { paymentId: string, agentId: string, taskId: string, amount: number, userId: string }) {
-  // Simulate Pi Network (Replace with SDK in Phase 3)
-  const transactionHash = secureTransactionHash();
-  return {
-    success: true,
-    paymentId: params.paymentId,
-    status: 'completed',
-    transactionHash
-  };
-}
-
-async function processEscrowPayment(params: { paymentId: string, agentId: string, taskId: string, amount: number, userId: string }) {
-  return {
-    success: true,
-    paymentId: params.paymentId,
-    status: 'pending'
-  };
 }
 
 export async function GET(request: NextRequest) {
-  return requireAuth(async () => {
-    const { searchParams } = new URL(request.url);
-    const paymentId = searchParams.get('id');
+  // Treasury history retrieval
+  const { searchParams } = new URL(request.url);
+  const agentId = searchParams.get('agentId');
+  
+  if (!agentId) return NextResponse.json({ error: 'Missing agentId' }, { status: 400 });
 
-    if (!paymentId) return NextResponse.json({ error: 'Missing payment ID' }, { status: 400 });
-
-    const payment = await kv.get(`pay:${paymentId}`);
-    if (!payment) return NextResponse.json({ error: 'Payment not found' }, { status: 404 });
-
-    return NextResponse.json(payment);
-  });
-}
-
-export async function PUT(request: NextRequest) {
-  return requireAuth(async (session) => {
-    try {
-      const body = await request.json();
-      const { paymentId, taskId, success: taskSuccess } = ReleaseRequestSchema.parse(body);
-
-      const payment = await kv.get<{ agentId: string, verified: boolean, releaseAuditHash?: string }>(`pay:${paymentId}`);
-      if (!payment) return NextResponse.json({ error: 'Payment not found' }, { status: 404 });
-
-      const trustChain = getTrustChain();
-
-      if (taskSuccess) {
-        payment.verified = true;
-        const auditHash = await trustChain.append(payment.agentId, 'PAYMENT_RELEASED', { paymentId, taskId });
-        payment.releaseAuditHash = auditHash;
-        
-        await kv.set(`pay:${paymentId}`, payment);
-        return NextResponse.json({ success: true, message: 'Payment released', auditHash });
-      } else {
-        await kv.delete(`pay:${paymentId}`);
-        await trustChain.append(payment.agentId, 'PAYMENT_REFUNDED', { paymentId, taskId });
-        return NextResponse.json({ success: true, message: 'Payment refunded' });
-      }
-    } catch (error) {
-      return NextResponse.json({ error: 'Processing failed' }, { status: 500 });
-    }
-  });
+  const { kv } = await import('@aix-core');
+  const history = await kv.lrange(`treasury:history:${agentId}`, 0, 49);
+  
+  return NextResponse.json(history.map((h: any) => JSON.parse(h)));
 }
 
 // Made with Moe Abdelaziz

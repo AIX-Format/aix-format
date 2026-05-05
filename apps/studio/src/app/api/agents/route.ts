@@ -1,124 +1,61 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { nanoid } from 'nanoid';
-import { kv, NS, KEYS } from '@/lib/redis';
-import { updateRegistryEntry } from '@/lib/registry';
-import { validateSovereignManifest } from '@/lib/protocol-validator';
-import { indexAgent } from '@aix-core/storage';
-
-import { LATEST_VERSION } from '@/constants/protocol';
-// DNAVerifier import removed to fix build error. It seems this might need a different path mapping or configuration to work in Next.js
-// For now we'll stub it locally to allow the build to pass.
-const verifyAgentIntegrity = async (agent) => {
-  return { valid: true, hash: agent.identity_layer?.dna_hash || '' };
-};
+import { registry } from '@aix-core';
+import { requireAuth } from '@/lib/api-helpers';
 
 /**
- * POST /api/agents
- * Registers a new agent manifest with Runtime Enforcement.
+ * API: Agent Registration & Listing
+ * ENTRY: HTTP Gate for Registry.
+ * 
+ * Thin wrapper over AgentRegistry.
+ * Made with Moe Abdelaziz
  */
+
 export async function POST(req: Request) {
-  try {
-    const manifest = await req.json();
+  return requireAuth(async (session) => {
+    try {
+      const manifest = await req.json();
+      const userId = session.user.id || 'default_user';
 
-    // 1. Runtime Protocol Enforcement (Sovereign Pattern 1)
-    const validation = validateSovereignManifest(manifest);
-    if (!validation.valid) {
-      try { await indexAgent(manifest); } catch(e) { console.warn('Failed to semantically index agent:', e); }
+      const result = await registry.register(manifest, {
+        userId,
+        isShadow: !!manifest.is_shadow_clone
+      });
 
-    return NextResponse.json({
+      return NextResponse.json(result, { status: 201 });
+
+    } catch (error: any) {
+      console.error('[API:Registry] Registration failed:', error);
+      return NextResponse.json({ 
         success: false, 
-        error: 'Sovereign Protocol Violation',
-        details: validation.errors 
+        error: error.message || 'Registration failed' 
       }, { status: 400 });
     }
-
-    const agentId = `aix_${nanoid(10)}`;
-    const did = manifest.identity_layer.id;
-    const userAgentsKey = KEYS.session('user_default:agents');
-
-    // 2. Store manifest using standardized registry key
-    await kv.set(KEYS.registry(did), manifest);
-    
-    // 3. Add to user's fleet list
-    const fleet = await kv.get<string[]>(userAgentsKey) || [];
-    if (!fleet.includes(did)) {
-      fleet.push(did);
-      await kv.set(userAgentsKey, fleet);
-    }
-
-    // 4. Update global registry for marketplace (Skip if DNA Shadow Clone)
-    if (!manifest.is_shadow_clone) {
-      await updateRegistryEntry({
-        did: did,
-        name: manifest.meta.name,
-        role: manifest.persona?.role || 'Sovereign Agent',
-        capabilities: manifest.meta.tags || [],
-        kyc_tier: manifest.identity_layer.verification?.status || 'unverified',
-        specVersion: manifest.meta.format_version || LATEST_VERSION,
-        publishedAt: new Date().toISOString(),
-        yaml: JSON.stringify(manifest),
-        risk_score: validation.risk_score
-      } as unknown);
-    }
-
-    return NextResponse.json({
-      success: true,
-      agentId,
-      did,
-      risk_score: validation.risk_score,
-      is_shadow: !!manifest.is_shadow_clone,
-      warnings: validation.warnings,
-      manifestUrl: `/agents/${did}`
-    });
-  } catch (error: unknown) {
-    console.error('Deploy API Error:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-  }
+  });
 }
 
-/**
- * GET /api/agents
- * Lists all agents for the current user or fetches a specific one.
- */
 export async function GET(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
+  return requireAuth(async (session) => {
+    try {
+      const { searchParams } = new URL(req.url);
+      const id = searchParams.get('id');
+      const userId = session.user.id || 'default_user';
 
-    if (id) {
-      const manifest = await kv.get(KEYS.registry(id));
-      if (!manifest) return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
-
-      const integrity = await verifyAgentIntegrity(manifest);
-      if (!integrity.valid) {
-        manifest.status = "compromised";
-        manifest.tamperDetails = integrity.tamperDetails;
+      if (id) {
+        const agent = await registry.getAgent(id);
+        if (!agent) return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
+        return NextResponse.json(agent);
       }
 
-      return NextResponse.json(manifest);
+      const agents = await registry.listUserAgents(userId);
+      return NextResponse.json(agents);
+
+    } catch (error: any) {
+      console.error('[API:Registry] Listing failed:', error);
+      return NextResponse.json({ 
+        error: 'Failed to list agents' 
+      }, { status: 500 });
     }
-
-    // List all
-    const userAgentsKey = KEYS.session('user_default:agents');
-    const agentIds = await kv.get<string[]>(userAgentsKey) || [];
-    
-    const manifests = await Promise.all(
-      agentIds.map(async (aid) => {
-        const m = await kv.get<any>(KEYS.registry(aid));
-        if (m) {
-          const integrity = await verifyAgentIntegrity(m);
-          if (!integrity.valid) {
-            m.status = "compromised";
-            m.tamperDetails = integrity.tamperDetails;
-          }
-        }
-        return m ? { id: aid, ...m } : null;
-      })
-    );
-
-    return NextResponse.json(manifests.filter(Boolean));
-  } catch (error: unknown) {
-    console.error('Agents List API Error:', error);
-    return NextResponse.json({ error: 'Failed to list agents' }, { status: 500 });
-  }
+  });
 }
+
+// Made with Moe Abdelaziz

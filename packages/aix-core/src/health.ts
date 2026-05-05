@@ -132,6 +132,47 @@ export class SovereignHealthService {
     }
     return true;
   }
+
+  /**
+   * Comprehensive System Health Check
+   */
+  async checkSystem() {
+    const checks: any = {};
+    const startTime = Date.now();
+
+    // 1. Redis check
+    try {
+      const redisStart = Date.now();
+      await kv.ping();
+      checks.redis = { status: "ok", latencyMs: Date.now() - redisStart };
+    } catch (err: any) {
+      checks.redis = { status: "error", message: err.message };
+    }
+
+    // 2. Pi Network check (Simulation/External)
+    try {
+      const piStart = Date.now();
+      const response = await fetch("https://api.minepi.com/v2/health", { cache: "no-store" });
+      checks.piNetwork = { status: response.ok ? "ok" : "degraded", latencyMs: Date.now() - piStart };
+    } catch {
+      checks.piNetwork = { status: "error" };
+    }
+
+    // 3. Rust Bridge check
+    try {
+      const rustScore = await this.rust.trustChain.getTrustScore('system');
+      checks.rustBridge = { status: 'ok', systemTrust: rustScore };
+    } catch {
+      checks.rustBridge = { status: 'error' };
+    }
+
+    return {
+      status: Object.values(checks).every((c: any) => c.status === 'ok') ? 'healthy' : 'degraded',
+      timestamp: new Date().toISOString(),
+      totalLatencyMs: Date.now() - startTime,
+      checks
+    };
+  }
 }
 
 export const health = SovereignHealthService.getInstance();
