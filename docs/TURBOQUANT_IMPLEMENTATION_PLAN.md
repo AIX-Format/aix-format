@@ -100,7 +100,7 @@ interface QuantizedSwarmContext {
 
 **Real Cost Calculation**:
 - Current long session: ~128K tokens
-- Gemini 1.5 Pro: $3.50/1M tokens input
+- AIX 1.5 Pro: $3.50/1M tokens input
 - Current cost: $0.448 per session
 - With TurboQuant: $0.075 per session (**83% savings**)
 

@@ -243,7 +243,7 @@ verdict = TRUSTED   → 20% price premium
 | Wake word / intent | Edge (phone) | Qwen2.5 0.5B | $0 |
 | Voice transcribe | Edge | Whisper Tiny | $0 |
 | Quick answer | Cloud | Groq 8B | $0 |
-| Complex reasoning | Cloud | Gemini Flash | $0 |
+| Complex reasoning | Cloud | AIX Flash | $0 |
 | Private/sensitive | Edge | Phi-3 Mini | $0 |
 | Code generation | Cloud | Groq 70B | $0 |
 

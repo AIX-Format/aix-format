@@ -60,7 +60,7 @@ This release introduces the **Universal Agent Passport** - transforming AIX Form
 #### Platform Adapters (Beta)
 - **OpenClaw Adapter**: Import 44K+ skills with identity verification
 - **Hermes Adapter**: MCP-first agent migration
-- **Kelos Adapter**: Kubernetes AgentConfig conversion
+- **AIX_Ks Adapter**: Kubernetes AgentConfig conversion
 - **Manus Adapter**: Enterprise agent export
 - **IBM watsonx Adapter**: Enterprise compliance integration
 

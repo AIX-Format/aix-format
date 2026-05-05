@@ -55,7 +55,7 @@ AIX Format is now the **Universal Agent Passport** for the agentic payment econo
 #### 🔗 Platform Interoperability (Beta)
 - **OpenClaw Adapter**: Import 44K+ skills with identity verification
 - **Hermes Adapter**: MCP-first agent migration
-- **Kelos Adapter**: Kubernetes AgentConfig conversion
+- **AIX_Ks Adapter**: Kubernetes AgentConfig conversion
 - **Manus Adapter**: Enterprise agent export
 - **IBM watsonx Adapter**: Enterprise compliance integration
 
@@ -263,7 +263,7 @@ git push origin gh-pages
 🚀 Excited to announce AIX Format v0.369.0 - Universal Agent Passport!
 
 AIX is now the first open standard enabling AI agents to:
-✅ Transact across any platform (OpenClaw, Hermes, Kelos, IBM watsonx)
+✅ Transact across any platform (OpenClaw, Hermes, AIX_Ks, IBM watsonx)
 ✅ Accept payments on any chain (Base, Solana, Ethereum, Pi Network)
 ✅ Handle $0.001 micropayments to $1M+ enterprise deals
 ✅ Maintain verifiable identity (did:axiom + Pi KYC + ZK-proofs)

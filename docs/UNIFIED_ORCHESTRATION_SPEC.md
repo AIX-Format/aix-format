@@ -455,7 +455,7 @@ packages/aix-core/src/agent-runtime.ts
 |--------|--------|-------|--------|
 | **Provider Abstraction** | ❌ None | ✅ `llm-provider.ts` | Complete |
 | **OpenAI Support** | ❌ TODO | ✅ GPT-4o, GPT-4o-mini | Complete |
-| **Anthropic Support** | ❌ TODO | ✅ Claude 3.5 Sonnet | Complete |
+| **Anthropic Support** | ❌ TODO | ✅ AIX 3.5 Sonnet | Complete |
 | **Ollama Support** | ❌ TODO | ✅ Local LLMs | Complete |
 | **Mock Provider** | ❌ Hardcoded strings | ✅ Configurable mock | Complete |
 | **Streaming** | ❌ None | ✅ AsyncGenerator | Complete |

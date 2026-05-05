@@ -12,7 +12,7 @@ The wizard operates as a 4-layer asynchronous pipeline:
     - **Function**: Captures user voice and converts it to high-fidelity text.
 
 2.  **Conversational Intelligence (LLM)**:
-    - **Engine**: Google Gemini 2.0 Flash.
+    - **Engine**: Google AIX 2.0 Flash.
     - **Endpoint**: `/api/voice-wizard/chat`.
     - **System Prompt**: Enforces a step-by-step data collection flow (Name → Role → Capabilities → Identity → Economics).
     - **Persistence**: Managed via Redis with a 24h session TTL.

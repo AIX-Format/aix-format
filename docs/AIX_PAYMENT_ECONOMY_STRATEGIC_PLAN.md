@@ -14,7 +14,7 @@ AIX Format stands at the intersection of three revolutionary technologies conver
 2. **Multi-Chain Settlement Rails** - Unified fiat (Stripe/PayPal) and crypto (Base/Solana) infrastructure
 3. **DeFi Agentic Intelligence** - AI agents executing flash loan arbitrage at 2,400% APY
 
-**The Opportunity**: AIX already possesses the industry's most sophisticated identity layer (did:axiom + Pi KYC + ZK-proofs). By adding a comprehensive payment layer, AIX becomes the **ONLY standard** that solves the platform fragmentation crisis affecting OpenClaw (44K+ skills), Hermes Agent, Kelos, Manus ($90M revenue), and IBM watsonx.
+**The Opportunity**: AIX already possesses the industry's most sophisticated identity layer (did:axiom + Pi KYC + ZK-proofs). By adding a comprehensive payment layer, AIX becomes the **ONLY standard** that solves the platform fragmentation crisis affecting OpenClaw (44K+ skills), Hermes Agent, AIX_Ks, Manus ($90M revenue), and IBM watsonx.
 
 **The Vision**: Position AIX as "JSON for the Agentic Economy" - the universal passport enabling agents to transact across any platform, any chain, any payment rail, from $0.001 micropayments to $1M+ enterprise deals.
 
@@ -86,7 +86,7 @@ X-Escrow-Contract: 0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063
 - **Visa**: Fiat on/off ramps
 - **AWS**: Infrastructure and TEE wallets
 - **Circle**: USDC settlement layer
-- **Anthropic**: Claude agent integration
+- **Anthropic**: AIX agent integration
 - **Vercel**: Edge function payments
 - **Cloudflare**: CDN micropayments
 
@@ -364,7 +364,7 @@ Solana's Durable Nonce feature enables HTTP 402 challenges to reference on-chain
 
 **AIX Solution**: Hermes agents can adopt did:axiom for universal identity while maintaining MCP compatibility.
 
-#### Kelos (Kubernetes-Native)
+#### AIX_Ks (Kubernetes-Native)
 **Strengths**:
 - Enterprise-grade orchestration
 - AgentConfig CRD for declarative deployment
@@ -375,7 +375,7 @@ Solana's Durable Nonce feature enables HTTP 402 challenges to reference on-chain
 - No identity verification
 - Complex setup for small teams
 
-**AIX Solution**: AIX manifests can be converted to Kelos AgentConfig with identity layer intact.
+**AIX Solution**: AIX manifests can be converted to AIX_Ks AgentConfig with identity layer intact.
 
 #### Manus ($90M Revenue)
 **Strengths**:
@@ -411,7 +411,7 @@ Developer creates agent in OpenClaw
     ↓
 Wants to deploy on Hermes (requires rewrite)
     ↓
-Enterprise wants Kelos (requires K8s expertise)
+Enterprise wants AIX_Ks (requires K8s expertise)
     ↓
 Customer uses Manus (requires migration)
     ↓
@@ -558,7 +558,7 @@ Regulator audits single AIX manifest
 ### 6.1 The Problem (60 seconds)
 
 **Opening Hook**:
-> "In 2026, we have 44,000 AI agent skills on OpenClaw, thousands more on Hermes, Kelos, and Manus - but they can't talk to each other. An agent built for OpenClaw can't run on IBM watsonx. An agent that accepts payments on Stripe can't receive crypto. We have a **platform fragmentation crisis** that's killing innovation."
+> "In 2026, we have 44,000 AI agent skills on OpenClaw, thousands more on Hermes, AIX_Ks, and Manus - but they can't talk to each other. An agent built for OpenClaw can't run on IBM watsonx. An agent that accepts payments on Stripe can't receive crypto. We have a **platform fragmentation crisis** that's killing innovation."
 
 **The Numbers**:
 - 44,000+ OpenClaw skills with no identity standard
@@ -584,7 +584,7 @@ Regulator audits single AIX manifest
 
 3. **Universal Portability** (Platform Adapters)
    - Write once, deploy anywhere
-   - OpenClaw → Hermes → Kelos → Manus → IBM watsonx
+   - OpenClaw → Hermes → AIX_Ks → Manus → IBM watsonx
    - Identity and payments preserved
 
 ### 6.3 IBM watsonx Integration (60 seconds)
@@ -904,8 +904,8 @@ contract AIXTreasury {
 - [ ] Test identity preservation
 - [ ] Migration tooling
 
-**Week 5: Kelos & Manus**
-- [ ] Build Kelos AgentConfig converter
+**Week 5: AIX_Ks & Manus**
+- [ ] Build AIX_Ks AgentConfig converter
 - [ ] Build Manus export adapter
 - [ ] Test deployment workflows
 - [ ] Performance benchmarks

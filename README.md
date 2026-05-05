@@ -77,7 +77,7 @@ learn autonomously, and operate 24/7 without human supervision.
 | **Multi-Chain Wallets** | Base L2, Solana, Ethereum, Pi Network | ✅ v1.0.0 |
 | **Fiat On/Off Ramps** | Stripe, PayPal, PYUSD | ✅ v1.0.0 |
 | **DeFi Strategies** | Flash loans, arbitrage, yield | 🔄 Beta |
-| **Platform Adapters** | OpenClaw, Hermes, Kelos, IBM watsonx | 🔄 Beta |
+| **Platform Adapters** | OpenClaw, Hermes, AIX_Ks, IBM watsonx | 🔄 Beta |
 | **TrustChain Audit** | Immutable per-action log | ✅ v0.369.0 |
 | **Evolution Tracking** | Agent self-improvement manifest | ✅ v0.369.0 |
 
@@ -195,9 +195,9 @@ aix deploy --platform ibm-watsonx
   <sub>⚙️ Core Implementation Agent<br/>TypeScript · Security · Refactoring</sub>
 </td>
 <td align="center" width="180">
-  <img src="https://img.shields.io/badge/AI-Claude-8b5cf6?style=for-the-badge&logo=anthropic&logoColor=white" height="40"/>
+  <img src="https://img.shields.io/badge/AI-AIX-8b5cf6?style=for-the-badge&logo=anthropic&logoColor=white" height="40"/>
   <br/><br/>
-  <b>Claude</b>
+  <b>AIX</b>
   <br/>
   <sub>🧠 Research & Architecture<br/>Deep Analysis · Constitution</sub>
 </td>
@@ -232,9 +232,9 @@ aix deploy --platform ibm-watsonx
   <sub>🚀 Deployment Agent<br/>CI/CD · Hosting</sub>
 </td>
 <td align="center" width="180">
-  <img src="https://img.shields.io/badge/Research-Claude_4.6-8b5cf6?style=for-the-badge" height="40"/>
+  <img src="https://img.shields.io/badge/Research-AIX_4.6-8b5cf6?style=for-the-badge" height="40"/>
   <br/><br/>
-  <b>Claude 4.6</b>
+  <b>AIX 4.6</b>
   <br/>
   <sub>🔬 Deep Research<br/>Gap Analysis · Roadmap</sub>
 </td>

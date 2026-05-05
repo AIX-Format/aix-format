@@ -1,7 +1,7 @@
 # ⚖️ AGENT GOVERNANCE — AIX-Format
 
 > **Version:** 1.3 · **Owner:** Mohamed Abdelaziz · **Date:** 2026-05-01  
-> This document is the **authoritative policy** for all AI agents operating in this repository (Antigravity, Jules, Claude, Gemini, Copilot, or any future agent).  
+> This document is the **authoritative policy** for all AI agents operating in this repository (Antigravity, Jules, AIX, AIX, Copilot, or any future agent).  
 > Agents **must** read and follow this file before taking any action. It overrides any internal default behavior.
 
 ---

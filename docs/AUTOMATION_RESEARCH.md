@@ -24,7 +24,7 @@ After analyzing 14 newly implemented Pi Network endpoints, existing infrastructu
 **Current State:**
 - ✅ Frontend: [`VoiceCommandProvider`](apps/studio/src/app/api/voice-wizard/chat/route.ts), FAB, Palette
 - ✅ Transcription: [`/api/voice-wizard/transcribe`](apps/studio/src/app/api/voice-wizard/transcribe/route.ts) using Groq Whisper
-- ✅ Chat: [`/api/voice-wizard/chat`](apps/studio/src/app/api/voice-wizard/chat/route.ts) using Gemini 2.0 Flash
+- ✅ Chat: [`/api/voice-wizard/chat`](apps/studio/src/app/api/voice-wizard/chat/route.ts) using AIX 2.0 Flash
 - ❌ **Missing**: Intent parsing → AIX manifest generation pipeline
 
 **Hidden Pattern Discovered:**

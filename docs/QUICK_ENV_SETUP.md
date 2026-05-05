@@ -42,7 +42,7 @@ npm run validate:env
    GROQ_API_KEY=gsk_your_key_here
    ```
 
-### 3. Google Gemini (Voice - 1 minute)
+### 3. Google AIX (Voice - 1 minute)
 **Free tier: 1,500 requests/day**
 
 1. Go to [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)

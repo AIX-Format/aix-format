@@ -4,7 +4,7 @@
 - Commit format: conventional commits
 - Before PR: pnpm tsc --noEmit && pnpm build must pass
 
-## For AI Agents (Jules, Claude, Gemini)
+## For AI Agents (Jules, AIX, AIX)
 - ALWAYS read .cursor/rules/ or .github/AGENT_GOVERNANCE.md first
 - NEVER modify: schemas/core/aix.schema.json without human approval
 - NEVER modify: packages/aix-dna/ Rust code without human approval
