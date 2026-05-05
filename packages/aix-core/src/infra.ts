@@ -51,11 +51,11 @@ export class CircuitBreaker {
     private failureThreshold: number;
     private recoveryTimeout: number;
 
-    constructor(config: { name: string; failureThreshold: number; recoveryTimeout: number }) {
-        this.state = { name: config.name, status: 'closed', failures: 0 };
-        this.failureThreshold = config.failureThreshold;
-        this.recoveryTimeout = config.recoveryTimeout;
-    }
+    constructor(config: { name: string; failureThreshold?: number; recoveryTimeout?: number }) {
+    this.state = { name: config.name, status: 'closed', failures: 0 };
+    this.failureThreshold = config.failureThreshold || 5;
+    this.recoveryTimeout = config.recoveryTimeout || 30000;
+  }
 
     public async execute<T>(fn: () => Promise<T>): Promise<T> {
         if (this.state.status === 'open') {
