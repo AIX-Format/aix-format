@@ -53,7 +53,7 @@ export const TaskSchema = z.object({
   taskId: z.string().min(1),
   description: z.string().min(5),
   maxSteps: z.number().int().positive().default(7),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 export type Task = z.infer<typeof TaskSchema>;
 
@@ -158,7 +158,7 @@ export const PulseEventSchema = z.object({
   type: z.enum(['task', 'error', 'success', 'info', 'deploy']),
   message: z.string(),
   timestamp: z.number(),
-  meta: z.record(z.string()).optional(),
+  meta: z.record(z.string(), z.string()).optional(),
 });
 export type PulseEvent = z.infer<typeof PulseEventSchema>;
 
@@ -168,8 +168,8 @@ export const AgentRequestSchema = z.object({
   task: z.string().min(1),
   userId: z.string().optional(),
   force: z.boolean().optional().default(false),
-  tools: z.record(z.any()).optional(),
-  context: z.record(z.any()).optional(),
+  tools: z.record(z.string(), z.any()).optional(),
+  context: z.record(z.string(), z.any()).optional(),
 });
 export type AgentRequest = z.infer<typeof AgentRequestSchema>;
 
@@ -222,12 +222,79 @@ export const FoldTraceSchema = z.object({
 });
 export type FoldTraceEntry = z.infer<typeof FoldTraceSchema>;
 
+// --- PULSE & BUS EVENT CONTRACTS ---
+
+export const AlertSeveritySchema = z.enum(['Low', 'Medium', 'High', 'Critical']);
+export type AlertSeverity = z.infer<typeof AlertSeveritySchema>;
+
+export const BusEventSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('TaskSpawned'),
+    agent_id: z.string(),
+    task_id: z.string(),
+    timestamp: z.number(),
+  }),
+  z.object({
+    type: z.literal('TaskCompleted'),
+    agent_id: z.string(),
+    task_id: z.string(),
+    result: z.string(),
+    timestamp: z.number(),
+  }),
+  z.object({
+    type: z.literal('SkillExtracted'),
+    agent_id: z.string(),
+    skill_id: z.string(),
+    skill_name: z.string(),
+    timestamp: z.number(),
+  }),
+  z.object({
+    type: z.literal('SecurityAlert'),
+    agent_id: z.string(),
+    reason: z.string(),
+    severity: AlertSeveritySchema,
+    timestamp: z.number(),
+  }),
+  z.object({
+    type: z.literal('TrustUpdated'),
+    agent_id: z.string(),
+    delta: z.number(),
+    new_score: z.number(),
+    timestamp: z.number(),
+  }),
+  z.object({
+    type: z.literal('SkillExecuted'),
+    agent_id: z.string(),
+    skill_id: z.string(),
+    duration_ms: z.number(),
+    success: z.boolean(),
+    timestamp: z.number(),
+  }),
+  z.object({
+    type: z.literal('TreasuryEvent'),
+    agent_id: z.string(),
+    event_type: z.string(),
+    amount: z.number(),
+    currency: z.string(),
+    timestamp: z.number(),
+  }),
+  z.object({
+    type: z.literal('IdentityEvent'),
+    agent_id: z.string(),
+    user_id: z.string(),
+    action: z.string(),
+    status: z.string(),
+    timestamp: z.number(),
+  }),
+]);
+export type BusEvent = z.infer<typeof BusEventSchema>;
+
 export const TreasuryEventSchema = z.object({
   type: z.enum(['usage', 'cost', 'revenue', 'rebalance', 'settlement', 'refund']),
   agentId: z.string(),
   amount: z.number(),
   currency: z.string(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
   timestamp: z.number(),
 });
 export type TreasuryEvent = z.infer<typeof TreasuryEventSchema>;

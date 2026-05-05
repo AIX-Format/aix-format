@@ -7,7 +7,8 @@ import {
   Settlement, 
   SettlementSchema,
   FoldTraceEntry,
-  FoldTraceSchema
+  FoldTraceSchema,
+  BusEventSchema
 } from './domain';
 import crypto from 'crypto';
 
@@ -37,14 +38,14 @@ export class SovereignTreasury {
     await kv.ltrim(historyKey, 0, 99);
 
     // 2. Publish to Pulse (Rust Event Store)
-    await this.rust.eventStore.publish({
+    await this.rust.eventStore.publish(BusEventSchema.parse({
       type: 'TreasuryEvent',
       agent_id: event.agentId,
       event_type: event.type,
       amount: event.amount,
       currency: event.currency,
       timestamp: event.timestamp,
-    });
+    }));
 
     console.log(`🏛️ [Treasury] Event Recorded: ${event.type} for ${event.agentId} (${event.amount} ${event.currency})`);
   }

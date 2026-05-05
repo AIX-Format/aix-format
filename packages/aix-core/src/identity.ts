@@ -1,5 +1,6 @@
 import { kv, KEYS } from './storage';
 import { getRustBridge } from '@aix/rust-core/src/bridge';
+import { BusEventSchema } from './domain';
 import crypto from 'crypto';
 
 /**
@@ -62,14 +63,14 @@ export class IdentityService {
       await this.rust.trustChain.reward(`user:${userId}`, 100, 'KYC_COMPLETED', 'identity');
       
       // Publish to Pulse
-      await this.rust.eventStore.publish({
+      await this.rust.eventStore.publish(BusEventSchema.parse({
         type: 'IdentityEvent',
         agent_id: `user:${userId}`,
         user_id: userId,
         action: 'kyc_update',
         status: level,
         timestamp: status.timestamp
-      });
+      }));
     } catch { /* Fallback */ }
   }
 }

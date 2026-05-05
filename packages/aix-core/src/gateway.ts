@@ -3,12 +3,12 @@ import { health } from './health';
 import { CuriosityEngine } from './curiosity';
 import { archiveWisdom, AgentSelfReview } from './brain';
 import { AgentRuntimeEngine } from './agent-runtime';
-import { GroqProvider } from './llm-provider';
+import { GroqProvider, ToolRegistry } from './llm-provider';
 import { mcpGate } from './mcp-gate';
 import { SovereignEconomics } from './economics';
 import { getHarness } from './harness.config';
 import { getRustBridge } from '@aix/rust-core/src/bridge';
-import { AgentRequest, AgentRequestSchema, GatewayResponse, GatewayResponseSchema } from './domain';
+import { AgentRequest, AgentRequestSchema, GatewayResponse, GatewayResponseSchema, BusEventSchema } from './domain';
 import { Octokit } from '@octokit/rest';
 import crypto from 'crypto';
 
@@ -62,12 +62,12 @@ export class SovereignGateway extends EventEmitter {
       }
 
       // 3. Audit Start (Rust Event Store)
-      await this.rust.eventStore.publish({
+      await this.rust.eventStore.publish(BusEventSchema.parse({
         type: 'TaskSpawned',
         agent_id: agentId,
         task_id: requestId,
         timestamp: startTime,
-      });
+      }));
 
       console.log(`🚀 [SovereignGateway] Initiating: ${agentId} (Req: ${requestId})`);
 
@@ -117,13 +117,13 @@ export class SovereignGateway extends EventEmitter {
 
       // 9. Audit Success (Rust Event Store)
       const duration = Date.now() - startTime;
-      await this.rust.eventStore.publish({
+      await this.rust.eventStore.publish(BusEventSchema.parse({
         type: 'TaskCompleted',
         agent_id: agentId,
         task_id: requestId,
         result: runtimeResult.success ? 'success' : 'failure',
         timestamp: Date.now(),
-      });
+      }));
 
       return GatewayResponseSchema.parse({
         success: true,

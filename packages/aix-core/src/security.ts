@@ -1,22 +1,32 @@
-/**
- * 🛡️ SOVEREIGN SECURITY SERVICE
- * Handles ABOM scanning, risk assessment, and security cache management.
- * 
- * Made with Moe Abdelaziz
- */
-
 import { AbomScanner } from './scanner';
-import { ValidationResult, AgentManifest } from './domain';
+import { ValidationResult, AgentManifest, BusEventSchema } from './domain';
+import { getRustBridge } from '@aix/rust-core/src/bridge';
 
 export class SovereignSecurityService {
+  private rust = getRustBridge();
+
   /**
    * Scans a manifest for security risks and returns a report.
    */
-  async scanManifest(manifest: any): Promise<ValidationResult> {
-    // Logic extracted from studio/api/abom-scan
+  async scanManifest(manifest: AgentManifest): Promise<ValidationResult> {
     const report = await AbomScanner.scan(manifest);
     
-    // Additional logic could go here (e.g. checking against a known-bad-actor list)
+    // If invalid, publish a SecurityAlert
+    if (!report.valid) {
+      const reason = report.errors.map(e => e.message).join(', ');
+      const severity = report.riskScore > 80 ? 'Critical' : report.riskScore > 50 ? 'High' : 'Medium';
+      
+      await this.rust.eventStore.publish(BusEventSchema.parse({
+        type: 'SecurityAlert',
+        agent_id: manifest.id,
+        reason,
+        severity,
+        timestamp: Date.now()
+      }));
+      
+      console.warn(`🛡️ [Security] Alert published for ${manifest.id}: ${reason}`);
+    }
+    
     return report;
   }
 

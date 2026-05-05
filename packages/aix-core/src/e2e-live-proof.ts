@@ -43,7 +43,7 @@ async function main() {
     console.log('📊 [E2E] Result Summary:');
     console.log('----------------------------');
     console.log(`Success: ${result.success}`);
-    console.log(`Latency: ${result.metrics?.latencyMs}ms`);
+    console.log(`Latency: ${result.metrics?.duration}ms`);
     console.log(`Response: ${result.result?.slice(0, 200)}...`);
     console.log('----------------------------');
 

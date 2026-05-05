@@ -12,7 +12,7 @@ export const PaymentProofSchema = z.object({
   currency: z.string().min(2).max(10),
   timestamp: z.number().positive(),
   signature: z.string().min(1),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.string(), z.any()).optional()
 });
 
 export type PaymentProof = z.infer<typeof PaymentProofSchema>;

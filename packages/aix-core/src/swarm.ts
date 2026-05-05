@@ -2,7 +2,8 @@ import { z } from 'zod';
 import { kv, KEYS } from './storage';
 import { CircuitBreaker } from './infra';
 import { health } from './health';
-import { OrchestrationPlan, OrchestrationStep, OrchestrationPlanSchema } from './domain';
+import { OrchestrationPlan, OrchestrationStep, OrchestrationPlanSchema, BusEventSchema } from './domain';
+import { getRustBridge } from '@aix/rust-core/src/bridge';
 
 /**
  * 🐝 SOVEREIGN_SWARM
@@ -34,6 +35,7 @@ export type AgentNode = z.infer<typeof AgentNodeSchema>;
 export class SwarmRouter {
     private agents: Map<string, AgentNode> = new Map();
     private breaker: CircuitBreaker;
+    private rust = getRustBridge();
 
     constructor() {
         this.breaker = new CircuitBreaker({
@@ -61,7 +63,18 @@ export class SwarmRouter {
             .sort((a, b) => b.score - a.score);
 
         if (candidates.length === 0) throw new Error('No capable agents found');
-        return { primaryAgentId: candidates[0].id };
+        
+        const primaryAgentId = candidates[0].id;
+
+        // Audit Routing in Pulse
+        await this.rust.eventStore.publish(BusEventSchema.parse({
+            type: 'TaskSpawned',
+            agent_id: primaryAgentId,
+            task_id: task.id,
+            timestamp: Date.now()
+        }));
+
+        return { primaryAgentId };
     }
 
     public async getDecisionModel(task: string): Promise<string> {
