@@ -1,3 +1,4 @@
+// @aix-hint: ring-2-swarm.md | TS Bus — publishes to "aix:ring:{N}:{TYPE}" for Go listeners
 import { EventEmitter } from 'events';
 import { randomBytes } from 'crypto';
 import { kv } from './storage';

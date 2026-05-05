@@ -1,3 +1,4 @@
+// @aix-hint: ring-3-studio.md | Next.js config — CSP, Pi validation headers, frame-ancestors
 import type { NextConfig } from "next";
 import path from "node:path";
 // @ts-ignore
@@ -35,7 +36,8 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          // X-Frame-Options removed: Pi Browser embeds via iframe from app-cdn.minepi.com
+          // CSP frame-ancestors handles this correctly with multi-origin support
           { key: "X-XSS-Protection", value: "1; mode=block" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Content-Security-Policy", value: "frame-ancestors 'self' https://app-cdn.minepi.com https://*.pi https://pi-blockchain.net;" },

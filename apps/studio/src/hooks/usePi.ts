@@ -1,3 +1,4 @@
+// @aix-hint: ring-3-studio.md | Pi SDK Hook — init, auth, payments for Pi Browser
 "use client";
 
 import { useState, useEffect, useCallback } from "react";

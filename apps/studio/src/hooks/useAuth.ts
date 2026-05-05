@@ -52,8 +52,9 @@ export function useAuth() {
         setUser(mockUser);
         localStorage.setItem('aix_user', JSON.stringify(mockUser));
       }
-    } catch (error: unknown) {
-      setError(err.message || 'Authentication failed');
+    } catch (e: unknown) {
+      const errMsg = e instanceof Error ? e.message : 'Authentication failed';
+      setError(errMsg);
     } finally {
       setLoading(false);
     }

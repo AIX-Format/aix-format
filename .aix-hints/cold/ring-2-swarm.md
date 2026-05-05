@@ -1,26 +1,38 @@
-# 🧊 RING 2: SWARM ORCHESTRATION (Mind)
-## "The Logic of the Swarm"
+# @aix-hint: ring-2-swarm — Cold Memory
+# Ring 2 (MIND) — Routing, Learning, Swarm Intelligence
+# Language: Go (primary) + TypeScript (bus bridge)
+# Made with Moe Abdelaziz
 
-### 🛡️ ALLOWED
-- Dynamic routing based on agent capacity.
-- Pulse emission for inter-agent signaling.
-- Redis-based memory sharing with `TurboQuant`.
+## Purpose
+Ring 2 is the decision-making layer. The Go SwarmRouter receives tasks,
+scores agents by capability, and routes with circuit-breaker protection.
+It connects to TypeScript via Redis Pub/Sub for quantum resonance events.
 
-### ⛔ FORBIDDEN
-- Hardcoding agent IDs.
-- Circular dependencies between Go and TS.
-- Modifying the TrustChain without a valid `sig:aix_dna`.
+## Key Files
+| File | Role |
+|------|------|
+| `packages/aix-agency/swarm_router.go` | Main routing hub — scores, routes, dead-letters |
+| `packages/aix-agency/pkg/bus/redis.go` | Go Redis bus — emits & subscribes to ring events |
+| `packages/aix-core/src/core/bus.ts` | TS event bus — publishes to `aix:ring:{N}:{TYPE}` |
+| `packages/aix-core/src/memory/publishEvent.ts` | TS memory event publisher |
 
-### 📡 TOPOLOGY
-The Swarm is the central nervous system. It connects the Engine (Go) to the Brain (TS).
-Refer to [AIX_TOPOLOGY_SCHEMA.md](../docs/AIX_TOPOLOGY_SCHEMA.md) for data formats.
+## Cross-Language Bridge
+```
+TS Bus.emitPulse() → Redis PUBLISH "aix:ring:2:QUANTUM_BURST"
+                              ↓
+Go SubscribeToRing(2) → swarm_router.go applies 1.5x boost
+```
 
-### 🥧 PI NETWORK INTEGRATION
-- All external bridges must reside in `packages/aix-core/src/network/`.
-- Prioritize **AxiomID** as the primary identity, with Pi UID as a secondary mapping.
-- Every Pi transaction must be logged in the **TrustChain**.
+## Half-Loop Verification
+See: `docs/HALF_LOOP_REPORT.md`
 
-### 🧹 CODE QUALITY & HOUSEKEEPING
-- **No Legacy**: `.bak` and `.tmp` files are strictly forbidden.
-- **Branching**: Use `agent/name-task` or `fix/issue-id`.
-- **Merge Criteria**: All PRs must have 100% test coverage for new logic.
+## Circuit Breaker
+- Failure threshold: 5
+- Success threshold: 3
+- Open duration: 30s
+- States: CLOSED → OPEN → HALF-OPEN → CLOSED
+
+## Known Issues
+- `ListenForResonance()` references `r.ResonanceEnabled` and `r.bus` — not defined in struct
+- `EmitHealthEvent()` has TODO for production Redis publish
+- Quantum boost applied twice in `scoreAgent()` (lines 362-368 AND 374-382)
