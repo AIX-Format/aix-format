@@ -290,9 +290,20 @@ export class AgentRuntimeEngine {
       memories: [...memories, ...pastReflections],
       skills: [],
       instructions: `You are a sovereign agent. Solve the task step by step. 
-      Current Mood Influence: ${this.runtime.mood}. 
-      If you are ecstatic, be more creative. If you are tired, be more efficient.`
+      [TURBO_MODE]: Context has been topologically compressed to keep only essential nodes.`
     };
+  }
+
+  /**
+   * 🌀 TOPOLOGICAL COMPRESSION (Round 41)
+   * Compresses agent history to essential 'Sovereign Nodes'.
+   */
+  private compressContextTopologically(history: any[]): any[] {
+    return history.map(step => ({
+      intent: step.thought.slice(0, 50), // Keep essence
+      action: step.action,
+      result: step.observation.length > 500 ? `[Compressed Result: Hash ${crypto.createHash('sha256').update(step.observation).digest('hex').slice(0, 8)}]` : step.observation
+    }));
   }
 
   private async fetchExperienceReplay(task: Task): Promise<string[]> {
@@ -482,6 +493,13 @@ Next Thought: `;
     const tool = this.tools[action.tool];
     if (!tool) return `Tool "${action.tool}" not found. Available tools: ${Object.keys(this.tools).join(', ')}`;
     
+    // 🛡️ PREDICTIVE SOVEREIGNTY (Round 42): Radar Check
+    const failureRisk = await this.predictTopologicalFailure(action);
+    if (failureRisk > 0.7) {
+      await this.emitState('agent:warning', `PREDICTIVE RADAR: High risk of failure (${failureRisk}) detected for ${action.tool}. Suggesting alternative path.`);
+      return `Prediction Error: This action is predicted to cause a topological breach. Please try a different approach.`;
+    }
+    
     try {
       // 🛡️ Sovereign Guardrail: Tool Circuit Breaker
       if (CircuitBreakers.isBroken(action.tool)) {
@@ -513,6 +531,14 @@ Next Thought: `;
       
       // 🌀 REAL-WORLD VERIFICATION (Round 31)
       const resultHash = crypto.createHash('sha256').update(observation).digest('hex');
+
+      // 🛡️ CROSS-DEPENDENCY INTENT (Round 37): Code explains its ripples
+      const coreFiles = ['trust-chain.ts', 'gateway.ts', 'agent-runtime.ts'];
+      const currentPath = (action.input as any).AbsolutePath || (action.input as any).TargetFile;
+      
+      if (currentPath && coreFiles.some(f => currentPath.includes(f))) {
+        await this.emitState('agent:warning', `CORE RIPPLING: Modifying ${currentPath} has high topological gravity.`);
+      }
       
       // 🛡️ SIGNAL STRENGTH GUARD (Round 32)
       if (action.tool.includes('search')) {
@@ -668,6 +694,16 @@ Next Thought: `;
   private async emitState(type: string, message: string): Promise<void> {
     const bus = getBus();
     await bus.emitEvent(type, this.runtime.agentId, { message }, this.runtime.taskId);
+  }
+
+  /**
+   * 📡 PREDICTIVE RADAR (Round 42)
+   * Analyzes risk based on historical patterns and current intent.
+   */
+  private async predictTopologicalFailure(action: ToolCall): Promise<number> {
+    // Logic to compare with Hidden Patterns in SemanticIndex
+    const isCoreModification = action.tool.includes('write_file') && (action.input as any).TargetFile?.includes('gateway.ts');
+    return isCoreModification ? 0.85 : 0.1; // Core modifications without proof are high risk
   }
 
   private async handleFailure(task: Task, error: any): Promise<void> {

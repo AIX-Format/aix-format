@@ -1,7 +1,12 @@
 /**
- * AIX Gateway
- * Central routing and orchestration for agent actions
- * Integrates with: ExpectationEngine, TrustChain, Bus, Meta-Loop
+ * 🛰️ AIX Sovereign Gateway
+ * [AI_COGNITIVE_FOOTPRINT]: {
+ *   "role": "Central Security Hub & Topological Guard",
+ *   "dynamic_behavior": "Executes health checks before every task. Heals TrustChain structural breaches.",
+ *   "topological_weight": "CRITICAL (Root of the chain)",
+ *   "hidden_rule": "Will abort execution if code integrity hash mismatches, even if the request is valid."
+ * }
+ * Made with Moe Abdelaziz
  */
 
 import { EventEmitter } from 'events';
@@ -150,6 +155,7 @@ export class Gateway extends EventEmitter {
       }
 
       // 🚀 QUANTUM TOPOLOGY: Initialize Structural Integrity Check
+      // [HIDDEN_PATTERN]: This check is recursive; failures in code integrity trigger global quarantine.
       const topologySane = await this.verifyTopology(agentId);
       if (!topologySane) {
         throw new Error(`[Gateway:Topology] Execution HALTED for ${agentId}: Integrity Breach or Structural Collapse.`);
@@ -391,7 +397,12 @@ export class Gateway extends EventEmitter {
     };
   }
 
-  private async recordMetaLoopAction(agentId: string, input: any, output: string) {
+  private async triggerCognitiveAlarm(agentId: string, reason: string) {
+    const alarmMessage = `[TOPOLOGICAL_ALARM]: Agent ${agentId} is deviating from Cognitive Footprint. Reason: ${reason}`;
+    await this.emitState('agent:critical_warning', alarmMessage);
+    await getTrustChain().append(agentId, 'COGNITIVE_ALARM', { reason, severity: 'high' });
+    console.error(alarmMessage);
+  }
     // 🌀 RULE 7: CuriosityEngine Feed
     const inputEntropy = typeof input === 'string' ? input.length : JSON.stringify(input).length;
     const curiosityReward = await CuriosityEngine.calculateCuriosityReward(agentId, 'run', { 
