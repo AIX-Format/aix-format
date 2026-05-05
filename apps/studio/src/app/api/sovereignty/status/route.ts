@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Gateway } from '../../../../../../packages/aix-core/src/gateway';
+import { SovereignGateway as Gateway } from '@aix-core/gateway';
 
 /**
  * 🛰️ [SOVEREIGN_API]: /api/sovereignty/status
@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
   // Real health calculation based on topology score and recent trust chain events
   const health = topologyStatus.score;
   
-  const trustChain = (await import('../../../../../../packages/aix-core/src/trust-chain')).getTrustChain();
+  const trustChain = (await import('@aix-core/security/trust-chain')).getTrustChain();
   const actions = await trustChain.getActions('SOV-AGENT-001', 50);
   const currentRound = actions.filter(a => a.action.startsWith('SOV_ROUND_COMPLETE')).length;
 

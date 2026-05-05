@@ -9,7 +9,7 @@ import { z } from 'zod';
 
 export const ConfigSchema = z.object({
   VERSION: z.string(),
-  ROOMS: z.record(z.string()),
+  ROOMS: z.record(z.string(), z.string()),
   MEMORY: z.object({
     NAMESPACE: z.string(),
     TURBOQUANT_THRESHOLD: z.number(),
