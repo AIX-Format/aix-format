@@ -37,13 +37,13 @@ async function main() {
     const task = "Verify the new HarnessGate consolidation and explain how it simplifies the middleware logic.";
     console.log(`🤖 [E2E] Running Task: "${task}"`);
     
-    const result = await gateway.run(agentId, task, true);
+    const result = await gateway.execute({ agentId, task, userId });
 
     // 4. Verify Results
     console.log('📊 [E2E] Result Summary:');
     console.log('----------------------------');
     console.log(`Success: ${result.success}`);
-    console.log(`Steps: ${result.steps}`);
+    console.log(`Latency: ${result.metrics?.latencyMs}ms`);
     console.log(`Response: ${result.result?.slice(0, 200)}...`);
     console.log('----------------------------');
 

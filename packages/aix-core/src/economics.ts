@@ -17,20 +17,7 @@ export const PaymentProofSchema = z.object({
 
 export type PaymentProof = z.infer<typeof PaymentProofSchema>;
 
-export interface FoldTraceEntry {
-  id: string;
-  agentId: string;
-  userId: string;
-  operation: string;
-  amount: number;
-  currency: string;
-  timestamp: number;
-  split: {
-    author: number;
-    stakers: number;
-    protocol: number;
-  };
-}
+import { FoldTraceEntry } from './domain';
 
 export class SovereignEconomics {
   /**

@@ -45,7 +45,7 @@ export class HarnessGate {
   private rateLimiter: AIXTokenBucket;
 
   constructor() {
-    this.health = new SovereignHealthService();
+    this.health = SovereignHealthService.getInstance();
     this.rateLimiter = new AIXTokenBucket(
       HarnessConfig.rateLimit.default.capacity,
       HarnessConfig.rateLimit.default.windowMs

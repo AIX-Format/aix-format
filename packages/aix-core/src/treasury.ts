@@ -1,5 +1,5 @@
 import { kv, KEYS } from './storage';
-import { getRustBridge } from '../../aix-rust-core/src/bridge';
+import { getRustBridge } from '@aix/rust-core/src/bridge';
 import { 
   TreasuryEvent, 
   TreasuryEventSchema, 

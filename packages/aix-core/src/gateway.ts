@@ -7,7 +7,7 @@ import { GroqProvider } from './llm-provider';
 import { mcpGate } from './mcp-gate';
 import { SovereignEconomics } from './economics';
 import { getHarness } from './harness.config';
-import { getRustBridge } from '../../aix-rust-core/src/bridge';
+import { getRustBridge } from '@aix/rust-core/src/bridge';
 import { AgentRequest, AgentRequestSchema, GatewayResponse, GatewayResponseSchema } from './domain';
 import { Octokit } from '@octokit/rest';
 import crypto from 'crypto';
@@ -80,8 +80,8 @@ export class SovereignGateway extends EventEmitter {
 
       // 5. Runtime Execution (Task Flow)
       // Note: In a real prod env, provider/model would come from agent manifest
-      const provider = new GroqProvider(process.env.GROQ_API_KEY!, 'llama-3.3-70b-versatile');
-      const engine = new AgentRuntimeEngine(agentId, 'sovereign', provider, tools);
+      const provider = new GroqProvider(process.env.GROQ_API_KEY || '', 'llama-3.3-70b-versatile');
+      const engine = new AgentRuntimeEngine(agentId, 'sovereign', provider, tools as ToolRegistry);
 
       const runtimeResult = await engine.run({
         taskId: requestId,

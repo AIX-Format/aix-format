@@ -23,7 +23,7 @@ export * from './swarm';
 export * from './scanner';
 export * from './validation';
 export * from './domain';
-export { getRustBridge } from '../../aix-rust-core/src/bridge';
+export { getRustBridge } from '@aix/rust-core/src/bridge';
 
 import { SovereignGateway } from './gateway';
 let gatewayInstance: SovereignGateway | null = null;

@@ -26,10 +26,10 @@ export class AgentSelfReview {
    * Distills wisdom from a high-quality self-review.
    */
   static async distill(record: SelfReviewRecord, task: string, result: string): Promise<boolean> {
-    const WISDOM_THRESHOLD = 0.85;
-    if (record.score >= WISDOM_THRESHOLD) {
-      console.log(`✨ [Brain] High quality review (${record.score}). Distilling wisdom...`);
-      await archiveWisdom(record.agentId, task, result);
+    const WISDOM_THRESHOLD = 8.5; // Overall score is 0-10
+    if (record.evaluation.overall >= WISDOM_THRESHOLD) {
+      console.log(`✨ [Brain] High quality review (${record.evaluation.overall}). Distilling wisdom...`);
+      await archiveWisdom(record.agentId, record.taskDescription, result);
       return true;
     }
     return false;

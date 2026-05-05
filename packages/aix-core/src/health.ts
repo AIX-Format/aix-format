@@ -1,6 +1,6 @@
 import { kv, KEYS } from './storage';
 import { generateHash, verifySignature as cryptoVerify } from './infra';
-import { getRustBridge } from '../../aix-rust-core/src/bridge';
+import { getRustBridge } from '@aix/rust-core/src/bridge';
 import { createHash } from 'crypto';
 import fs from 'fs';
 import path from 'path';
@@ -11,15 +11,7 @@ import path from 'path';
  * Made with Moe Abdelaziz
  */
 
-export interface ActionRecord {
-  auditHash: string;
-  prevAction: string;
-  agentId: string;
-  action: string;
-  data: unknown;
-  timestamp: number;
-  topologySignature?: string;
-}
+import { ActionRecord } from './domain';
 
 export class SovereignHealthService {
   private static instance: SovereignHealthService;
@@ -43,7 +35,7 @@ export class SovereignHealthService {
       if (rustScore !== null) return rustScore / 10; // Scale to 0-10
     } catch { /* Fallback to Redis */ }
 
-    const score = await kv.get<number>(KEYS.agentTrust(agentId));
+    const score = await kv.get<number>(KEYS.agentTrustScore(agentId));
     return score ?? 10.0;
   }
 
@@ -65,7 +57,7 @@ export class SovereignHealthService {
 
     const current = await this.getTrustScore(agentId);
     const next = Math.min(10.0, current + amount);
-    await kv.set(KEYS.agentTrust(agentId), next);
+    await kv.set(KEYS.agentTrustScore(agentId), next);
     
     console.log(`📈 [TRUST_UP] Agent ${agentId}: ${current.toFixed(1)} -> ${next.toFixed(1)} (${reason})`);
   }
@@ -77,7 +69,7 @@ export class SovereignHealthService {
 
     const current = await this.getTrustScore(agentId);
     const next = Math.max(0.0, current - amount);
-    await kv.set(KEYS.agentTrust(agentId), next);
+    await kv.set(KEYS.agentTrustScore(agentId), next);
     
     console.warn(`📉 [TRUST_DOWN] Agent ${agentId}: ${current.toFixed(1)} -> ${next.toFixed(1)} (${reason})`);
   }
@@ -152,7 +144,7 @@ export class SovereignHealthService {
     // 2. Pi Network check (Simulation/External)
     try {
       const piStart = Date.now();
-      const response = await fetch("https://api.minepi.com/v2/health", { cache: "no-store" });
+      const response = await fetch("https://api.minepi.com/v2/health");
       checks.piNetwork = { status: response.ok ? "ok" : "degraded", latencyMs: Date.now() - piStart };
     } catch {
       checks.piNetwork = { status: "error" };

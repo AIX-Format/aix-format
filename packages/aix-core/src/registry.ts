@@ -25,7 +25,7 @@ export class AgentRegistry {
     // 1. Security & Protocol Scan
     const scanResult = await AbomScanner.scan(manifest);
     if (!scanResult.valid) {
-      throw new Error(`Protocol Violation: ${scanResult.errors.map(e => e.message).join(', ')}`);
+      throw new Error(`Protocol Violation: ${scanResult.errors.map((e: any) => e.message).join(', ')}`);
     }
 
     const agentId = manifest.id || `aix_${nanoid(10)}`;
@@ -48,7 +48,7 @@ export class AgentRegistry {
         did,
         name: manifest.meta?.name || 'Unnamed Agent',
         role: manifest.persona?.role || 'Sovereign Agent',
-        risk_score: scanResult.risk_score,
+        risk_score: scanResult.riskScore,
         timestamp: Date.now()
       });
     }
@@ -57,7 +57,7 @@ export class AgentRegistry {
       success: true,
       agentId,
       did,
-      risk_score: scanResult.risk_score
+      risk_score: scanResult.riskScore
     };
   }
 
