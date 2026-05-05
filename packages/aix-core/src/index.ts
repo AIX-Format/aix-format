@@ -17,6 +17,8 @@ export * from './wikibrain/SemanticIndex';
 export * from './infra';
 export * from './mcp-gate';
 export * from './swarm';
+export * from './scanner';
+export { getRustBridge } from '../../aix-rust-core/src/bridge';
 
 import { Gateway } from './gateway';
 let gatewayInstance: Gateway | null = null;

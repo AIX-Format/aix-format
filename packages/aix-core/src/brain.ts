@@ -8,33 +8,7 @@ import { Octokit } from '@octokit/rest';
  * Made with Moe Abdelaziz
  */
 
-export interface SelfEvaluation {
-  understanding: number;
-  correctness: number;
-  creativity: number;
-  safety: number;
-  overall: number;
-}
-
-export interface SelfReviewRecord {
-  agentId: string;
-  taskId: string;
-  timestamp: number;
-  taskDescription: string;
-  output: string;
-  evaluation: SelfEvaluation;
-  reflection: {
-    strengths: string[];
-    weaknesses: string[];
-    newToolsUsed: string[];
-    risksIdentified: string[];
-  };
-  improvementPlan: {
-    stop: string;
-    continue: string;
-    try: string;
-  };
-}
+import { SelfEvaluation, SelfReviewRecord } from './domain';
 
 export class AgentSelfReview {
   static async store(record: SelfReviewRecord) {

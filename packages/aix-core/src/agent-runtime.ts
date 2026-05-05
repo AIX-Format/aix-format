@@ -6,29 +6,16 @@
 import { z } from 'zod';
 import { kv, KEYS } from './storage';
 import { health } from './health';
-import { AgentSelfReview, SelfReviewRecord } from './brain';
+import { AgentSelfReview } from './brain';
 import { LLMProvider, AgentRuntimeConfig, ToolRegistry } from './llm-provider';
 import { SovereignEntity } from './base';
+import { Task, TaskSchema, RuntimeResult, ScratchEntry, SelfReviewRecordSchema } from './domain';
 import crypto from 'crypto';
 
-export const TaskSchema = z.object({
-  taskId: z.string().min(1),
-  description: z.string().min(5),
-  maxSteps: z.number().int().positive().default(7),
-});
-
-export type Task = z.infer<typeof TaskSchema>;
-
-export interface RuntimeResult {
-  success: boolean;
-  result?: string;
-  error?: string;
-  steps: number;
-  duration: number;
-}
+export { type Task, type RuntimeResult };
 
 export class AgentRuntimeEngine extends SovereignEntity {
-  private scratchpad: any[] = [];
+  private scratchpad: ScratchEntry[] = [];
   private step = 0;
 
   constructor(
@@ -96,15 +83,37 @@ export class AgentRuntimeEngine extends SovereignEntity {
       const actionMatch = response.match(/Action: (\{.*\})/);
       if (actionMatch) {
         try {
-          const action = JSON.parse(actionMatch[1]);
+          const actionJson = JSON.parse(actionMatch[1]);
+          const action = z.object({
+            tool: z.string(),
+            input: z.any()
+          }).parse(actionJson);
+
           const tool = this.tools[action.tool];
           const observation = tool ? await tool(action.input) : `Tool ${action.tool} not found.`;
-          this.scratchpad.push({ thought: response, action, observation });
-        } catch {
-          this.scratchpad.push({ thought: response, observation: 'Invalid Action format.' });
+          
+          this.scratchpad.push({ 
+            step: this.step,
+            thought: response, 
+            action, 
+            observation,
+            timestamp: Date.now()
+          });
+        } catch (e) {
+          this.scratchpad.push({ 
+            step: this.step,
+            thought: response, 
+            observation: `Invalid Action format or validation failed: ${e instanceof Error ? e.message : 'Unknown'}`,
+            timestamp: Date.now()
+          });
         }
       } else {
-        this.scratchpad.push({ thought: response, observation: 'No action found.' });
+        this.scratchpad.push({ 
+          step: this.step,
+          thought: response, 
+          observation: 'No action found.',
+          timestamp: Date.now()
+        });
       }
     }
     return "Task exceeded step limit.";

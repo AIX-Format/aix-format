@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { getRustBridge } from '@aix-core';
 
 /**
  * SSE Stream for Real-Time Pulse Dashboard
@@ -11,11 +12,8 @@ import { NextRequest } from 'next/server';
  * - Graceful shutdown
  */
 
-interface PulseEvent {
-  type: 'bus' | 'pet' | 'meta' | 'heartbeat';
-  data: unknown;
-  timestamp: number;
-}
+import { PulseEvent } from '@aix-core/domain';
+
 
 // Configuration
 const CONFIG = {
@@ -58,20 +56,42 @@ class EventQueue {
   }
 }
 
-// Generate mock pulse data (replace with real bus integration)
-function generatePulseEvent(): PulseEvent {
-  const types: Array<'bus' | 'pet' | 'meta'> = ['bus', 'pet', 'meta'];
-  const type = types[Math.floor(Math.random() * types.length)];
+// Real Event Fetcher
+async function fetchLatestEvents(agentId?: string): Promise<PulseEvent[]> {
+  const rust = getRustBridge();
+  let rawEvents = [];
 
-  return {
-    type,
-    data: {
-      id: Date.now().toString(),
-      message: `${type} event at ${new Date().toISOString()}`,
-      value: Math.random() * 100,
-    },
-    timestamp: Date.now(),
-  };
+  try {
+    if (agentId && agentId !== 'all') {
+      rawEvents = await rust.eventStore.query(agentId);
+    } else {
+      const starts = await rust.eventStore.queryByType('task:start');
+      const successes = await rust.eventStore.queryByType('task:success');
+      const failures = await rust.eventStore.queryByType('task:failure');
+      rawEvents = [...starts, ...successes, ...failures].sort((a, b) => b.timestamp - a.timestamp).slice(0, 10);
+    }
+
+    return rawEvents.map(e => {
+      let type: PulseEvent['type'] = 'info';
+      if (e.event_type === 'task:start') type = 'task';
+      else if (e.event_type === 'task:success') type = 'success';
+      else if (e.event_type === 'task:failure') type = 'error';
+
+      return {
+        id: e.id,
+        type,
+        message: `${e.event_type} for agent ${e.agent_id.slice(0, 8)}`,
+        timestamp: e.timestamp,
+        meta: {
+          agentId: e.agent_id,
+          originalType: e.event_type
+        }
+      };
+    });
+  } catch (error) {
+    console.error('[Pulse:Stream] Failed to fetch events:', error);
+    return [];
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -112,36 +132,28 @@ export async function GET(request: NextRequest) {
       }, CONFIG.HEARTBEAT_INTERVAL);
 
       // Generate events
-      eventTimer = setInterval(() => {
+      // Fetch and stream events
+      eventTimer = setInterval(async () => {
         if (!isConnected) return;
 
         try {
-          // Generate new event
-          const event = generatePulseEvent();
-          queue.push(event);
+          const { searchParams } = new URL(request.url);
+          const agentId = searchParams.get('agentId') || undefined;
+          
+          // Fetch latest from Rust
+          const newEvents = await fetchLatestEvents(agentId);
+          newEvents.forEach(e => queue.push(e));
 
           // Send queued events
           while (queue.size > 0) {
             const queuedEvent = queue.shift();
             if (!queuedEvent) break;
 
-            const sseData = `event: ${queuedEvent.type}\ndata: ${JSON.stringify(queuedEvent.data)}\nid: ${queuedEvent.timestamp}\n\n`;
+            const sseData = `data: ${JSON.stringify(queuedEvent)}\n\n`;
             controller.enqueue(new TextEncoder().encode(sseData));
           }
         } catch (error) {
-          console.error('[SSE] Event send failed:', error);
-          
-          // Error recovery: try to send error event
-          try {
-            const errorEvent = `event: error\ndata: ${JSON.stringify({ 
-              message: 'Event processing error',
-              timestamp: Date.now() 
-            })}\n\n`;
-            controller.enqueue(new TextEncoder().encode(errorEvent));
-          } catch (fatalError) {
-            console.error('[SSE] Fatal error, closing connection:', fatalError);
-            cleanup();
-          }
+          console.error('[SSE] Event stream error:', error);
         }
       }, CONFIG.EVENT_INTERVAL);
 

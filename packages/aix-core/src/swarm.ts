@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { kv, KEYS } from './storage';
 import { CircuitBreaker } from './infra';
 import { health } from './health';
+import { OrchestrationPlan, OrchestrationStep, OrchestrationPlanSchema } from './domain';
 
 /**
  * 🐝 SOVEREIGN_SWARM
@@ -74,11 +75,77 @@ export class SwarmRouter {
 // --- PULSE ENGINE ---
 
 export class PulseOrchestrator {
+    async createPlan(agents: Array<{ id: string; role: string; capabilities: string[] }>, task: string, strategy: 'sequential' | 'parallel' | 'hierarchical'): Promise<OrchestrationPlan> {
+        const planId = `swarm_${Date.now()}`;
+        const steps: OrchestrationStep[] = [];
+
+        if (strategy === 'sequential') {
+            agents.forEach((agent, index) => {
+                steps.push({
+                    step: index + 1,
+                    agentId: agent.id,
+                    role: agent.role,
+                    dependencies: index > 0 ? [agents[index - 1].id] : [],
+                    estimatedDuration: 5000
+                });
+            });
+        } else if (strategy === 'parallel') {
+            agents.forEach((agent, index) => {
+                steps.push({
+                    step: index + 1,
+                    agentId: agent.id,
+                    role: agent.role,
+                    dependencies: [],
+                    estimatedDuration: 5000
+                });
+            });
+        } else if (strategy === 'hierarchical') {
+            steps.push({
+                step: 1,
+                agentId: agents[0].id,
+                role: 'coordinator',
+                dependencies: [],
+                estimatedDuration: 2000
+            });
+            agents.slice(1).forEach((agent, index) => {
+                steps.push({
+                    step: index + 2,
+                    agentId: agent.id,
+                    role: agent.role,
+                    dependencies: [agents[0].id],
+                    estimatedDuration: 5000
+                });
+            });
+        }
+
+        const estimatedTime = this.calculateEstimatedTime(strategy, steps);
+        const costEstimate = agents.length * 0.05;
+
+        return OrchestrationPlanSchema.parse({
+            id: planId,
+            strategy,
+            task,
+            agents: agents.map(a => a.id),
+            steps,
+            estimatedTime,
+            costEstimate
+        });
+    }
+
+    private calculateEstimatedTime(strategy: string, steps: OrchestrationStep[]): number {
+        if (strategy === 'sequential') {
+            return steps.reduce((sum, step) => sum + step.estimatedDuration, 0);
+        } else if (strategy === 'parallel') {
+            return Math.max(...steps.map(s => s.estimatedDuration));
+        } else {
+            return steps[0].estimatedDuration + Math.max(...steps.slice(1).map(s => s.estimatedDuration));
+        }
+    }
+
     async executePulse(agentId: string, action: string) {
         const frozen = await kv.get(KEYS.frozen(agentId));
         if (frozen) throw new Error("Agent frozen by safety protocol");
         
-        // ... (Pulse logic)
         return { success: true };
     }
 }

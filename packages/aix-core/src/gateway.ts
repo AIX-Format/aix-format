@@ -7,7 +7,8 @@ import { runTask } from './agent-runtime';
 import { GroqProvider } from './llm-provider';
 import { mcpGate } from './mcp-gate';
 import { SwarmRouter } from './swarm';
-import { economics } from './economics';
+import { SovereignEconomics } from './economics';
+import { getRustBridge } from '../../aix-rust-core/src/bridge';
 import { Octokit } from '@octokit/rest';
 import crypto from 'crypto';
 
@@ -25,6 +26,8 @@ export * from './gateway';
 export class Gateway extends EventEmitter {
   private octokit?: Octokit;
   private langfuse: any = null;
+  private economics = new SovereignEconomics();
+  private rust = getRustBridge();
 
   constructor(config: { githubToken?: string; langfuse?: any } = {}) {
     super();
@@ -39,6 +42,17 @@ export class Gateway extends EventEmitter {
    * Ensures safety, integrity, and manages the meta-loop.
    */
   async run(agentId: string, taskDescription: string, force = false, userId: string = 'anonymous') {
+    const startTime = Date.now();
+
+    // 1. Publish start event to Rust Event Store
+    await this.rust.eventStore.publish({
+      id: crypto.randomUUID(),
+      agent_id: agentId,
+      event_type: 'task:start',
+      payload: JSON.stringify({ task: taskDescription, userId }),
+      timestamp: startTime,
+    });
+
     console.log(`🚀 [Gateway] Initiating execution for ${agentId}`);
 
     // ⚡ [Conditional Evolution Trick]
@@ -85,7 +99,7 @@ export class Gateway extends EventEmitter {
 
       // 5. FoldTrace Economic Settlement (Real 402)
       const cost = 0.005; // Base invocation cost in PI
-      await economics.settleTask(agentId, userId, cost);
+      await this.economics.settleTask(agentId, userId, cost);
 
       if (result.success && result.result && result.result.length > 50) {
         console.log(`🧠 [WikiBrain] Archiving wisdom for ${agentId}`);
@@ -96,12 +110,31 @@ export class Gateway extends EventEmitter {
       await kv.set(KEYS.agentLastActivity(agentId), Date.now());
 
       this.emit('agent:completed', { agentId, result });
+
+      // 6. Audit Success
+      await this.rust.eventStore.publish({
+        id: crypto.randomUUID(),
+        agent_id: agentId,
+        event_type: 'task:success',
+        payload: JSON.stringify({ duration: Date.now() - startTime }),
+        timestamp: Date.now(),
+      });
+
       return result;
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(`❌ [Gateway] Execution FAILED for ${agentId}:`, error);
       await health.decrementTrust(agentId, 0.5);
       this.emit('gateway:error', { agentId, error });
+      
+      // 7. Audit Failure
+      await this.rust.eventStore.publish({
+        id: crypto.randomUUID(),
+        agent_id: agentId,
+        event_type: 'task:failure',
+        payload: JSON.stringify({ error: error.message }),
+        timestamp: Date.now(),
+      });
       throw error;
     }
   }

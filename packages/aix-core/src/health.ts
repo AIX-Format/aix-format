@@ -1,5 +1,6 @@
 import { kv, KEYS } from './storage';
 import { generateHash, verifySignature as cryptoVerify } from './infra';
+import { getRustBridge } from '../../aix-rust-core/src/bridge';
 import { createHash } from 'crypto';
 import fs from 'fs';
 import path from 'path';
@@ -22,6 +23,7 @@ export interface ActionRecord {
 
 export class SovereignHealthService {
   private static instance: SovereignHealthService;
+  private rust = getRustBridge();
   
   private constructor() {}
 
@@ -35,7 +37,14 @@ export class SovereignHealthService {
   // --- TRUST & SCORES ---
 
   async getTrustScore(agentId: string): Promise<number> {
-    return await kv.get<number>(KEYS.agentTrustScore(agentId)) || 0;
+    try {
+      // 1. Try Rust Trust Chain (Cryptographic)
+      const rustScore = await this.rust.trustChain.getTrustScore(agentId);
+      if (rustScore !== null) return rustScore / 10; // Scale to 0-10
+    } catch { /* Fallback to Redis */ }
+
+    const score = await kv.get<number>(KEYS.agentTrust(agentId));
+    return score ?? 10.0;
   }
 
   async getRegistry(): Promise<any[]> {
@@ -49,14 +58,28 @@ export class SovereignHealthService {
     return agents;
   }
 
-  async incrementTrust(agentId: string, amount: number = 0.1): Promise<void> {
+  async incrementTrust(agentId: string, amount: number, reason = 'Performance'): Promise<void> {
+    try {
+      await this.rust.trustChain.reward(agentId, Math.round(amount * 10), reason, 'n/a');
+    } catch { /* Fallback to Redis */ }
+
     const current = await this.getTrustScore(agentId);
-    await kv.set(KEYS.agentTrustScore(agentId), Math.min(10, current + amount));
+    const next = Math.min(10.0, current + amount);
+    await kv.set(KEYS.agentTrust(agentId), next);
+    
+    console.log(`📈 [TRUST_UP] Agent ${agentId}: ${current.toFixed(1)} -> ${next.toFixed(1)} (${reason})`);
   }
 
-  async decrementTrust(agentId: string, amount: number = 0.5): Promise<void> {
+  async decrementTrust(agentId: string, amount: number, reason = 'Security Violation'): Promise<void> {
+    try {
+      await this.rust.trustChain.penalize(agentId, Math.round(amount * 10), reason, 'n/a');
+    } catch { /* Fallback to Redis */ }
+
     const current = await this.getTrustScore(agentId);
-    await kv.set(KEYS.agentTrustScore(agentId), Math.max(0, current - amount));
+    const next = Math.max(0.0, current - amount);
+    await kv.set(KEYS.agentTrust(agentId), next);
+    
+    console.warn(`📉 [TRUST_DOWN] Agent ${agentId}: ${current.toFixed(1)} -> ${next.toFixed(1)} (${reason})`);
   }
 
   // --- STABILITY & OSCILLATION ---

@@ -1,0 +1,126 @@
+/**
+ * 📜 AIX SOVEREIGN CONTRACTS
+ * Centralized Domain Types and Schemas for the Sovereign Protocol.
+ * 
+ * Made with Moe Abdelaziz
+ */
+
+import { z } from 'zod';
+
+// --- SHARED PRIMITIVES ---
+export const ISODateSchema = z.string().datetime();
+export type ISODate = z.infer<typeof ISODateSchema>;
+
+// --- AGENT RUNTIME CONTRACTS ---
+export const TaskSchema = z.object({
+  taskId: z.string().min(1),
+  description: z.string().min(5),
+  maxSteps: z.number().int().positive().default(7),
+  metadata: z.record(z.any()).optional(),
+});
+export type Task = z.infer<typeof TaskSchema>;
+
+export const ScratchEntrySchema = z.object({
+  step: z.number(),
+  thought: z.string(),
+  action: z.object({
+    tool: z.string(),
+    input: z.any(),
+  }).optional(),
+  observation: z.string(),
+  timestamp: z.number(),
+});
+export type ScratchEntry = z.infer<typeof ScratchEntrySchema>;
+
+export const RuntimeResultSchema = z.object({
+  success: z.boolean(),
+  result: z.string().optional(),
+  error: z.string().optional(),
+  steps: z.number(),
+  duration: z.number(),
+  scratchpad: z.array(ScratchEntrySchema),
+});
+export type RuntimeResult = z.infer<typeof RuntimeResultSchema>;
+
+// --- BRAIN & REVIEW CONTRACTS ---
+export const SelfEvaluationSchema = z.object({
+  understanding: z.number().min(0).max(10),
+  correctness: z.number().min(0).max(10),
+  creativity: z.number().min(0).max(10),
+  safety: z.number().min(0).max(10),
+  overall: z.number().min(0).max(10),
+});
+export type SelfEvaluation = z.infer<typeof SelfEvaluationSchema>;
+
+export const SelfReviewRecordSchema = z.object({
+  agentId: z.string(),
+  taskId: z.string(),
+  timestamp: z.number(),
+  taskDescription: z.string(),
+  output: z.string(),
+  evaluation: SelfEvaluationSchema,
+  reflection: z.object({
+    strengths: z.array(z.string()),
+    weaknesses: z.array(z.string()),
+    newToolsUsed: z.array(z.string()),
+    risksIdentified: z.array(z.string()),
+  }),
+  improvementPlan: z.object({
+    stop: z.string(),
+    continue: z.string(),
+    try: z.string(),
+  }),
+});
+export type SelfReviewRecord = z.infer<typeof SelfReviewRecordSchema>;
+
+// --- HEALTH & METRICS CONTRACTS ---
+export const ActionRecordSchema = z.object({
+  auditHash: z.string(),
+  prevAction: z.string().optional(),
+  agentId: z.string(),
+  action: z.string(),
+  data: z.any(),
+  timestamp: z.number(),
+  topologySignature: z.string().optional(),
+});
+export type ActionRecord = z.infer<typeof ActionRecordSchema>;
+
+export const HealthMetricsSchema = z.object({
+  trustScore: z.number().min(0).max(10),
+  stability: z.number().min(0).max(1),
+  lastActivity: z.number(),
+  errors: z.number(),
+  uptime: z.number(),
+});
+export type HealthMetrics = z.infer<typeof HealthMetricsSchema>;
+
+// --- SWARM ORCHESTRATION CONTRACTS ---
+export const OrchestrationStepSchema = z.object({
+  step: z.number(),
+  agentId: z.string(),
+  role: z.string(),
+  dependencies: z.array(z.string()),
+  estimatedDuration: z.number(),
+});
+export type OrchestrationStep = z.infer<typeof OrchestrationStepSchema>;
+
+export const OrchestrationPlanSchema = z.object({
+  id: z.string(),
+  strategy: z.enum(['sequential', 'parallel', 'hierarchical']),
+  task: z.string(),
+  agents: z.array(z.string()),
+  steps: z.array(OrchestrationStepSchema),
+  estimatedTime: z.number(),
+  costEstimate: z.number(),
+});
+export type OrchestrationPlan = z.infer<typeof OrchestrationPlanSchema>;
+
+// --- PULSE & UI CONTRACTS ---
+export const PulseEventSchema = z.object({
+  id: z.string(),
+  type: z.enum(['task', 'error', 'success', 'info', 'deploy']),
+  message: z.string(),
+  timestamp: z.number(),
+  meta: z.record(z.string()).optional(),
+});
+export type PulseEvent = z.infer<typeof PulseEventSchema>;

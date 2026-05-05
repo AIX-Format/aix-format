@@ -23,25 +23,7 @@ const TYPE_CONFIG = {
   deploy:  { icon: Radio,        color: "#8b5cf6", bg: "bg-purple-500/10",  border: "border-purple-500/20" },
 };
 
-// ── Mock events for demo when SSE has no data ──────────────────────────────
-function mockEvent(agentId: string): PulseEvent {
-  const types = ["task", "success", "info", "deploy"] as const;
-  const msgs  = [
-    "Processed user query in 340ms",
-    "Memory node indexed: session_2847",
-    "Skill invoked: web_search",
-    "KYC verification passed",
-    "MCP tool call: fetch_data",
-    "Response generated — 512 tokens",
-  ];
-  return {
-    id:        crypto.randomUUID(),
-    type:      types[Math.floor(Math.random() * types.length)],
-    message:   msgs[Math.floor(Math.random() * msgs.length)],
-    timestamp: new Date().toISOString(),
-    meta:      { agentId },
-  };
-}
+// Demo mocks removed - Sovereign events only.
 
 export default function PulsePage() {
   const { agentId } = useParams<{ agentId: string }>();
@@ -59,21 +41,17 @@ export default function PulsePage() {
       es.onopen = () => setConnected(true);
       es.onmessage = (e) => {
         try {
-          const data = JSON.parse(e.data);
-          if (data.type === "PULSE" && Array.isArray(data.events)) {
-            setEvents(prev => [...data.events, ...prev].slice(0, 100));
+          const event = JSON.parse(e.data);
+          if (event.id && event.type) {
+            setEvents(prev => {
+              // De-duplicate by ID
+              if (prev.some(p => p.id === event.id)) return prev;
+              return [event, ...prev].slice(0, 100);
+            });
           }
         } catch { /* ignore parse errors */ }
       };
       es.onerror = () => setConnected(false);
-
-      // ── Demo: inject mock events every 3s when stream is quiet ──────────
-      demo = setInterval(() => {
-        setEvents(prev => {
-          if (prev.length > 0 && Date.now() - new Date(prev[0].timestamp).getTime() < 5000) return prev;
-          return [mockEvent(agentId), ...prev].slice(0, 100);
-        }, []);
-      }, 3000);
     } catch (err) {
       console.error("[Pulse] SSE init failed:", err);
     }
