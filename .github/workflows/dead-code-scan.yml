@@ -4,6 +4,11 @@
 
 name: Dead Code Scan
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 on:
   pull_request:
     paths:

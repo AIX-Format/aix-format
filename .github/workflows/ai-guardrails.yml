@@ -37,6 +37,9 @@ jobs:
     steps:
       - name: Checkout with full history
         uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
           fetch-depth: 0
 
@@ -133,6 +136,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
           fetch-depth: 0
 
@@ -140,15 +146,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: NPM Audit (Moderate+ Severity for AI PRs)
         run: |
-          echo "Running npm audit with MODERATE threshold (stricter than default HIGH for AI PRs)..."
-          npm audit --audit-level=moderate
+          echo "Running pnpm audit with MODERATE threshold (stricter than default HIGH for AI PRs)..."
+          pnpm audit --audit-level=moderate
         continue-on-error: false
 
       - name: Scan for forbidden patterns (Secrets / Keys)
@@ -271,17 +277,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Run core test suite
-        run: npm test
+        run: pnpm test
         env:
           CI: true
 
