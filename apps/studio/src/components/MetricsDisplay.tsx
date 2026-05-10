@@ -40,9 +40,9 @@ export function MetricsDisplay() {
           const newMetrics: Metrics = {
             compressionRatio: data.analysis?.ratio || 0,
             costSavings: data.analysis?.savingsPercentage || 0,
-            qualityScore: 0.92 + Math.random() * 0.08,
-            latency: 30 + Math.random() * 40,
-            throughput: 100 + Math.random() * 50,
+            qualityScore: 0.92 + secureRandom() * 0.08,
+            latency: 30 + secureRandom() * 40,
+            throughput: 100 + secureRandom() * 50,
             timestamp: new Date().toISOString()
           };
           

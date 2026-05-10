@@ -86,7 +86,7 @@ export const AIXApp: React.FC = () => {
     const interval = setInterval(() => {
       setPets(prev => prev.map(pet => {
         if (pet.status === 'active' || pet.status === 'learning') {
-          const newXp = Math.min(pet.maxXp, pet.xp + Math.random() * 10);
+          const newXp = Math.min(pet.maxXp, pet.xp + secureRandom() * 10);
           return { ...pet, xp: newXp };
         }
         return pet;
@@ -101,7 +101,7 @@ export const AIXApp: React.FC = () => {
     const interval = setInterval(() => {
       const eventTypes: Array<'skill' | 'trust' | 'swarm' | 'gateway'> = 
         ['skill', 'trust', 'swarm', 'gateway'];
-      const randomType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+      const randomType = eventTypes[Math.floor(secureRandom() * eventTypes.length)];
       
       const messages = {
         skill: ['New skill acquired', 'Pattern recognized', 'Learning complete'],
@@ -111,7 +111,7 @@ export const AIXApp: React.FC = () => {
       };
 
       const randomMessage = messages[randomType][
-        Math.floor(Math.random() * messages[randomType].length)
+        Math.floor(secureRandom() * messages[randomType].length)
       ];
 
       const newEvent: BusEvent = {
@@ -132,7 +132,7 @@ export const AIXApp: React.FC = () => {
     const interval = setInterval(() => {
       setMetaStatus(prev => ({
         ...prev,
-        entropy: Math.max(0, Math.min(1, prev.entropy + (Math.random() - 0.5) * 0.1)),
+        entropy: Math.max(0, Math.min(1, prev.entropy + (secureRandom() - 0.5) * 0.1)),
         cycleCount: prev.cycleCount + 1,
         lastUpdate: 'just now'
       }));

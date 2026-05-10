@@ -82,8 +82,8 @@ export default function DevCommandPage() {
       if (command.status === 'processing') {
         setPet(prev => ({
           ...prev,
-          x: Math.max(0, Math.min(100, prev.x + (Math.random() - 0.5) * 10)),
-          y: Math.max(0, Math.min(100, prev.y + (Math.random() - 0.5) * 5)),
+          x: Math.max(0, Math.min(100, prev.x + (secureRandom() - 0.5) * 10)),
+          y: Math.max(0, Math.min(100, prev.y + (secureRandom() - 0.5) * 5)),
           animation: 'walk'
         }));
       } else {

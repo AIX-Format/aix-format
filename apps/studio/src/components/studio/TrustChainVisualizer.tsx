@@ -151,7 +151,7 @@ export function TrustChainVisualizer({
     const interval = setInterval(() => {
       setMiningNonce((prev) => prev + 100);
       // Generate random hex for visual effect
-      const randomHex = Math.random().toString(16).slice(2, 14);
+      const randomHex = secureRandom().toString(16).slice(2, 14);
       setMiningHash(`0x${randomHex}`);
     }, 200);
 

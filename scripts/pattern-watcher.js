@@ -38,8 +38,10 @@ if (statSync('apps/studio').isDirectory()) {
       }
 
       // RULE 2: crypto.randomBytes over Math.random
-      if (content.includes('Math.random()') && !path.includes('test')) {
-        errors.push(`❌ RULE 2 VIOLATION: Math.random() found in ${path}. Security First! Use crypto.randomBytes() for all randoms and payments.`);
+      // Exception for purely visual animations and legacy html demos
+      const isVisual = path.includes('Background') || path.includes('Particle') || path.endsWith('.html');
+      if (content.includes('Math.random()') && !path.includes('test') && !isVisual) {
+        errors.push(`❌ RULE 2 VIOLATION: Math.random() found in ${path}. Security First! Use crypto.randomBytes() or secureId() from @/lib/security-core.`);
       }
 
       // RULE 4 & 7: AgentSelfReview & CuriosityEngine enforcement

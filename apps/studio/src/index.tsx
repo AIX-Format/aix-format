@@ -107,8 +107,8 @@ const App: React.FC = () => {
         // Add new bus event
         const newEvent = {
           id: String(Date.now()),
-          source: ['volt', 'shade', 'bull', 'drop', 'chrono'][Math.floor(Math.random() * 5)],
-          type: ['boost', 'alert', 'signal', 'found', 'alarm'][Math.floor(Math.random() * 5)],
+          source: ['volt', 'shade', 'bull', 'drop', 'chrono'][Math.floor(secureRandom() * 5)],
+          type: ['boost', 'alert', 'signal', 'found', 'alarm'][Math.floor(secureRandom() * 5)],
           timestamp: Date.now(),
         };
         

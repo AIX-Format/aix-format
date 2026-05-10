@@ -112,7 +112,7 @@ export function ReasoningTerminal({
 
         if (entryType) {
           const newEntry: TerminalEntry = {
-            id: event.id || Math.random().toString(36).slice(2),
+            id: event.id || secureRandom().toString(36).slice(2),
             timestamp: event.timestamp || Date.now(),
             type: entryType,
             content,

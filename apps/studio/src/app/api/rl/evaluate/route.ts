@@ -93,19 +93,19 @@ export async function POST(req: NextRequest) {
 
 function generateTestState(taskType: string): number[] {
   return [
-    500 + Math.random() * 500,
-    200 + Math.random() * 300,
+    500 + (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 500,
+    200 + (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 300,
     taskType === 'code' ? 0 : taskType === 'data' ? 1 : 2,
-    0.8 + Math.random() * 0.2,
-    50 + Math.random() * 100,
-    3 + Math.random() * 4
+    0.8 + (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 0.2,
+    50 + (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 100,
+    3 + (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 4
   ];
 }
 
 function evaluateAction(state: number[], action: number) {
   const compressionRatio = 2 + (action % 8);
-  const quality = 0.75 + Math.random() * 0.25;
-  const latency = 30 + Math.random() * 70;
+  const quality = 0.75 + (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 0.25;
+  const latency = 30 + (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 70;
 
   const reward = (
     (compressionRatio / 10) * 0.3 +

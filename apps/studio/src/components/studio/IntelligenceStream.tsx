@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { secureRandom } from '@/lib/security-core';
 import { Terminal, Shield, Cpu, Activity } from 'lucide-react';
 
 const MOCK_EVENTS = [
@@ -28,7 +29,7 @@ export function IntelligenceStream() {
 
     const interval = setInterval(() => {
       setEvents(prev => {
-        const next = MOCK_EVENTS[Math.floor(Math.random() * MOCK_EVENTS.length)];
+        const next = MOCK_EVENTS[Math.floor(secureRandom() * MOCK_EVENTS.length)];
         return [next, ...prev.slice(0, 5)];
       }, []);
     }, 3500);

@@ -44,8 +44,8 @@ const Backdrop = memo(function Backdrop({ onClose }: { onClose: () => void }) {
 // ─── Static quantum topology — memoised, never regenerates ───────────────────
 const NODES = Array.from({ length: 15 }, (_, i) => ({
   id: i,
-  x: Math.random() * 100,
-  y: Math.random() * 100,
+  x: secureRandom() * 100,
+  y: secureRandom() * 100,
 }));
 
 const QuantumTopology = memo(function QuantumTopology() {

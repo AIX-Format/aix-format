@@ -68,8 +68,8 @@ function DashboardContent() {
     const interval = setInterval(() => {
       const newEvent = {
         id: Date.now(),
-        type: ["task_completed", "agent_deployed", "payment_received"][Math.floor(Math.random() * 3)],
-        agent: agents[Math.floor(Math.random() * agents.length)]?.name || "Unknown Agent",
+        type: ["task_completed", "agent_deployed", "payment_received"][Math.floor(secureRandom() * 3)],
+        agent: agents[Math.floor(secureRandom() * agents.length)]?.name || "Unknown Agent",
         timestamp: new Date().toISOString(),
       };
       setRealtimeData((prev) => [newEvent, ...prev].slice(0, 10));

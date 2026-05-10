@@ -1,3 +1,4 @@
+import { secureRandom } from '../security-core';
 import { RevenueRouter, SovereignLoopManager } from "@aix-core/storage";
 import { Economics } from "@aix-types";
 
@@ -22,7 +23,7 @@ export class PulseEconomics {
     
     // 2. Out-of-the-box: Real Arbitrage Strategy
     // We check if "Timing Attack" or "Route Splitting" is better.
-    const isCongested = Math.random() > 0.7; // Simulated network state
+    const isCongested = secureRandom() > 0.7; // Simulated network state
     
     let path: EconResult['path'] = 'DIRECT';
     let yieldAmount = 0;

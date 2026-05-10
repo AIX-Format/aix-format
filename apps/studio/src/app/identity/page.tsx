@@ -60,7 +60,7 @@ export default function IdentityPage() {
         await new Promise((r) => setTimeout(r, 1000));
         setPiUser({
           username: "Pioneer_Dev",
-          uid: "dev_" + Math.random().toString(36).slice(2, 8),
+          uid: "dev_" + secureRandom().toString(36).slice(2, 8),
         });
       } else {
         throw new Error("Pi SDK unavailable. Please enable the Pi SDK and try again.");

@@ -113,19 +113,19 @@ async function runTraining(agent: DQNAgent, episodes: number, taskType: string):
 
 function generateRandomState(taskType: string): number[] {
   return [
-    Math.random() * 1000,
-    Math.random() * 500,
+    (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 1000,
+    (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 500,
     taskType === 'code' ? 0 : taskType === 'data' ? 1 : 2,
-    Math.random(),
-    Math.random() * 200,
-    Math.random() * 10
+    (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296),
+    (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 200,
+    (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 10
   ];
 }
 
 function simulateCompression(state: number[], action: number): { nextState: number[], reward: number, done: boolean } {
   const compressionRatio = 2 + (action % 8);
-  const quality = 0.7 + Math.random() * 0.3;
-  const latency = 20 + Math.random() * 80;
+  const quality = 0.7 + (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 0.3;
+  const latency = 20 + (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 80;
 
   const reward = (
     (compressionRatio / 10) * 0.3 +

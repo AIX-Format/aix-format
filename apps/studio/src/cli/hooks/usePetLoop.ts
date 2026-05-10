@@ -34,9 +34,9 @@ export function usePetLoop() {
           xp: levelUp ? 0 : newXp,
           level: levelUp ? p.level + 1 : p.level,
           maxXp: levelUp ? p.maxXp + 100 : p.maxXp,
-          energy: clamp(p.energy - 0.5 + Math.random() * 1.2, 0, 100),
+          energy: clamp(p.energy - 0.5 + secureRandom() * 1.2, 0, 100),
           mood: MOODS[clamp(
-            MOODS.indexOf(p.mood) + (levelUp ? 1 : Math.random() > 0.95 ? -1 : 0),
+            MOODS.indexOf(p.mood) + (levelUp ? 1 : secureRandom() > 0.95 ? -1 : 0),
             0, MOODS.length - 1
           )],
         };

@@ -508,6 +508,16 @@ export class AIXAgent {
     return { errors: this.errors, warnings: this.warnings };
   }
 
+  validateRequirements(requirements) {
+    if (requirements.gpu && !requirements.vram_gb) {
+      this.warnings.push({
+        code: "RESOURCE_OPTIMIZATION",
+        section: "requirements",
+        message: "GPU requirement detected without VRAM specification. Optimization may be sub-optimal."
+      });
+    }
+  }
+
   validateGuardianLogic(logic) {
     if (logic.front_run_defense && !logic.mempool_monitor) {
       this.errors.push({
@@ -521,6 +531,6 @@ export class AIXAgent {
 
 // ─── Plugin System Exports ────────────────────────────────────────────────────
 // Export plugin system for external use
-export { defaultRegistry, PluginRegistry };
+
 export { ValidationPlugin } from './validation-plugins.js';
 export * from './plugins/index.js';

@@ -14,6 +14,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { secureRandom } from '@/lib/security-core';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -153,7 +154,7 @@ export default function InteractiveDevEnvironment() {
 
   const addTerminalLine = (type: TerminalLine['type'], content: string, depth: number) => {
     const line: TerminalLine = {
-      id: `line-${Date.now()}-${Math.random()}`,
+      id: `line-${Date.now()}-${secureRandom()}`,
       type,
       content,
       timestamp: Date.now(),
@@ -246,8 +247,8 @@ export default function InteractiveDevEnvironment() {
     const interval = setInterval(() => {
       setPetState(prev => {
         // Random movement
-        const newX = Math.max(10, Math.min(90, prev.x + (Math.random() - 0.5) * 10));
-        const newY = Math.max(10, Math.min(90, prev.y + (Math.random() - 0.5) * 10));
+        const newX = Math.max(10, Math.min(90, prev.x + (secureRandom() - 0.5) * 10));
+        const newY = Math.max(10, Math.min(90, prev.y + (secureRandom() - 0.5) * 10));
 
         return {
           ...prev,

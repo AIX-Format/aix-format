@@ -3,13 +3,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, X, Loader2, Volume2, Sparkles, CheckCircle2 } from "lucide-react";
 import { useVoiceWizard } from "@/hooks/useVoiceWizard";
-
 import { Card } from "@/components/ui/card";
 
-/**
- * AIX Voice Setup Wizard UI
- * A premium, interactive overlay for conversational agent creation.
- */
 export function VoiceWizard({ 
   onClose, 
   onComplete,
@@ -49,7 +44,10 @@ export function VoiceWizard({
               <p className="text-sm text-zinc-400">Describe your agent to get started</p>
             </div>
           </div>
-          <button className="button" variant="ghost" size="icon" onClick={onClose} className="text-zinc-400 hover:text-white">
+          <button
+            onClick={onClose}
+            className="text-zinc-400 hover:text-white p-2 rounded-lg hover:bg-white/5 transition-colors"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -65,7 +63,6 @@ export function VoiceWizard({
                 exit={{ opacity: 0, y: -10 }}
                 className="w-full text-center space-y-6"
               >
-                {/* Visualizer / Pulse */}
                 <div className="relative flex items-center justify-center h-48">
                   <AnimatePresence>
                     {(isListening || isSpeaking) && (
@@ -86,9 +83,9 @@ export function VoiceWizard({
                     whileTap={{ scale: 0.95 }}
                     className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center transition-colors duration-500  ${
                       isListening 
-                        ? "bg-red-500 text-white /50"
+                        ? "bg-red-500 text-white"
                         : isSpeaking
-                        ? "bg-blue-500 text-white /50"
+                        ? "bg-blue-500 text-white"
                         : "bg-zinc-900 text-zinc-400 border border-zinc-800"
                     }`}
                     onMouseDown={handleVoiceTurn}
@@ -105,9 +102,8 @@ export function VoiceWizard({
                   </motion.div>
                 </div>
 
-                {/* Status & Last Message */}
                 <div className="space-y-4 max-w-md mx-auto">
-                  <span className="badge" variant="outline" className={`${
+                  <span className={`px-2 py-1 text-[10px] font-bold border rounded-md uppercase tracking-wider ${
                     isListening ? "border-red-500 text-red-500 bg-red-500/5" :
                     isProcessing ? "border-purple-500 text-purple-500 bg-purple-500/5" :
                     isSpeaking ? "border-blue-500 text-blue-500 bg-blue-500/5" :
@@ -153,15 +149,14 @@ export function VoiceWizard({
                 </div>
 
                 <div className="flex gap-4">
-                  <button className="button"
-                    variant="outline" 
-                    className="flex-1 border-zinc-800 hover:bg-zinc-900"
+                  <button
+                    className="flex-1 border border-zinc-800 hover:bg-zinc-900 text-white py-3 rounded-xl transition-colors"
                     onClick={() => onComplete(manifest)}
                   >
                     Edit Details
                   </button>
-                  <button className="button"
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                  <button
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl transition-colors font-bold"
                     onClick={() => onDeploy(manifest)}
                   >
                     Deploy Agent
@@ -178,7 +173,7 @@ export function VoiceWizard({
             Powered by Groq Whisper & Gemini 2.0 Flash
           </p>
         </div>
-      </div>
+      </Card>
     </motion.div>
   );
 }
