@@ -92,7 +92,22 @@ export function validateManifestFiles(
     report.failed = 1;
     return report;
   }
-  const schema = JSON.parse(readFileSync(schemaPath, 'utf8'));
+  // Guard the schema read+parse so a malformed schema file produces a
+  // structured finding instead of a process-level exception that aborts
+  // the entire validation batch.
+  let schema: object;
+  try {
+    schema = JSON.parse(readFileSync(schemaPath, 'utf8'));
+  } catch (e) {
+    report.findings.push({
+      checker: 'schema',
+      severity: 'error',
+      file: schemaPath,
+      message: `schema JSON parse error: ${(e as Error).message}`,
+    });
+    report.failed = 1;
+    return report;
+  }
   for (const f of manifestPaths) {
     report.totalFiles += 1;
     if (!existsSync(f)) {
@@ -183,31 +198,25 @@ export function validateSkillMarkdown(file: string): ValidationFinding[] {
     });
   }
 
-  // Tier 0..5. The previous regex /^tier:\s*(\d+)/m silently accepted
-  // non-numeric values like `tier: two` or `tier: high` because the
-  // pattern simply did not match and the branch was a no-op. Now we
-  // capture whatever the user supplied and validate it explicitly: if
-  // the value is missing, non-numeric, or out of range we emit an error.
-  const tierRawMatch = fm.match(/^tier:\s*(.+?)\s*$/m);
+  // Tier 0..5. Three layers of defence so every invalid shape lands in
+  // the error branch with a clear message:
+  //   1. Capture the entire tier scalar (anything up to newline / # comment)
+  //      so values like `tier: -1` or `tier: 2.5` are visible to the parser
+  //      instead of getting masked by a /\d+/ that just doesn't match.
+  //   2. Parse with Number() and require Number.isInteger so signed values
+  //      (-1) and fractional values (2.5) are rejected before range check.
+  //   3. Range-check 0..5 inclusive only after the integer check passed.
+  const tierRawMatch = fm.match(/^tier:\s*([^\r\n#]+)/m);
   if (tierRawMatch) {
-    const raw = tierRawMatch[1];
-    if (!/^\d+$/.test(raw)) {
+    const raw = tierRawMatch[1].trim();
+    const tier = Number(raw);
+    if (!Number.isInteger(tier) || tier < 0 || tier > 5) {
       out.push({
         checker: 'skill-md',
         severity: 'error',
         file,
-        message: `tier value "${raw}" is not a non-negative integer`,
+        message: `tier "${raw}" must be an integer in range 0..5`,
       });
-    } else {
-      const tier = Number(raw);
-      if (tier < 0 || tier > 5) {
-        out.push({
-          checker: 'skill-md',
-          severity: 'error',
-          file,
-          message: `tier ${tier} out of range 0..5`,
-        });
-      }
     }
   }
 

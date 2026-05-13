@@ -21,15 +21,36 @@ function parseArgs(argv) {
     json: false,
     failBelow: 60,
   };
+  // Helper guards every flag that consumes a value. The old loop happily
+  // accepted `argv[++i]` returning undefined or another flag, which produced
+  // `resolve(undefined)` exceptions and NaN thresholds that silently
+  // bypassed --fail-below logic.
+  const takeValue = (flag, i) => {
+    const v = argv[i + 1];
+    if (v === undefined || v.startsWith('-')) {
+      console.error(`${flag} requires a value`);
+      process.exit(2);
+    }
+    return v;
+  };
+  const takeNumber = (flag, i) => {
+    const raw = takeValue(flag, i);
+    const n = Number(raw);
+    if (!Number.isFinite(n)) {
+      console.error(`${flag} must be numeric, got ${JSON.stringify(raw)}`);
+      process.exit(2);
+    }
+    return n;
+  };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === '--root') opts.root = argv[++i];
-    else if (a === '--coverage') opts.coverage = argv[++i];
-    else if (a === '--chain') opts.chain = argv[++i];
-    else if (a === '--generated') opts.generated = argv[++i];
-    else if (a === '--drift-manifest') opts.driftManifest = argv[++i];
-    else if (a === '--min-coverage') opts.minCoverage = Number(argv[++i]);
-    else if (a === '--fail-below') opts.failBelow = Number(argv[++i]);
+    if (a === '--root') { opts.root = takeValue(a, i); i += 1; }
+    else if (a === '--coverage') { opts.coverage = takeValue(a, i); i += 1; }
+    else if (a === '--chain') { opts.chain = takeValue(a, i); i += 1; }
+    else if (a === '--generated') { opts.generated = takeValue(a, i); i += 1; }
+    else if (a === '--drift-manifest') { opts.driftManifest = takeValue(a, i); i += 1; }
+    else if (a === '--min-coverage') { opts.minCoverage = takeNumber(a, i); i += 1; }
+    else if (a === '--fail-below') { opts.failBelow = takeNumber(a, i); i += 1; }
     else if (a === '--json') opts.json = true;
     else if (a === '--help' || a === '-h') {
       console.log(`axiom-health [--root .] [--coverage path.json] [--chain chain.json] [--generated path] [--drift-manifest path.json] [--min-coverage N] [--fail-below N] [--json]`);

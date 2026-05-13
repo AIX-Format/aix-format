@@ -8,7 +8,7 @@
 // PRs without write access.
 
 import { readFileSync, statSync } from 'node:fs';
-import { extname } from 'node:path';
+import { extname, basename } from 'node:path';
 
 export type Severity = 'error' | 'warning' | 'info';
 
@@ -225,7 +225,11 @@ function ruleNaming(convention: 'kebab-case' | 'snake_case' | 'mixed'): LintRule
     filePattern: /\.(ts|tsx|js|jsx|mjs|cjs|py|go|rs|md|json|yaml|yml)$/i,
     check(file) {
       if (convention === 'mixed') return [];
-      const base = file.split('/').pop()?.replace(/\.[^.]+$/, '') ?? '';
+      // Use path.basename so Windows paths (joined with '\') resolve to the
+      // same basename a POSIX path would. The previous `file.split('/').pop()`
+      // returned the full path on Windows, so naming checks silently
+      // skipped every file there.
+      const base = basename(file).replace(/\.[^.]+$/, '');
       if (exempt.has(base) || exempt.has(base.replace(/\..+$/, ''))) return [];
       // Allow .config.ts, .test.ts, etc. by stripping all extensions.
       const root = base.split('.')[0];

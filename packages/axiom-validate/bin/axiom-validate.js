@@ -37,7 +37,19 @@ const positional = [];
 for (let i = 0; i < args.length; i++) {
   const a = args[i];
   if (a === '--json') json = true;
-  else if (a === '--fail-on') failOn = args[++i];
+  else if (a === '--fail-on') {
+    const v = args[i + 1];
+    if (v === undefined || v.startsWith('-')) {
+      console.error('--fail-on requires a value (error|warning)');
+      process.exit(2);
+    }
+    if (!['error', 'warning'].includes(v)) {
+      console.error(`--fail-on must be one of error|warning, got ${JSON.stringify(v)}`);
+      process.exit(2);
+    }
+    failOn = v;
+    i += 1;
+  }
   else positional.push(a);
 }
 
@@ -78,6 +90,14 @@ switch (subcommand) {
     const filePath = resolve(rest[0]);
     if (!existsSync(filePath)) {
       console.error(`drift: file not found: ${filePath}`);
+      process.exit(2);
+    }
+    // Refuse to block forever waiting on stdin when invoked
+    // interactively. CI / pipeline use is the supported case; an
+    // operator who runs `axiom-validate drift foo.d.ts` without
+    // piping anything should get a clear error, not a hung process.
+    if (process.stdin.isTTY) {
+      console.error('drift: expected type output piped on stdin (e.g. `tool | axiom-validate drift <file>`)');
       process.exit(2);
     }
     const current = readFileSync(filePath, 'utf8');

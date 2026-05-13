@@ -80,6 +80,31 @@ test('trustChainScore: broken linkage scored < 100', () => {
   assert.ok(sub.score !== null && sub.score < 100);
 });
 
+test('trustChainScore: malformed entry shape produces a break, not a crash', () => {
+  // Regression: a null entry or a non-object inside .entries would have
+  // thrown on .index / .prev_hash access. Now it counts as a break and
+  // the score reflects that, but the process keeps running.
+  const entries = [
+    { index: 0, action_hash: 'a', prev_hash: '' },
+    null,
+    { index: 2, action_hash: 'c', prev_hash: 'a' },
+  ];
+  const f = tmp('chain.json', JSON.stringify({ entries }));
+  const sub = trustChainScore(f);
+  assert.ok(sub.score !== null);
+  assert.ok(sub.score < 100, `expected break recorded for null entry, got ${sub.score}`);
+});
+
+test('trustChainScore: entry with non-string action_hash counts as a break', () => {
+  const entries = [
+    { index: 0, action_hash: 'a', prev_hash: '' },
+    { index: 1, action_hash: 12345, prev_hash: 'a' },
+  ];
+  const f = tmp('chain.json', JSON.stringify({ entries }));
+  const sub = trustChainScore(f);
+  assert.ok(sub.score !== null && sub.score < 100);
+});
+
 test('trustChainScore: duplicate action_hash penalised', () => {
   const entries = [
     { index: 0, action_hash: 'a', prev_hash: '' },

@@ -137,6 +137,43 @@ x
   assert.ok(findings.some(f => f.message.includes('kebab-case')));
 });
 
+test('validateManifestFiles: malformed schema JSON returns a finding, not a crash', () => {
+  const schemaPath = tmp('schema.json', '{ this is not valid json');
+  const report = validateManifestFiles(schemaPath, []);
+  assert.equal(report.failed, 1);
+  assert.ok(report.findings.some(f => f.message.includes('JSON parse error')));
+});
+
+test('skill markdown: rejects negative tier (-1)', () => {
+  const file = tmp('neg.md', `---
+name: ok-name
+tier: -1
+description: x
+---
+
+## Purpose
+
+x
+`);
+  const findings = validateSkillMarkdown(file);
+  assert.ok(findings.some(f => f.message.includes('must be an integer in range 0..5')));
+});
+
+test('skill markdown: rejects decimal tier (2.5)', () => {
+  const file = tmp('dec.md', `---
+name: ok-name
+tier: 2.5
+description: x
+---
+
+## Purpose
+
+x
+`);
+  const findings = validateSkillMarkdown(file);
+  assert.ok(findings.some(f => f.message.includes('must be an integer in range 0..5')));
+});
+
 test('skill markdown: rejects non-numeric tier', () => {
   // Regression for the silent-acceptance bug: tier: two used to pass
   // because the digit-only regex simply did not match the value.
@@ -151,7 +188,7 @@ description: x
 x
 `);
   const findings = validateSkillMarkdown(file);
-  assert.ok(findings.some(f => f.message.includes('not a non-negative integer')));
+  assert.ok(findings.some(f => f.message.includes('must be an integer in range 0..5')));
 });
 
 test('skill markdown: flags out-of-range tier', () => {
@@ -166,7 +203,7 @@ description: x
 x
 `);
   const findings = validateSkillMarkdown(file);
-  assert.ok(findings.some(f => f.message.includes('out of range')));
+  assert.ok(findings.some(f => f.message.includes('must be an integer in range 0..5')));
 });
 
 test('skill markdown: flags TODO purpose', () => {

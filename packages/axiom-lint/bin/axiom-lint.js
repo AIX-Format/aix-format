@@ -24,12 +24,49 @@ function walk(root, out, exclude) {
 
 function parseArgs(argv) {
   const out = { paths: [], format: 'text', maxBytes: 500_000, naming: 'mixed', failOn: 'error' };
+  // Helper: consume the next token as the value for the flag at index i.
+  // Refuses missing values and tokens that look like another flag, so a
+  // command like `axiom-lint . --max-bytes --naming snake_case` no longer
+  // turns --max-bytes into NaN by silently swallowing the next flag.
+  const takeValue = (flag, i) => {
+    const v = argv[i + 1];
+    if (v === undefined || v.startsWith('-')) {
+      console.error(`${flag} requires a value`);
+      process.exit(2);
+    }
+    return v;
+  };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--json') out.format = 'json';
-    else if (a === '--max-bytes') out.maxBytes = Number(argv[++i]);
-    else if (a === '--naming') out.naming = argv[++i];
-    else if (a === '--fail-on') out.failOn = argv[++i];
+    else if (a === '--max-bytes') {
+      const raw = takeValue(a, i);
+      const parsed = Number(raw);
+      if (!Number.isFinite(parsed) || parsed < 0) {
+        console.error(`--max-bytes must be a non-negative number, got ${JSON.stringify(raw)}`);
+        process.exit(2);
+      }
+      out.maxBytes = parsed;
+      i += 1;
+    }
+    else if (a === '--naming') {
+      const v = takeValue(a, i);
+      if (!['kebab-case', 'snake_case', 'mixed'].includes(v)) {
+        console.error(`--naming must be one of kebab-case|snake_case|mixed, got ${JSON.stringify(v)}`);
+        process.exit(2);
+      }
+      out.naming = v;
+      i += 1;
+    }
+    else if (a === '--fail-on') {
+      const v = takeValue(a, i);
+      if (!['error', 'warning', 'info'].includes(v)) {
+        console.error(`--fail-on must be one of error|warning|info, got ${JSON.stringify(v)}`);
+        process.exit(2);
+      }
+      out.failOn = v;
+      i += 1;
+    }
     else if (a === '--help' || a === '-h') {
       console.log(`axiom-lint <path...> [--json] [--max-bytes N] [--naming kebab-case|snake_case|mixed] [--fail-on error|warning|info]`);
       process.exit(0);

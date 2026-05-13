@@ -149,8 +149,25 @@ export function trustChainScore(chainPath: string): SubScore {
   let breaks = 0;
   for (let i = 0; i < entries.length; i++) {
     const e = entries[i];
+    // Defensive shape check. The chain file is JSON from an external
+    // source (possibly tampered with — the whole reason we score chain
+    // integrity here). A malformed entry must produce a break, not a
+    // process-level crash.
+    if (
+      !e ||
+      typeof e !== 'object' ||
+      typeof e.index !== 'number' ||
+      typeof e.action_hash !== 'string' ||
+      typeof e.prev_hash !== 'string'
+    ) {
+      breaks += 1;
+      continue;
+    }
     if (e.index !== i) breaks += 1;
-    if (i > 0 && e.prev_hash !== entries[i - 1].action_hash) breaks += 1;
+    const prev = entries[i - 1];
+    if (i > 0 && (typeof prev?.action_hash !== 'string' || e.prev_hash !== prev.action_hash)) {
+      breaks += 1;
+    }
     if (seen.has(e.action_hash)) breaks += 1;
     seen.add(e.action_hash);
   }
@@ -219,7 +236,12 @@ export function collectSourceFiles(root: string, exts = ['.ts', '.tsx', '.js', '
   const out: string[] = [];
   const skip = /(?:^|\/)(?:node_modules|\.git|\.next|dist|build|coverage|\.generated|docs\/archive)(?:\/|$)/;
   function walk(p: string) {
-    if (skip.test(p)) return;
+    // Normalise to forward slashes before testing the skip regex.
+    // node:path.join() returns platform-specific separators ('\' on
+    // Windows), and a regex anchored on '/' silently fails to match
+    // there, causing the walk to descend into node_modules etc.
+    const normalised = p.replace(/\\/g, '/');
+    if (skip.test(normalised)) return;
     let s;
     try { s = statSync(p); } catch { return; }
     if (s.isDirectory()) {
