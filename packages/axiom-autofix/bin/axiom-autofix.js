@@ -99,9 +99,14 @@ if (subcommand === 'apply' || subcommand === 'diff') {
     if (wrote > 0) console.log(`${wrote} change(s) applied.`);
   }
 
-  // Consume token on successful apply: clear the recorded SHA so a second
-  // run requires a freshly minted one.
-  if (approved && results.some(r => r.applied)) {
+  // Consume the approval token on ANY approved run, whether or not any
+  // file actually needed writing. The previous behaviour only cleared
+  // the token when at least one diff was applied, which meant an
+  // operator could mint a token, run apply against an already-clean
+  // directory (zero diffs, token not consumed), then re-use the same
+  // token later on dirty files. That violates the documented one-shot
+  // contract.
+  if (approved) {
     writeFileSync(TOKEN_FILE, '', 'utf8');
   }
 

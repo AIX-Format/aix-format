@@ -171,17 +171,31 @@ export function validateSkillMarkdown(file: string): ValidationFinding[] {
     });
   }
 
-  // Tier 0..5.
-  const tierMatch = fm.match(/^tier:\s*(\d+)/m);
-  if (tierMatch) {
-    const tier = Number(tierMatch[1]);
-    if (tier < 0 || tier > 5) {
+  // Tier 0..5. The previous regex /^tier:\s*(\d+)/m silently accepted
+  // non-numeric values like `tier: two` or `tier: high` because the
+  // pattern simply did not match and the branch was a no-op. Now we
+  // capture whatever the user supplied and validate it explicitly: if
+  // the value is missing, non-numeric, or out of range we emit an error.
+  const tierRawMatch = fm.match(/^tier:\s*(.+?)\s*$/m);
+  if (tierRawMatch) {
+    const raw = tierRawMatch[1];
+    if (!/^\d+$/.test(raw)) {
       out.push({
         checker: 'skill-md',
         severity: 'error',
         file,
-        message: `tier ${tier} out of range 0..5`,
+        message: `tier value "${raw}" is not a non-negative integer`,
       });
+    } else {
+      const tier = Number(raw);
+      if (tier < 0 || tier > 5) {
+        out.push({
+          checker: 'skill-md',
+          severity: 'error',
+          file,
+          message: `tier ${tier} out of range 0..5`,
+        });
+      }
     }
   }
 

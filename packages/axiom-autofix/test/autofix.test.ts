@@ -6,7 +6,7 @@
 
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { writeFileSync, readFileSync, mkdtempSync } from 'node:fs';
+import { writeFileSync, readFileSync, mkdtempSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -15,6 +15,7 @@ import {
   fixTrailingWhitespace,
   fixFinalNewline,
   applyFixesToFile,
+  applyFixesToFiles,
   mintApprovalToken,
   validateApprovalToken,
 } from '../src/index.ts';
@@ -89,6 +90,39 @@ test('token validation: tampered token fails', () => {
 test('token validation: missing prefix rejected', () => {
   const { sha } = mintApprovalToken();
   assert.equal(validateApprovalToken('not-a-token', sha), false);
+});
+
+test('applyFixesToFile skips a directory input without throwing', () => {
+  // Regression for the EISDIR bug: previously applyFixesToFile called
+  // readFileSync on whatever path it received and crashed on directories.
+  const dir = mkdtempSync(join(tmpdir(), 'axiom-autofix-dir-'));
+  // No throw, empty results.
+  const out = applyFixesToFile(dir, { approved: false });
+  assert.deepEqual(out, []);
+});
+
+test('applyFixesToFiles expands directories into constituent files', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'axiom-autofix-walk-'));
+  const sub = join(dir, 'sub');
+  mkdirSync(sub);
+  writeFileSync(join(dir, 'a.md'), 'foo \u2014 bar\n', 'utf8');
+  writeFileSync(join(sub, 'b.md'), 'baz \u2014 qux\n', 'utf8');
+  const out = applyFixesToFiles([dir], { approved: false });
+  const files = new Set(out.map(r => r.file.split('/').pop()));
+  assert.ok(files.has('a.md'), 'must walk top-level file');
+  assert.ok(files.has('b.md'), 'must recurse into sub-directory');
+});
+
+test('applyFixesToFiles skips node_modules during directory walk', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'axiom-autofix-nm-'));
+  const nm = join(dir, 'node_modules');
+  mkdirSync(nm);
+  writeFileSync(join(dir, 'real.md'), 'a \u2014 b\n', 'utf8');
+  writeFileSync(join(nm, 'fake.md'), 'c \u2014 d\n', 'utf8');
+  const out = applyFixesToFiles([dir], { approved: false });
+  const files = out.map(r => r.file);
+  assert.ok(files.some(f => f.endsWith('real.md')));
+  assert.ok(!files.some(f => f.includes('node_modules')));
 });
 
 test('all fixes are idempotent under double application', () => {

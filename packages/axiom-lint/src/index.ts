@@ -76,7 +76,13 @@ const ruleSecretsScan: LintRule = {
   description: 'Detect hard-coded credentials (AWS, GitHub PATs, OpenAI keys, private keys, Pi secrets).',
   defaultSeverity: 'error',
   // Skip lockfiles and binary-ish encodings to keep false positives bounded.
-  filePattern: /\.(ts|tsx|js|jsx|mjs|cjs|json|jsonc|yaml|yml|env|sh|py|go|rs|md|toml)$/i,
+  // The .env branch must accept the common variants (.env.local,
+  // .env.production, .env.example, .env.test, etc.) — the previous
+  // /env$/ alternative only matched a bare .env file and let leaked
+  // credentials in .env.local sail through unnoticed. We allow an
+  // optional second suffix segment to cover every realistic naming
+  // convention dotenv ecosystems use.
+  filePattern: /\.(?:ts|tsx|js|jsx|mjs|cjs|json|jsonc|yaml|yml|sh|py|go|rs|md|toml)$|\.env(?:\.[A-Za-z0-9_-]+)?$/i,
   check(file, content) {
     const out: LintFinding[] = [];
     const lines = content.split('\n');

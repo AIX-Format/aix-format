@@ -87,6 +87,23 @@ x
   assert.ok(findings.some(f => f.message.includes('kebab-case')));
 });
 
+test('skill markdown: rejects non-numeric tier', () => {
+  // Regression for the silent-acceptance bug: tier: two used to pass
+  // because the digit-only regex simply did not match the value.
+  const file = tmp('alpha.md', `---
+name: ok-name
+tier: two
+description: x
+---
+
+## Purpose
+
+x
+`);
+  const findings = validateSkillMarkdown(file);
+  assert.ok(findings.some(f => f.message.includes('not a non-negative integer')));
+});
+
 test('skill markdown: flags out-of-range tier', () => {
   const file = tmp('bad2.md', `---
 name: ok-name

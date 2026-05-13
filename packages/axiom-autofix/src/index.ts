@@ -13,7 +13,8 @@
 // These three rules kill the auto-PR antipattern that TawbahLoop and
 // sentinel-autofix introduced.
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, statSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 
 export interface Fix {
@@ -128,6 +129,14 @@ export interface RunOptions {
 
 export function applyFixesToFile(filePath: string, opts: RunOptions = {}): FixResult[] {
   if (!existsSync(filePath)) return [];
+  // Skip directories, symlinks-to-directories, and non-regular files so
+  // a caller running `axiom-autofix apply docs/` no longer throws EISDIR.
+  // The CLI documentation advertises directory inputs as a normal case;
+  // the runner explicitly does the file-vs-dir branching here, while
+  // applyFixesToFiles handles the recursive walk for directories.
+  let s: ReturnType<typeof statSync>;
+  try { s = statSync(filePath); } catch { return []; }
+  if (!s.isFile()) return [];
   const original = readFileSync(filePath, 'utf8');
   const fixes = opts.fixes ?? DEFAULT_FIXES;
   const results: FixResult[] = [];
@@ -152,9 +161,29 @@ export function applyFixesToFile(filePath: string, opts: RunOptions = {}): FixRe
   return results;
 }
 
-export function applyFixesToFiles(files: string[], opts: RunOptions = {}): FixResult[] {
+export function applyFixesToFiles(paths: string[], opts: RunOptions = {}): FixResult[] {
   const out: FixResult[] = [];
-  for (const f of files) out.push(...applyFixesToFile(f, opts));
+  // Expand any directory inputs into their constituent files so a caller
+  // passing `docs/` gets the same behaviour as passing every markdown
+  // file inside docs/ individually. We skip common vendored / generated
+  // trees (node_modules, .git, dist, build, .next, coverage) and
+  // symlinks to avoid loops.
+  const skip = /(?:^|\/)(?:node_modules|\.git|\.next|dist|build|coverage|\.generated)(?:\/|$)/;
+  function expand(p: string, acc: string[]) {
+    if (skip.test(p)) return;
+    let s: ReturnType<typeof statSync>;
+    try { s = statSync(p); } catch { return; }
+    if (s.isFile()) {
+      acc.push(p);
+    } else if (s.isDirectory()) {
+      let entries: string[] = [];
+      try { entries = readdirSync(p); } catch { return; }
+      for (const e of entries) expand(join(p, e), acc);
+    }
+  }
+  const allFiles: string[] = [];
+  for (const p of paths) expand(p, allFiles);
+  for (const f of allFiles) out.push(...applyFixesToFile(f, opts));
   return out;
 }
 

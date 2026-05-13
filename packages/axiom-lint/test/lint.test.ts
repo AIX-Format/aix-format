@@ -54,6 +54,21 @@ test('detects GitHub PAT', () => {
   assert.ok(findings.some(f => f.rule === 'no-secrets/github-pat'));
 });
 
+test('secrets rule scans .env variant filenames (.env.local, .env.production, .env.test)', () => {
+  // Regression for the blind spot where /env$/ only matched a bare .env
+  // file. Real leaks live in .env.local far more often than in .env.
+  const bait = 'AKIA' + 'IOSFODNN7' + 'EXAMPLE';
+  const rules = buildRules({ naming: 'mixed' });
+  for (const name of ['.env.local', '.env.production', '.env.test', '.env']) {
+    const file = fixture(name, `AWS_KEY=${bait}\n`);
+    const findings = lintFile(file, rules);
+    assert.ok(
+      findings.some(f => f.rule.startsWith('no-secrets')),
+      `${name} must be scanned for secrets`,
+    );
+  }
+});
+
 test('detects tabs in markdown', () => {
   const file = fixture('a.md', 'line1\n\tindented\n');
   const rules = buildRules({ naming: 'mixed' });
