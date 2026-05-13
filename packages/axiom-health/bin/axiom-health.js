@@ -56,6 +56,14 @@ function parseArgs(argv) {
       console.log(`axiom-health [--root .] [--coverage path.json] [--chain chain.json] [--generated path] [--drift-manifest path.json] [--min-coverage N] [--fail-below N] [--json]`);
       process.exit(0);
     }
+    else {
+      // Unknown options used to silently no-op, which masked typos like
+      // --json-output or --coverag in CI configs and let stale defaults
+      // bypass the user's intent. Fail fast with a clear message and the
+      // GNU-conventional exit code 2 for usage errors.
+      console.error(`axiom-health: unknown option: ${a}`);
+      process.exit(2);
+    }
   }
   return opts;
 }

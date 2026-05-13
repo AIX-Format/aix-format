@@ -135,13 +135,27 @@ export function trustChainScore(chainPath: string): SubScore {
   if (!existsSync(chainPath)) {
     return { name: 'trust-chain', score: null, weight: 25, detail: `chain file not found: ${chainPath}` };
   }
-  let data: { entries?: ChainEntry[] };
+  let data: unknown;
   try {
     data = JSON.parse(readFileSync(chainPath, 'utf8'));
   } catch (e) {
     return { name: 'trust-chain', score: 0, weight: 25, detail: `parse error: ${(e as Error).message}` };
   }
-  const entries = data.entries ?? [];
+  // The chain file is external input. If `entries` is present but is
+  // something other than an array (a string, a number, an object, etc.),
+  // the previous code dereferenced .length on a non-array and propagated
+  // NaN into the aggregate score. Treat any non-array `entries` as a
+  // structural failure — score 0 with a clear detail — instead.
+  const rawEntries = (data as { entries?: unknown } | null)?.entries;
+  if (rawEntries !== undefined && !Array.isArray(rawEntries)) {
+    return {
+      name: 'trust-chain',
+      score: 0,
+      weight: 25,
+      detail: 'invalid chain shape: entries must be an array',
+    };
+  }
+  const entries = (rawEntries ?? []) as ChainEntry[];
   if (entries.length === 0) {
     return { name: 'trust-chain', score: 100, weight: 25, detail: 'empty chain (vacuously intact)' };
   }

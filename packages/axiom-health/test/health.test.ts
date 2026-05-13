@@ -80,6 +80,17 @@ test('trustChainScore: broken linkage scored < 100', () => {
   assert.ok(sub.score !== null && sub.score < 100);
 });
 
+test('trustChainScore: rejects non-array entries with a structural failure', () => {
+  // Regression: when `entries` is present but is a string / number / object,
+  // dereferencing .length used to yield NaN and the aggregate scoring
+  // propagated the NaN. Now this case returns score 0 with a clear
+  // structural-failure detail.
+  const f = tmp('chain.json', JSON.stringify({ entries: 'not-an-array' }));
+  const sub = trustChainScore(f);
+  assert.equal(sub.score, 0);
+  assert.ok(sub.detail.includes('entries must be an array'));
+});
+
 test('trustChainScore: malformed entry shape produces a break, not a crash', () => {
   // Regression: a null entry or a non-object inside .entries would have
   // thrown on .index / .prev_hash access. Now it counts as a break and

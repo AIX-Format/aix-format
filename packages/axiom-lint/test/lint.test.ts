@@ -54,6 +54,37 @@ test('detects GitHub PAT', () => {
   assert.ok(findings.some(f => f.rule === 'no-secrets/github-pat'));
 });
 
+test('secrets rule filePattern matches id_* keys on both / and \\ separators', () => {
+  // Regression: the id_* alternative was anchored on '/', so on a
+  // Windows path like C:\Users\me\.ssh\id_rsa the extensionless
+  // filename slipped through despite being explicitly in scope. We
+  // can't actually create a file at a Windows-style path on POSIX,
+  // so we exercise the filePattern directly here. (The POSIX-path
+  // runtime test on real files lives in the next case.)
+  const rules = buildRules({ naming: 'mixed' });
+  const rule = rules.find(r => r.id === 'no-secrets');
+  assert.ok(rule, 'no-secrets rule must be registered');
+  assert.ok(rule!.filePattern!.test('C:\\Users\\me\\.ssh\\id_rsa'), 'Windows path must match');
+  assert.ok(rule!.filePattern!.test('/home/me/.ssh/id_rsa'), 'POSIX path must still match');
+});
+
+test('max-file-size rule fires on files above the 5MB hard cap', () => {
+  // Regression: lintFile used to early-return [] for files larger than
+  // 5MB, which skipped every rule INCLUDING the size rule itself. That
+  // meant the largest files (the ones the size policy exists for) were
+  // reported as clean. Now lintFile evaluates max-file-size against
+  // the stat alone before the read short-circuit.
+  const dir = mkdtempSync(join(tmpdir(), 'axiom-lint-big-'));
+  const big = join(dir, 'big.ts');
+  // Write ~6 MB of ASCII so we exceed the 5 MB hard cap without OOM.
+  writeFileSync(big, 'x'.repeat(6_000_000), 'utf8');
+  const report = lintFiles([big], { naming: 'mixed' });
+  assert.ok(
+    report.findings.some(f => f.rule === 'max-file-size'),
+    `expected max-file-size finding on a 6MB file, got ${JSON.stringify(report.findings)}`,
+  );
+});
+
 test('secrets rule scans PEM key file conventions (.pem, .key, id_rsa, id_ed25519)', () => {
   // Regression: the private-key-pem pattern was in the detector but
   // the file filter excluded the very files that hold those keys.

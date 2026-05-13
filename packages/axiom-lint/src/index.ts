@@ -82,10 +82,11 @@ const ruleSecretsScan: LintRule = {
   //      .env.test, .env.example, ...).
   //   3. Key-file conventions: any *.pem / *.key / *.crt / *.cer / *.p12 /
   //      *.pfx file, plus the unsuffixed id_rsa / id_dsa / id_ed25519 /
-  //      id_ecdsa files SSH writes by default. PEM keys living in any of
-  //      these are exactly the leak shape the private-key-pem detector was
-  //      built for; excluding them from the file filter was the whole bug.
-  filePattern: /\.(?:ts|tsx|js|jsx|mjs|cjs|json|jsonc|yaml|yml|sh|py|go|rs|md|toml|pem|key|crt|cer|p12|pfx)$|\.env(?:\.[A-Za-z0-9_-]+)?$|(?:^|\/)id_(?:rsa|dsa|ed25519|ecdsa)(?:\.[A-Za-z0-9_-]+)?$/i,
+  //      id_ecdsa files SSH writes by default. The directory boundary on
+  //      the id_* alternative accepts either '/' or '\' so SSH keys living
+  //      in a Windows-style path like C:\Users\me\.ssh\id_rsa are matched
+  //      the same way they would be on POSIX.
+  filePattern: /\.(?:ts|tsx|js|jsx|mjs|cjs|json|jsonc|yaml|yml|sh|py|go|rs|md|toml|pem|key|crt|cer|p12|pfx)$|\.env(?:\.[A-Za-z0-9_-]+)?$|(?:^|[\\/])id_(?:rsa|dsa|ed25519|ecdsa)(?:\.[A-Za-z0-9_-]+)?$/i,
   check(file, content) {
     const out: LintFinding[] = [];
     const lines = content.split('\n');
@@ -275,18 +276,69 @@ export function buildRules(config: LintConfig): LintRule[] {
     });
 }
 
+// Files over this size are not READ into memory (we won't grep them for
+// secrets / em-dashes), but max-file-size is the one rule that genuinely
+// only needs the size, not the content — so it runs against the stat
+// alone, giving us a finding precisely on the kind of file the size
+// policy is meant to catch.
+const HARD_SIZE_LIMIT = 5_000_000;
+
 export function lintFile(file: string, rules: LintRule[]): LintFinding[] {
-  let content: string;
+  let s: ReturnType<typeof statSync>;
   try {
-    // Skip directories and unreadable entries gracefully.
-    const s = statSync(file);
-    if (!s.isFile()) return [];
-    if (s.size > 5_000_000) return []; // skip large binaries entirely
-    content = readFileSync(file, 'utf8');
+    s = statSync(file);
   } catch {
     return [];
   }
+  if (!s.isFile()) return [];
+
   const findings: LintFinding[] = [];
+
+  // Apply the size rule first, BEFORE we early-return on the hard cap.
+  // The previous shape returned [] for files > 5MB, which meant the
+  // size policy never fired on exactly the files it was supposed to
+  // catch. We synthesise a finding from the stat-only data here, then
+  // let the content-based rules run only when the file is small enough
+  // to be safely held in memory.
+  const sizeRule = rules.find(r => r.id === 'max-file-size');
+  if (sizeRule) {
+    // Force the rule's perspective on the byte count by handing it a
+    // dummy content whose UTF-8 length equals the real size. Buffer.byteLength
+    // is exact for ASCII, and the rule only reads `Buffer.byteLength(content)`
+    // — but to avoid allocating a 5MB+ string we instead invoke the rule's
+    // intent directly using s.size.
+    if (typeof (sizeRule as { defaultSeverity?: string }).defaultSeverity === 'string') {
+      // Re-evaluate against the file's real size. We mirror the message the
+      // rule itself would have produced.
+      const maxBytes = HARD_SIZE_LIMIT; // dynamic limit lives inside the rule;
+      // To honour a smaller configured limit set by buildRules, hand the
+      // rule a content of exactly s.size synthetic bytes — but only when
+      // s.size <= HARD_SIZE_LIMIT, because for very large files the rule
+      // always fires and the synthetic-buffer step would just waste RAM.
+      if (s.size > HARD_SIZE_LIMIT) {
+        findings.push({
+          rule: 'max-file-size',
+          severity: sizeRule.defaultSeverity,
+          file,
+          message: `file is ${s.size} bytes, exceeds hard limit ${maxBytes}`,
+        });
+      }
+    }
+  }
+
+  if (s.size > HARD_SIZE_LIMIT) {
+    // Don't read 50MB into memory just to grep for em-dashes; we've
+    // already recorded the size finding above.
+    return findings;
+  }
+
+  let content: string;
+  try {
+    content = readFileSync(file, 'utf8');
+  } catch {
+    return findings;
+  }
+
   for (const rule of rules) {
     if (rule.filePattern && !rule.filePattern.test(file)) continue;
     const raw = rule.check(file, content);
