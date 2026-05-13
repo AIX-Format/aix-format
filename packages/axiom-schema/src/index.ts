@@ -18,5 +18,5 @@
  *   - No hallucinations. Optional fields stay optional; required stay required.
  */
 
-export * from './types';
-export * from './version';
+export * from './types.js';
+export * from './version.js';

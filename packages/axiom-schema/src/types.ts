@@ -25,7 +25,7 @@
  * in Phase 1.1 of RFC-001 (see aix-format/docs/rfc).
  */
 
-import { AXIOM_AUTHORITY } from './version';
+import { AXIOM_AUTHORITY } from './version.js';
 
 // ── Primitive aliases ─────────────────────────────────────────────────────────
 
@@ -162,15 +162,82 @@ export interface AIXIdentityLayer {
 
 // ── security ──────────────────────────────────────────────────────────────────
 
+/** Content hash carried in `security.checksum`. Required by the schema. */
+export interface AIXSecurityChecksum {
+  algorithm: 'sha256' | 'sha512' | 'blake3';
+  /** Lowercase hex digest. */
+  value: string;
+  /** What the digest covers (e.g. `content`, `canonical`). */
+  scope?: string;
+}
+
+/**
+ * Signature object accepted in `security.signature`.
+ *
+ * Note: this is intentionally a different shape from the
+ * canonical `Signature` ($defs.Signature) used on
+ * `identity_layer.signature`. The security block allows a broader
+ * algorithm set (`RSA-SHA256` / `ECDSA-SHA256` in addition to
+ * `Ed25519`) and carries `public_key` and `signer` alongside the
+ * value, because it covers manifest-content signing scenarios where
+ * the verifier may not already hold the key.
+ */
+export interface AIXSecuritySignature {
+  algorithm?: 'RSA-SHA256' | 'Ed25519' | 'ECDSA-SHA256';
+  value?: string;
+  public_key?: string;
+  signer?: string;
+  timestamp?: ISODateTime;
+}
+
+export interface AIXSecurityEncryption {
+  encrypted?: boolean;
+  algorithm?: 'AES-256-GCM' | 'ChaCha20-Poly1305' | 'none';
+  key_fingerprint?: string;
+}
+
+export interface AIXSecurityCapabilities {
+  allowed_operations?: string[];
+  restricted_operations?: string[];
+  restricted_domains?: string[];
+  max_api_calls_per_minute?: number;
+  max_memory_mb?: number;
+  sandbox?: boolean;
+}
+
+export interface AIXSecurityCompliance {
+  standards?: string[];
+  certifications?: string[];
+  audit_log?: boolean;
+}
+
+/**
+ * Guardian/Sentinel logic for mempool monitoring and autonomous
+ * defense against flash-loan-style exploits.
+ */
+export interface AIXSecurityGuardianLogic {
+  mempool_monitor?: boolean;
+  front_run_defense?: boolean;
+  max_slippage_tolerance?: number;
+  emergency_circuit_breaker?: boolean;
+}
+
+/**
+ * Top-level `security` block. Required field per schema: `checksum`.
+ * All other fields are optional. `additionalProperties: true` in the
+ * schema, mirrored here by the trailing index signature.
+ */
 export interface AIXSecurity {
-  level: number;
-  authentication?: Record<string, unknown>;
-  capabilities?: string[];
-  checksum?: string;
-  compliance?: string[];
-  encryption?: Record<string, unknown>;
-  guardian_logic?: Record<string, unknown>;
-  signature?: Signature;
+  checksum: AIXSecurityChecksum;
+  signature?: AIXSecuritySignature;
+  encryption?: AIXSecurityEncryption;
+  capabilities?: AIXSecurityCapabilities;
+  compliance?: AIXSecurityCompliance;
+  /** Shorthand security level label (e.g. `standard`, `high`, `sovereign`). */
+  level?: string;
+  authentication?: string[];
+  guardian_logic?: AIXSecurityGuardianLogic;
+  [extra: string]: unknown;
 }
 
 // ── trustchain ────────────────────────────────────────────────────────────────
