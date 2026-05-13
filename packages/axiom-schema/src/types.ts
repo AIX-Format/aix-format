@@ -111,14 +111,34 @@ export interface AIXMeta {
 
 // ── persona ───────────────────────────────────────────────────────────────────
 
+/**
+ * One example exchange in `persona.example_responses`. Schema closes
+ * the object to `question`/`answer` strings only
+ * (`additionalProperties: false`).
+ */
+export interface AIXPersonaExample {
+  question?: string;
+  answer?: string;
+}
+
 export interface AIXPersona {
   role: string;
+  /** Display name for the persona (separate from `meta.name`). */
+  name?: string;
   tone?: string;
   style?: string;
   instructions: string;
   constraints?: string[];
   personality_traits?: Record<string, string>;
-  example_responses?: Array<Record<string, unknown>>;
+  example_responses?: AIXPersonaExample[];
+  /** Sampling temperature, 0.0-2.0 per schema. */
+  temperature?: number;
+  /** Maximum context window in tokens; positive integer. */
+  context_window?: number;
+  /** Free-form response format hint (e.g. `json`, `markdown`). */
+  response_format?: string;
+  /** Persona is `additionalProperties: true`, so extension is allowed. */
+  [extra: string]: unknown;
 }
 
 // ── identity_layer ────────────────────────────────────────────────────────────
@@ -335,13 +355,61 @@ export interface AIXMetaArbiterConfig {
     resource_usage?: number;
   };
   growth_milestone_level?: 'beginner' | 'intermediate' | 'advanced' | 'expert';
-  [extra: string]: unknown;
+}
+
+// ── Skills and APIs ──────────────────────────────────────────────────────────
+// Schema defines these as arrays of richly-typed items. Top-level
+// fields are tracked here; nested sub-objects (auth, endpoints,
+// rate_limit, parameters) stay structurally loose because their
+// schema shapes use `additionalProperties: true` for the inner
+// payloads or accept multiple alternative shapes.
+
+/** One entry in the manifest's `skills` array (an MCP-flavoured tool surface). */
+export interface AIXSkill {
+  /** Tool identifier, snake_case (`^[a-z0-9_]+$`). */
+  name: string;
+  description: string;
+  enabled?: boolean;
+  parameters?: Record<string, unknown>;
+  triggers?: string[];
+  examples?: string[];
+  /** Priority 1-10 (10 highest). */
+  priority?: number;
+  timeout?: number;
+  /** Per-tool safety score 0-10; 10 = fully sandboxed, 0 = unbounded side effects. Default 5. */
+  safety_score?: number;
+}
+
+export interface AIXAPIAuth {
+  type?: 'bearer' | 'api_key' | 'oauth2' | 'basic' | 'none';
+  location?: 'header' | 'query' | 'body';
+  key_name?: string;
+}
+
+export interface AIXAPIEndpoint {
+  path?: string;
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  description?: string;
+  parameters?: Array<Record<string, unknown>>;
+}
+
+/** One entry in the manifest's `apis` array. */
+export interface AIXAPI {
+  name: string;
+  base_url: string;
+  description?: string;
+  version?: string;
+  auth?: AIXAPIAuth;
+  endpoints?: AIXAPIEndpoint[];
+  rate_limit?: Record<string, unknown>;
 }
 
 // ── Open / progressive sections ──────────────────────────────────────────────
-// These sections exist in the schema but their TS surface is not yet
-// fully authored. Declared as opaque records so future emitters can
-// fill them progressively without breaking type-safety here.
+// Object-shaped sections whose nested types are not yet fully
+// authored on the rich surface. Declared as opaque records so future
+// emitters can fill them progressively without breaking type-safety
+// here. Array-shaped sections (skills, apis) are handled above with
+// dedicated array types.
 
 export type AIXOpaqueSection = Record<string, unknown>;
 
@@ -362,11 +430,11 @@ export interface AIXManifest {
   abom?: AIXAbom;
   meta_arbiter?: AIXMetaArbiterConfig;
 
-  apis?: AIXOpaqueSection;
+  apis?: AIXAPI[];
+  skills?: AIXSkill[];
   mcp?: AIXOpaqueSection;
   memory?: AIXOpaqueSection;
   topology?: AIXOpaqueSection;
-  skills?: AIXOpaqueSection;
   live_voice?: AIXOpaqueSection;
   economics?: AIXOpaqueSection;
   requirements?: AIXOpaqueSection;
