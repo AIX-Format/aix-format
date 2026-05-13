@@ -80,16 +80,22 @@ function parseArgs(argv) {
 
 const opts = parseArgs(process.argv.slice(2));
 
-// Skip vendored / generated trees by default. Repo can extend via env.
+// Skip vendored / generated trees by default. Patterns accept either '/'
+// or '\\' as the segment separator so Windows paths (where node:path.join
+// emits backslashes) are excluded the same way POSIX paths are. The
+// previous patterns were anchored on '/' only, so on Windows the walker
+// happily descended into node_modules / .git / dist and either produced
+// noisy findings or massively slowed down the scan.
+const sep = '[\\\\/]';
 const defaultExclude = [
-  /\/node_modules\//,
-  /\/\.git\//,
-  /\/\.next\//,
-  /\/dist\//,
-  /\/build\//,
-  /\/coverage\//,
-  /\/\.generated\//,
-  /\/docs\/archive\//,
+  new RegExp(`${sep}node_modules${sep}`),
+  new RegExp(`${sep}\\.git${sep}`),
+  new RegExp(`${sep}\\.next${sep}`),
+  new RegExp(`${sep}dist${sep}`),
+  new RegExp(`${sep}build${sep}`),
+  new RegExp(`${sep}coverage${sep}`),
+  new RegExp(`${sep}\\.generated${sep}`),
+  new RegExp(`${sep}docs${sep}archive${sep}`),
 ];
 
 const files = [];

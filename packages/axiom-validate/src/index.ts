@@ -169,20 +169,25 @@ export function validateSkillMarkdown(file: string): ValidationFinding[] {
   }
   const fm = fmMatch[1];
 
-  // Required-key detection used to be `fm.includes(required)`, which
-  // accepted any substring match — so `rename:` satisfied `name:`,
-  // `frontier:` satisfied `tier:`, `short_description:` satisfied
-  // `description:`. Now we anchor each required key to the start of a
-  // line (after optional whitespace) so only a real top-level key
-  // satisfies the check.
+  // Required-key detection. Two precision passes:
+  //
+  //   1. Reject any substring lookalike (the original fm.includes() bug
+  //      accepted `rename:` for `name:`, etc.). Each key is matched as
+  //      a real "<key>:" key after a (potentially empty) line prefix.
+  //
+  //   2. Require the key to live at the TOP LEVEL of the YAML, not under
+  //      another key. The previous /^[ \\t]*name:/m accepted any indent
+  //      and therefore admitted documents whose only `name:` lived inside
+  //      a nested `meta:` block. Top-level YAML keys carry zero leading
+  //      whitespace, so we anchor on the column-0 start of a line.
   for (const required of ['name', 'tier', 'description']) {
-    const exact = new RegExp(`^[ \\t]*${required}\\s*:`, 'm');
-    if (!exact.test(fm)) {
+    const topLevel = new RegExp(`^${required}\\s*:`, 'm');
+    if (!topLevel.test(fm)) {
       out.push({
         checker: 'skill-md',
         severity: 'error',
         file,
-        message: `frontmatter missing required key "${required}"`,
+        message: `frontmatter missing required top-level key "${required}"`,
       });
     }
   }

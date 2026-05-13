@@ -151,7 +151,16 @@ export function applyFixesToFile(filePath: string, opts: RunOptions = {}): FixRe
   let s: ReturnType<typeof statSync>;
   try { s = statSync(filePath); } catch { return []; }
   if (!s.isFile()) return [];
-  const original = readFileSync(filePath, 'utf8');
+  // Refuse to touch binaries. Reading a PNG / WASM / .so as UTF-8 lossily
+  // decodes the bytes, and the final-newline / trailing-whitespace fixes
+  // would then rewrite the file with corrupted content. We sniff the first
+  // 8 KiB for a NUL byte (the standard cheap binary-detection heuristic
+  // used by git diff and grep) and bail out if we find one.
+  let buf: Buffer;
+  try { buf = readFileSync(filePath); } catch { return []; }
+  const probe = buf.subarray(0, Math.min(buf.length, 8192));
+  if (probe.indexOf(0) !== -1) return [];
+  const original = buf.toString('utf8');
   const fixes = opts.fixes ?? DEFAULT_FIXES;
   const results: FixResult[] = [];
   let current = original;

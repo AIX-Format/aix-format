@@ -92,6 +92,21 @@ test('token validation: missing prefix rejected', () => {
   assert.equal(validateApprovalToken('not-a-token', sha), false);
 });
 
+test('refuses to read binary files (NUL byte sniff)', () => {
+  // Regression: applyFixesToFile previously decoded any file as UTF-8
+  // and the final-newline / trailing-whitespace fixes would rewrite a
+  // PNG / WASM / .so on an approved run, corrupting bytes silently.
+  // Now the runner sniffs the first 8 KiB for NUL and bails out.
+  const buf = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x00, 0x42, 0x49, 0x4e]); // PNG header + NUL + bytes
+  const file = tmp('img.bin', '');
+  writeFileSync(file, buf);
+  const results = applyFixesToFile(file, { approved: true });
+  assert.deepEqual(results, [], 'binary file must produce zero fix results');
+  // And the bytes are unchanged.
+  const after = readFileSync(file);
+  assert.equal(Buffer.compare(after, buf), 0, 'binary bytes must be untouched');
+});
+
 test('no-tab-in-markdown does not rewrite tabs in .ts source', () => {
   // Regression: previously fixTabInMarkdown ran on every file with no
   // file-type guard, so a TypeScript file's significant leading tab

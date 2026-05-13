@@ -73,6 +73,32 @@ test('skill markdown: accepts CRLF line endings (Windows authoring)', () => {
   );
 });
 
+test('skill markdown: required-key check rejects nested keys at column > 0', () => {
+  // Regression: the previous "anchored" regex was /^[ \t]*name:/m, which
+  // accepted any indentation level and therefore admitted a file whose
+  // only `name:` lived inside a `meta:` block. Now the regex requires
+  // column 0 (top-level YAML), so `meta.name`-shaped frontmatter is
+  // flagged as missing the top-level key.
+  const file = tmp('nested.md', `---
+meta:
+  name: skill-x
+  tier: 2
+  description: nested everywhere
+---
+
+## Purpose
+
+x
+`);
+  const findings = validateSkillMarkdown(file);
+  const missing = findings.filter(f =>
+    f.message.startsWith('frontmatter missing required'),
+  );
+  // All three top-level keys are missing — the only matches sat inside
+  // an indented `meta:` block.
+  assert.equal(missing.length, 3, `expected 3 missing-key errors, got ${JSON.stringify(missing)}`);
+});
+
 test('skill markdown: required-key check is anchored, not substring', () => {
   // Regression: fm.includes('name:') used to accept `rename:` and
   // similar lookalikes. Each lookalike must now be flagged as a
@@ -90,7 +116,7 @@ x
   const findings = validateSkillMarkdown(file);
   const missing = new Set(
     findings
-      .filter(f => f.message.startsWith('frontmatter missing required key'))
+      .filter(f => f.message.startsWith('frontmatter missing required'))
       .map(f => f.message),
   );
   for (const key of ['name', 'tier', 'description']) {
