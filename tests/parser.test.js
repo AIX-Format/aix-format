@@ -358,13 +358,20 @@ describe('AIXParser', () => {
       assert.strictEqual(parser.timingSafeEqualHex('a'.repeat(64), undefined), false);
     });
 
-    it('should return false for invalid hex that cannot be buffered', () => {
+    it('should return false for invalid hex even when both inputs are identical', () => {
       const parser = new AIXParser();
-      // Non-hex chars of same length - Buffer.from will not throw but will produce zero-bytes
+      // Non-hex chars of same length. Buffer.from with 'hex' encoding silently
+      // truncates at the first non-hex char, so without an explicit hex check
+      // two identical malformed strings would each produce an empty buffer and
+      // compare as 'equal'. Lock the rejection in.
       const invalid = 'zz'.repeat(32);
-      // just verify it doesn't throw and returns a boolean
-      const result = parser.timingSafeEqualHex(invalid, invalid);
-      assert(typeof result === 'boolean');
+      assert.strictEqual(parser.timingSafeEqualHex(invalid, invalid), false);
+    });
+
+    it('should return false for hex strings of odd length', () => {
+      const parser = new AIXParser();
+      const odd = 'a'.repeat(63);
+      assert.strictEqual(parser.timingSafeEqualHex(odd, odd), false);
     });
   });
 
