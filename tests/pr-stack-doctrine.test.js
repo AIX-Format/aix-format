@@ -945,9 +945,9 @@ describe('Cross-file consistency — Echo369 and AIX/1.0 doctrine', () => {
     }
   });
 
-  it('every changed file consistently uses "Echo369" as the codename', () => {
+  it('every changed file consistently references the Echo369 codename (case-insensitive: SVGs use ECHO369, docs use Echo369)', () => {
     for (const [path, content] of Object.entries(FILES)) {
-      expect(content, `${path} must reference Echo369`).toContain('Echo369');
+      expect(content, `${path} must reference Echo369`).toMatch(/echo369/i);
     }
   });
 
@@ -985,17 +985,19 @@ describe('Cross-file consistency — Echo369 and AIX/1.0 doctrine', () => {
     expect(FILES['assets/aix-stack-header-v2.svg']).toContain('#39FF14');
   });
 
-  it('all three v2 SVG files use gold (#FFD700) for L0 root authority distinction', () => {
+  it('topology SVGs (header + diagram) use gold (#FFD700) for L0 root authority distinction; footer is a credit quote and intentionally omits L0 styling', () => {
     expect(FILES['assets/aix-stack-diagram-v2.svg']).toContain('#FFD700');
     expect(FILES['assets/aix-stack-header-v2.svg']).toContain('#FFD700');
+    // Footer is a closing quote (`King isn't Born, he is Made.`); it does not render the L0 root authority box.
+    expect(FILES['assets/aix-footer-quote-v2.svg']).not.toContain('#FFD700');
   });
 
-  it('all three v2 SVG files have unique versioned pattern IDs (no id collision)', () => {
+  it('all three v2 SVG files have versioned pattern IDs AND those IDs do not collide across files', () => {
     const footerIds = FILES['assets/aix-footer-quote-v2.svg'].match(/id="[^"]+"/g) || [];
     const diagIds = FILES['assets/aix-stack-diagram-v2.svg'].match(/id="[^"]+"/g) || [];
     const headerIds = FILES['assets/aix-stack-header-v2.svg'].match(/id="[^"]+"/g) || [];
 
-    // Each file should have at least one versioned id
+    // Each file should have at least one versioned id (defensive: catches naive cp of v1 file).
     const footerVersioned = footerIds.some(id => id.includes('V2') || id.includes('v2'));
     const diagVersioned = diagIds.some(id => id.includes('V2') || id.includes('Diag') || id.includes('v2'));
     const headerVersioned = headerIds.some(id => id.includes('V2') || id.includes('v2'));
@@ -1003,6 +1005,24 @@ describe('Cross-file consistency — Echo369 and AIX/1.0 doctrine', () => {
     expect(footerVersioned, 'footer SVG should have versioned pattern/gradient ids').toBe(true);
     expect(diagVersioned, 'diagram SVG should have versioned pattern/filter ids').toBe(true);
     expect(headerVersioned, 'header SVG should have versioned pattern/gradient ids').toBe(true);
+
+    // Cross-file uniqueness: an id reused across files would cause SVG defs to clash when both
+    // SVGs are inlined into the same HTML page (e.g. GitHub README renders both).
+    const stripQuotes = ids => ids.map(id => id.slice(4, -1)); // `id="foo"` -> `foo`
+    const footerSet = new Set(stripQuotes(footerIds));
+    const diagSet = new Set(stripQuotes(diagIds));
+    const headerSet = new Set(stripQuotes(headerIds));
+
+    const overlaps = [];
+    for (const id of footerSet) {
+      if (diagSet.has(id)) overlaps.push(`footer<->diagram: ${id}`);
+      if (headerSet.has(id)) overlaps.push(`footer<->header: ${id}`);
+    }
+    for (const id of diagSet) {
+      if (headerSet.has(id)) overlaps.push(`diagram<->header: ${id}`);
+    }
+
+    expect(overlaps, `SVG id collisions detected: ${overlaps.join(', ')}`).toEqual([]);
   });
 
   it('axiomid.app authority domain appears in all doctrine docs', () => {
