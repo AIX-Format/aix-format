@@ -14,6 +14,12 @@
 
 <div align="center">
 
+[![Sovereign AI Stack · 1 Human + 12 AI Agents across 5 projects](https://img.shields.io/badge/SOVEREIGN%20AI%20STACK-1%20Human%20%2B%2012%20AI%20Agents%20across%205%20projects-39FF14?style=for-the-badge&labelColor=050505&logo=github&logoColor=39FF14)](#-built-by-1-human--9-ai-agents)
+
+</div>
+
+<div align="center">
+
 **🟢 L1 · PROTOCOL · `aix-format` · YOU ARE HERE** &nbsp;·&nbsp; [**L2 · RUNTIME · `iqra` →**](https://github.com/Moeabdelaziz007/iqra) &nbsp;·&nbsp; [**L3 · MARKETPLACE · `aix-agent-skills` →**](https://github.com/Moeabdelaziz007/aix-agent-skills)
 
 </div>
@@ -36,16 +42,19 @@ AIX هو فلاشـة الوكلاء: ملف واحد موقَّع يشيل هو
 
 ---
 
-## 🤝 Built by 1 Human + 5 AI Agents
+<a id="-built-by-1-human--9-ai-agents"></a>
 
-> *"I didn't use AI as a tool — I used AI as a team.*
-> *AIX Format is the first open standard built **by** AI agents, **for** AI agents."*
+## 🤝 Built by 1 Human + 9 AI Agents
+
+> *"The AIX Sovereign Stack: 5 sovereign projects, each built by 1 human and a dedicated team of AI agents. 12 AI collaborators total."*
+
+This **L1 Protocol** carries the fingerprints of **9 of the 12 stack-wide AI agents**, derived from commit history (direct authors, `Co-authored-by` trailers, and review attributions).
 
 | | For | Message |
 |---|---|---|
-| 🥇 | **Everyone** | 6 contributors. 5 are AI. The code is real, the tests pass, the schema is live. |
+| 🥇 | **Everyone** | 10 contributors on this repo. 9 are AI. The code is real, the tests pass, the schema is live. |
 | 🥈 | **Developers** | This is what Human–AI collaboration looks like in 2026. |
-| 🥉 | **Enterprises** | If 5 AI models can collaborate on one codebase under one standard — imagine what your agents can do with AIX. |
+| 🥉 | **Enterprises** | If 9 AI models can collaborate on one codebase under one standard, imagine what your agents can do with AIX. |
 
 ---
 
@@ -215,75 +224,96 @@ aix deploy --platform ibm-watsonx
 
 ### 🤝 Credits & Maintainers
 
+This **L1 Protocol** carries the fingerprints of **9 of the 12 stack-wide AI agents**: 7 coding agents and 2 review/debug agents.
+
+#### 🏛️ Architect
+
 <div align="center">
 <table>
 <tr>
-<td align="center" width="180">
-  <a href="https://github.com/Moeabdelaziz007">
-    <img src="https://github.com/Moeabdelaziz007.png" width="90" style="border-radius:50%;"/>
-  </a>
+<td align="center" width="200">
+  <a href="https://github.com/Moeabdelaziz007"><img src="https://github.com/Moeabdelaziz007.png" width="90" style="border-radius:50%;"/></a>
   <br/><br/>
   <b>Mohamed Abdelaziz</b>
   <br/>
   <sub>🏛️ Visionary Architect</sub>
-  <br/><br/>
-  <a href="https://github.com/Moeabdelaziz007">
-    <img src="https://img.shields.io/badge/@Moeabdelaziz007-181717?style=flat-square&logo=github"/>
-  </a>
-</td>
-<td align="center" width="180">
-  <img src="https://img.shields.io/badge/AI-Junie-6366f1?style=for-the-badge&logo=jetbrains&logoColor=white" height="40"/>
-  <br/><br/>
-  <b>Junie</b>
-  <br/>
-  <sub>⚙️ Core Implementation Agent<br/>TypeScript · Security · Refactoring</sub>
-</td>
-<td align="center" width="180">
-  <img src="https://img.shields.io/badge/AI-AIX-8b5cf6?style=for-the-badge&logo=anthropic&logoColor=white" height="40"/>
-  <br/><br/>
-  <b>AIX</b>
-  <br/>
-  <sub>🧠 Research & Architecture<br/>Deep Analysis · Constitution</sub>
-</td>
-<td align="center" width="180">
-  <img src="https://img.shields.io/badge/AI-v0-000000?style=for-the-badge&logo=vercel&logoColor=white" height="40"/>
-  <br/><br/>
-  <b>v0</b>
-  <br/>
-  <sub>🎨 UI/UX Generation<br/>Components · Studio</sub>
-</td>
-</tr>
-<tr>
-<td align="center" width="180">
-  <img src="https://img.shields.io/badge/AI-Cursor-0ea5e9?style=for-the-badge&logo=cursor&logoColor=white" height="40"/>
-  <br/><br/>
-  <b>Cursor</b>
-  <br/>
-  <sub>💻 Code Completion<br/>Inline edits · Fixes</sub>
-</td>
-<td align="center" width="180">
-  <img src="https://img.shields.io/badge/AI-Jules-10b981?style=for-the-badge&logo=googlecloud&logoColor=white" height="40"/>
-  <br/><br/>
-  <b>Jules</b>
-  <br/>
-  <sub>🔁 Async Task Agent<br/>Background execution</sub>
-</td>
-<td align="center" width="180">
-  <img src="https://img.shields.io/badge/AI-Vercel_AI-111827?style=for-the-badge&logo=vercel&logoColor=white" height="40"/>
-  <br/><br/>
-  <b>Vercel AI</b>
-  <br/>
-  <sub>🚀 Deployment Agent<br/>CI/CD · Hosting</sub>
-</td>
-<td align="center" width="180">
-  <img src="https://img.shields.io/badge/Research-AIX_4.6-8b5cf6?style=for-the-badge" height="40"/>
-  <br/><br/>
-  <b>AIX 4.6</b>
-  <br/>
-  <sub>🔬 Deep Research<br/>Gap Analysis · Roadmap</sub>
 </td>
 </tr>
 </table>
+</div>
+
+#### 🔨 Coding Agents (7)
+
+<div align="center">
+<table>
+<tr>
+<td align="center" width="160">
+  <a href="https://blacksmith.sh"><img src="https://img.shields.io/badge/AI-Codesmith-ff6b35?style=for-the-badge&logo=githubactions&logoColor=white" height="40"/></a>
+  <br/><br/><b>Codesmith</b><br/>
+  <sub>Forge &amp; CI Steward<br/>Blacksmith · Autofix · PRs</sub>
+</td>
+<td align="center" width="160">
+  <a href="https://jules.google"><img src="https://img.shields.io/badge/AI-Jules-10b981?style=for-the-badge&logo=googlecloud&logoColor=white" height="40"/></a>
+  <br/><br/><b>Jules</b><br/>
+  <sub>Async Task Agent<br/>Google Antigravity</sub>
+</td>
+<td align="center" width="160">
+  <a href="https://www.jetbrains.com/junie/"><img src="https://img.shields.io/badge/AI-Junie-6366f1?style=for-the-badge&logo=jetbrains&logoColor=white" height="40"/></a>
+  <br/><br/><b>Junie</b><br/>
+  <sub>Core Implementation<br/>JetBrains · TypeScript</sub>
+</td>
+<td align="center" width="160">
+  <a href="https://cursor.sh"><img src="https://img.shields.io/badge/AI-Cursor-0ea5e9?style=for-the-badge&logo=cursor&logoColor=white" height="40"/></a>
+  <br/><br/><b>Cursor</b><br/>
+  <sub>Inline Completion<br/>Anysphere · Edits · Fixes</sub>
+</td>
+</tr>
+<tr>
+<td align="center" width="160">
+  <a href="https://v0.dev"><img src="https://img.shields.io/badge/AI-v0-000000?style=for-the-badge&logo=vercel&logoColor=white" height="40"/></a>
+  <br/><br/><b>v0</b><br/>
+  <sub>UI/UX Generation<br/>Vercel · Components · Studio</sub>
+</td>
+<td align="center" width="160">
+  <a href="https://vercel.com/ai"><img src="https://img.shields.io/badge/AI-Vercel_AI-111827?style=for-the-badge&logo=vercel&logoColor=white" height="40"/></a>
+  <br/><br/><b>Vercel AI</b><br/>
+  <sub>Deployment Agent<br/>CI/CD · Hosting · Previews</sub>
+</td>
+<td align="center" width="160">
+  <a href="#"><img src="https://img.shields.io/badge/Research-AIX_4.6-8b5cf6?style=for-the-badge&logo=anthropic&logoColor=white" height="40"/></a>
+  <br/><br/><b>AIX 4.6</b><br/>
+  <sub>Research &amp; Architecture<br/>Constitution · Roadmap</sub>
+</td>
+<td align="center" width="160">
+  &nbsp;
+</td>
+</tr>
+</table>
+</div>
+
+#### 🔍 Review &amp; Debug Agents (2)
+
+<div align="center">
+<table>
+<tr>
+<td align="center" width="240">
+  <a href="https://coderabbit.ai"><img src="https://img.shields.io/badge/AI-CodeRabbit-7c3aed?style=for-the-badge&logo=githubactions&logoColor=white" height="40"/></a>
+  <br/><br/><b>CodeRabbit</b><br/>
+  <sub>Pattern Watcher<br/>PR review · Quality gate</sub>
+</td>
+<td align="center" width="240">
+  <a href="https://openai.com/codex"><img src="https://img.shields.io/badge/AI-Codex-10a37f?style=for-the-badge&logo=openai&logoColor=white" height="40"/></a>
+  <br/><br/><b>Codex</b><br/>
+  <sub>Code Reviewer<br/>OpenAI · P1/P2 findings</sub>
+</td>
+</tr>
+</table>
+</div>
+
+<div align="center">
+  <a href="https://github.com/Moeabdelaziz007#07-architects--ai-collaborators--المعماريون-والمتعاونون-الذكيون"><img src="https://img.shields.io/badge/SEE_ALL-12_AI_Agents_across_the_stack-39FF14?style=for-the-badge&logo=github&logoColor=39FF14" height="36"/></a>
+  <br/><br/>
+  <em>Gemini Code Assist, Claude Code, and Grok are active in sibling sovereign repos.</em>
 </div>
 
 ---
@@ -295,7 +325,7 @@ aix deploy --platform ibm-watsonx
 <br/>
 *"نحن لا نبني أدوات؛ نحن نصمم طبقة الثقة لمستقبل الذكاء."*
 
-<img src="https://img.shields.io/badge/Built%20with-1%20Human%20%2B%205%20AI%20Agents-6366f1?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/Built%20with-1%20Human%20%2B%209%20AI%20Agents-6366f1?style=for-the-badge"/>
 &nbsp;
 <img src="https://img.shields.io/badge/Version-v0.369.0-8b5cf6?style=for-the-badge"/>
 &nbsp;
