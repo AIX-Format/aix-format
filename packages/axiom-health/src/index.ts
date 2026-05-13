@@ -6,7 +6,7 @@
 // found) yields a null sub-score and is excluded from the average, not coerced
 // to zero, so a repo with no coverage instrumentation still reports honestly.
 
-import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync, lstatSync } from 'node:fs';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 
@@ -220,7 +220,7 @@ export function typeDriftScore(generatedPath: string, manifestPath: string): Sub
   if (!existsSync(manifestPath)) {
     return { name: 'type-drift', score: null, weight: 25, detail: 'drift manifest not found' };
   }
-  let manifest: { expectedSha256?: string };
+  let manifest: { expectedSha256?: unknown };
   try {
     manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
   } catch {
@@ -231,14 +231,29 @@ export function typeDriftScore(generatedPath: string, manifestPath: string): Sub
   }
   const body = readFileSync(generatedPath);
   const sha = createHash('sha256').update(body).digest('hex');
-  if (manifest.expectedSha256 === sha) {
+  // The drift manifest is external input. Treat any non-string
+  // expectedSha256 (numbers, booleans, missing, nested objects) as a
+  // structural failure with score 0 rather than reaching .slice() on
+  // it and crashing the whole health-check process. Below we know
+  // expected is either a string or the literal '<none>'.
+  const expectedRaw = manifest.expectedSha256;
+  if (expectedRaw !== undefined && typeof expectedRaw !== 'string') {
+    return {
+      name: 'type-drift',
+      score: 0,
+      weight: 25,
+      detail: `drift manifest has non-string expectedSha256 (type ${typeof expectedRaw})`,
+    };
+  }
+  const expected = (expectedRaw as string | undefined) ?? '<none>';
+  if (expected === sha) {
     return { name: 'type-drift', score: 100, weight: 25, detail: 'generated artifact matches recorded SHA' };
   }
   return {
     name: 'type-drift',
     score: 0,
     weight: 25,
-    detail: `SHA mismatch: got ${sha.slice(0, 12)}, expected ${(manifest.expectedSha256 ?? '<none>').slice(0, 12)}`,
+    detail: `SHA mismatch: got ${sha.slice(0, 12)}, expected ${expected.slice(0, 12)}`,
   };
 }
 
@@ -270,8 +285,14 @@ export function collectSourceFiles(root: string, exts = ['.ts', '.tsx', '.js', '
     // there, causing the walk to descend into node_modules etc.
     const normalised = p.replace(/\\/g, '/');
     if (skip.test(normalised)) return;
+    // lstatSync, not statSync. statSync dereferences symlinks, so a
+    // directory symlinked back to one of its ancestors (e.g. `loop -> ..`)
+    // turned the walker into an infinite loop and a health-check job
+    // would stall until something killed it. Refusing to enter
+    // symlinked entries removes that footgun entirely.
     let s;
-    try { s = statSync(p); } catch { return; }
+    try { s = lstatSync(p); } catch { return; }
+    if (s.isSymbolicLink()) return;
     if (s.isDirectory()) {
       let entries: string[] = [];
       try { entries = readdirSync(p); } catch { return; }

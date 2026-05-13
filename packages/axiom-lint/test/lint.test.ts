@@ -85,6 +85,22 @@ test('max-file-size rule fires on files above the 5MB hard cap', () => {
   );
 });
 
+test('oversized fast path respects configured max-file-size threshold', () => {
+  // Regression: the over-5MB short-circuit previously always emitted a
+  // max-file-size finding even when --max-bytes was set higher than
+  // the file size, producing a false positive. Now we re-read the
+  // configured threshold and only fire when s.size > configuredMax.
+  const dir = mkdtempSync(join(tmpdir(), 'axiom-lint-big2-'));
+  const big = join(dir, 'big.ts');
+  writeFileSync(big, 'x'.repeat(6_000_000), 'utf8');
+  const report = lintFiles([big], { naming: 'mixed', maxFileBytes: 10_000_000 });
+  assert.equal(
+    report.findings.filter(f => f.rule === 'max-file-size').length,
+    0,
+    `6MB file under a 10MB cap must NOT fire; got ${JSON.stringify(report.findings)}`,
+  );
+});
+
 test('secrets rule scans PEM key file conventions (.pem, .key, id_rsa, id_ed25519)', () => {
   // Regression: the private-key-pem pattern was in the detector but
   // the file filter excluded the very files that hold those keys.

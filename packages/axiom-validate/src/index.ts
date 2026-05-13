@@ -203,25 +203,37 @@ export function validateSkillMarkdown(file: string): ValidationFinding[] {
     });
   }
 
-  // Tier 0..5. Three layers of defence so every invalid shape lands in
+  // Tier 0..5. Four layers of defence so every invalid shape lands in
   // the error branch with a clear message:
-  //   1. Capture the entire tier scalar (anything up to newline / # comment)
-  //      so values like `tier: -1` or `tier: 2.5` are visible to the parser
-  //      instead of getting masked by a /\d+/ that just doesn't match.
-  //   2. Parse with Number() and require Number.isInteger so signed values
-  //      (-1) and fractional values (2.5) are rejected before range check.
-  //   3. Range-check 0..5 inclusive only after the integer check passed.
-  const tierRawMatch = fm.match(/^tier:\s*([^\r\n#]+)/m);
-  if (tierRawMatch) {
-    const raw = tierRawMatch[1].trim();
-    const tier = Number(raw);
-    if (!Number.isInteger(tier) || tier < 0 || tier > 5) {
+  //   1. Match the line whenever `tier:` appears at the top level so a
+  //      blank `tier:` is still routed through the validator instead of
+  //      slipping past on a regex that needed at least one non-newline
+  //      character to capture.
+  //   2. Capture whatever follows up to newline / # comment.
+  //   3. Parse with Number() and require Number.isInteger so signed
+  //      values (-1) and fractional values (2.5) are rejected before
+  //      the range check.
+  //   4. Range-check 0..5 inclusive only after the integer check passed.
+  const tierLineMatch = fm.match(/^tier:[ \t]*([^\r\n#]*)/m);
+  if (tierLineMatch) {
+    const raw = tierLineMatch[1].trim();
+    if (raw === '') {
       out.push({
         checker: 'skill-md',
         severity: 'error',
         file,
-        message: `tier "${raw}" must be an integer in range 0..5`,
+        message: 'tier must be an integer in range 0..5 (got empty value)',
       });
+    } else {
+      const tier = Number(raw);
+      if (!Number.isInteger(tier) || tier < 0 || tier > 5) {
+        out.push({
+          checker: 'skill-md',
+          severity: 'error',
+          file,
+          message: `tier "${raw}" must be an integer in range 0..5`,
+        });
+      }
     }
   }
 

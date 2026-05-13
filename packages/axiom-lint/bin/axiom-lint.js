@@ -1,17 +1,23 @@
 #!/usr/bin/env node
 // axiom-lint CLI — walks the given paths and prints findings as JSON or text.
 
-import { readdirSync, statSync, existsSync } from 'node:fs';
+import { readdirSync, statSync, lstatSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { lintFiles } from '../src/index.ts';
 
+// Walk uses lstatSync (does NOT follow symlinks) instead of statSync.
+// A directory symlinked back to one of its ancestors (`loop -> ..`)
+// previously caused the linter to recurse forever and the CI job to
+// stall until killed. We now refuse to enter any symlinked entry at
+// all — the rare benefit of following is dwarfed by the loop risk.
 function walk(root, out, exclude) {
   const stack = [root];
   while (stack.length > 0) {
     const p = stack.pop();
     if (exclude.some(re => re.test(p))) continue;
     let s;
-    try { s = statSync(p); } catch { continue; }
+    try { s = lstatSync(p); } catch { continue; }
+    if (s.isSymbolicLink()) continue;
     if (s.isDirectory()) {
       let entries;
       try { entries = readdirSync(p); } catch { continue; }

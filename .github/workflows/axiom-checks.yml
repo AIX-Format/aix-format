@@ -2,11 +2,17 @@ name: Axiom Checks
 
 on:
   pull_request:
+    # Also trigger on lockfile / workspace config changes. The job runs
+    # `pnpm install --frozen-lockfile`, so a PR that only edits
+    # pnpm-lock.yaml or pnpm-workspace.yaml can still break installs
+    # for these packages — and previously skipped the workflow entirely.
     paths:
       - 'packages/axiom-lint/**'
       - 'packages/axiom-validate/**'
       - 'packages/axiom-health/**'
       - 'packages/axiom-autofix/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
       - '.github/workflows/axiom-checks.yml'
   push:
     branches: [main]
@@ -15,6 +21,8 @@ on:
       - 'packages/axiom-validate/**'
       - 'packages/axiom-health/**'
       - 'packages/axiom-autofix/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
       - '.github/workflows/axiom-checks.yml'
 
 permissions:

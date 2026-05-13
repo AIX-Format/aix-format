@@ -276,12 +276,35 @@ export function buildRules(config: LintConfig): LintRule[] {
     });
 }
 
-// Files over this size are not READ into memory (we won't grep them for
-// secrets / em-dashes), but max-file-size is the one rule that genuinely
-// only needs the size, not the content — so it runs against the stat
-// alone, giving us a finding precisely on the kind of file the size
-// policy is meant to catch.
-const HARD_SIZE_LIMIT = 5_000_000;
+// HARD_READ_LIMIT is the byte ceiling above which we refuse to pull the
+// file's contents into memory. It is an implementation guard against
+// runaway RAM use on multi-GB inputs, NOT a configurable policy — that
+// role belongs to the user-controlled `max-file-size` rule, whose
+// threshold comes from config.maxFileBytes (CLI: --max-bytes). The two
+// limits are deliberately separate:
+//
+//   - File ≤ configured limit AND ≤ HARD_READ_LIMIT → content-rules run,
+//     and (configured/HARD) rules can fire.
+//   - File > configured limit AND ≤ HARD_READ_LIMIT → content-rules
+//     still run; size rule fires from inside the rule (sees real bytes).
+//   - File > HARD_READ_LIMIT → we synthesise a size finding ONLY if the
+//     configured threshold says it should fire, then skip content rules.
+//     We never invent a size finding the user did not ask for.
+const HARD_READ_LIMIT = 5_000_000;
+
+/** Extract the configured max-file-size threshold from the rule set. */
+function getConfiguredMaxBytes(rules: LintRule[]): number {
+  const sizeRule = rules.find(r => r.id === 'max-file-size');
+  if (!sizeRule) return Number.POSITIVE_INFINITY;
+  // The rule embeds its threshold inside the description string ("Reject
+  // files larger than N bytes..."). Parse it back so this function does
+  // not need to know how ruleFileSize was constructed. If parsing fails
+  // we fall back to HARD_READ_LIMIT, the conservative default.
+  const m = sizeRule.description.match(/larger than (\d+)/);
+  if (!m) return HARD_READ_LIMIT;
+  const n = Number(m[1]);
+  return Number.isFinite(n) ? n : HARD_READ_LIMIT;
+}
 
 export function lintFile(file: string, rules: LintRule[]): LintFinding[] {
   let s: ReturnType<typeof statSync>;
@@ -293,42 +316,23 @@ export function lintFile(file: string, rules: LintRule[]): LintFinding[] {
   if (!s.isFile()) return [];
 
   const findings: LintFinding[] = [];
+  const configuredMax = getConfiguredMaxBytes(rules);
 
-  // Apply the size rule first, BEFORE we early-return on the hard cap.
-  // The previous shape returned [] for files > 5MB, which meant the
-  // size policy never fired on exactly the files it was supposed to
-  // catch. We synthesise a finding from the stat-only data here, then
-  // let the content-based rules run only when the file is small enough
-  // to be safely held in memory.
-  const sizeRule = rules.find(r => r.id === 'max-file-size');
-  if (sizeRule) {
-    // Force the rule's perspective on the byte count by handing it a
-    // dummy content whose UTF-8 length equals the real size. Buffer.byteLength
-    // is exact for ASCII, and the rule only reads `Buffer.byteLength(content)`
-    // — but to avoid allocating a 5MB+ string we instead invoke the rule's
-    // intent directly using s.size.
-    if (typeof (sizeRule as { defaultSeverity?: string }).defaultSeverity === 'string') {
-      // Re-evaluate against the file's real size. We mirror the message the
-      // rule itself would have produced.
-      const maxBytes = HARD_SIZE_LIMIT; // dynamic limit lives inside the rule;
-      // To honour a smaller configured limit set by buildRules, hand the
-      // rule a content of exactly s.size synthetic bytes — but only when
-      // s.size <= HARD_SIZE_LIMIT, because for very large files the rule
-      // always fires and the synthetic-buffer step would just waste RAM.
-      if (s.size > HARD_SIZE_LIMIT) {
-        findings.push({
-          rule: 'max-file-size',
-          severity: sizeRule.defaultSeverity,
-          file,
-          message: `file is ${s.size} bytes, exceeds hard limit ${maxBytes}`,
-        });
-      }
+  // For very large files we cannot safely read the content into a
+  // string. But the size rule itself only needs s.size, so we
+  // synthesise its finding stat-only, AND we honour the user's
+  // configured threshold so `--max-bytes 10000000` does NOT flag a
+  // 6MB file just because it is over our internal HARD_READ_LIMIT.
+  if (s.size > HARD_READ_LIMIT) {
+    const sizeRule = rules.find(r => r.id === 'max-file-size');
+    if (sizeRule && s.size > configuredMax) {
+      findings.push({
+        rule: 'max-file-size',
+        severity: sizeRule.defaultSeverity,
+        file,
+        message: `file is ${s.size} bytes, exceeds limit ${configuredMax}`,
+      });
     }
-  }
-
-  if (s.size > HARD_SIZE_LIMIT) {
-    // Don't read 50MB into memory just to grep for em-dashes; we've
-    // already recorded the size finding above.
     return findings;
   }
 

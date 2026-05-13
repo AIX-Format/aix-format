@@ -170,6 +170,24 @@ test('validateManifestFiles: malformed schema JSON returns a finding, not a cras
   assert.ok(report.findings.some(f => f.message.includes('JSON parse error')));
 });
 
+test('skill markdown: rejects empty tier value (tier:)', () => {
+  // Regression: previously the capture regex required at least one
+  // non-newline character, so `tier:` (no value) silently skipped
+  // numeric validation while still satisfying the required-key check.
+  const file = tmp('empty-tier.md', `---
+name: ok-name
+tier:
+description: x
+---
+
+## Purpose
+
+x
+`);
+  const findings = validateSkillMarkdown(file);
+  assert.ok(findings.some(f => f.message.includes('empty value')));
+});
+
 test('skill markdown: rejects negative tier (-1)', () => {
   const file = tmp('neg.md', `---
 name: ok-name

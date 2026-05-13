@@ -154,6 +154,19 @@ test('typeDriftScore: matching SHA -> 100', () => {
   assert.equal(sub.score, 100);
 });
 
+test('typeDriftScore: rejects non-string expectedSha256 with structural failure', () => {
+  // Regression: a numeric expectedSha256 (manifest = { expectedSha256: 123 })
+  // used to crash with TypeError when the mismatch branch called
+  // .slice() on it. The drift manifest is external input, so a
+  // bad field type must become a score-0 finding, not a process
+  // crash that takes the rest of the health check with it.
+  const gen = tmp('gen.d.ts', 'export type X = number;\n');
+  const manifest = tmp('manifest.json', JSON.stringify({ expectedSha256: 123 }));
+  const sub = typeDriftScore(gen, manifest);
+  assert.equal(sub.score, 0);
+  assert.ok(sub.detail.includes('non-string expectedSha256'));
+});
+
 test('typeDriftScore: mismatch -> 0', () => {
   const gen = tmp('gen.d.ts', 'export type X = number;\n');
   const manifest = tmp('manifest.json', JSON.stringify({ expectedSha256: 'deadbeef' }));
