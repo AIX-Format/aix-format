@@ -1,8 +1,7 @@
 import { EventEmitter } from 'events';
 import { health } from './health.js';
 import { CuriosityEngine } from './curiosity.js';
-import { archiveWisdom } from './brain.js';
-import { AgentSelfReview } from './AgentSelfReview.js';
+import { archiveWisdom, AgentSelfReview } from './brain.js';
 import { AgentRuntimeEngine } from './agent-runtime.js';
 import { GroqProvider, ToolRegistry } from './llm/index.js';
 import { mcpGate } from './mcp-gate.js';
@@ -159,7 +158,7 @@ export class SovereignGateway extends EventEmitter {
       if (runtimeResult.success && runtimeResult.result) {
         // Background distillation to ensure responsiveness
         AgentSelfReview.distill(reviewRecord, task, JSON.stringify(runtimeResult.result), this.octokit)
-          .catch(e => console.warn('⚠️ [SovereignGateway] Background distillation failed:', e));
+          .catch((e: unknown) => console.warn('⚠️ [SovereignGateway] Background distillation failed:', e));
       }
 
       // 9. Audit Success (Rust Event Store)
@@ -217,7 +216,10 @@ export class SovereignGateway extends EventEmitter {
       ]);
 
       const content = response.content;
-      const scores = JSON.parse(content.match(/\{.*\}/s)?.[0] || '{"overall": 5}');
+      // Use [\s\S] instead of the /s (dotAll) flag so this matches even
+      // when consumers compile with an ES2017 lib in scope (apps/studio
+      // currently targets ES2017 and rejects the /s flag with TS1501).
+      const scores = JSON.parse(content.match(/\{[\s\S]*\}/)?.[0] || '{"overall": 5}');
 
       return {
         understanding: scores.understanding || 5,
