@@ -61,7 +61,7 @@ The TrustChain is **append-only**. Resources are **consumed once** (Graded Linea
 
 ## 4. The Stack Layers
 
-```
+```text
 L1 — aix-format          The Spec (schemas, types, identity primitives)
 L2 — iqra                The Runtime (mission control, conscience, workers, evolution)
 L3 — aix-agent-skills    The Marketplace (skills + governance + constitutional runtime)
@@ -101,7 +101,7 @@ Re-implementing any of these in a downstream repo is forbidden. Consumers depend
 | Skill identifiers | `snake_case` (regex `^[a-z0-9_]+$`) — enforced by schema |
 | File names / branches | `kebab-case` |
 | Package scopes | `@axiom/<concept>` for canonical core. Avoid `@aix/<topic>` going forward |
-| Versions | SemVer; manifests pin `AIX_FORMAT_VERSION`. Patch bumps are non-shape-breaking |
+| Versions | SemVer. Manifests carry the version in `meta.format_version` (or the top-level `aix_version` shorthand); both are pinned in code via the `AIX_FORMAT_VERSION` constant exported from `@axiom/schema/version`. Patch bumps are non-shape-breaking |
 | Commit messages | Conventional Commits where the project's `AGENTS.md` does not say otherwise |
 
 ---
@@ -126,7 +126,7 @@ These numbers are encoded in code (not docs only). They are referenced by name i
 | Constant | Value | Where it lives |
 |---|---|---|
 | `THREE` | 3 | Minimum quorum for SHURĀ-grade decisions |
-| `SABEEN` | 7 | Halt threshold (uncorrected violations in TAWBAH.md) |
+| `SABEEN` | 7 | Halt threshold (uncorrected violations in TAWBAH.md) AND the recommended minimum `safety_score` for autonomous skill dispatch (per `skills[].safety_score` schema description) |
 | `NINE` | 9 | STALE threshold (path-key reward decay) |
 | `NINETEEN` | 19 | Quranic structural prime |
 | `ARBAUN` | 40 | Maturation period |
