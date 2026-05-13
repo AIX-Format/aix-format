@@ -6,8 +6,12 @@
 // on the first regression. Run on every PR via the smoke-gate workflow.
 //
 // Usage:
-//   node scripts/smoke.mjs           # text output, exit 1 on first fail
-//   node scripts/smoke.mjs --json    # structured JSON for CI consumption
+//   node --experimental-strip-types scripts/smoke.mjs           # text output, exit 1 on first fail
+//   node --experimental-strip-types scripts/smoke.mjs --json    # structured JSON for CI consumption
+//
+// The --experimental-strip-types flag is required because this runner
+// dynamically imports the @axiom/* packages' .ts entry points
+// (packages/axiom-{lint,validate,health}/src/index.ts).
 //
 // Adding a scenario: append a Case object to CASES. Keep it pure:
 // every scenario takes zero arguments, returns Promise<{ok, detail}>,
@@ -91,16 +95,29 @@ it('rejects a syntactically-malformed JSON manifest', async () => {
 }, 'parsing');
 
 it('parses v0.369.0 optional-fields fixture without dropping data', async () => {
+  // Round-trip through the real AIXParser so a future field-stripping
+  // regression in the parser (e.g. a forgotten property in an output
+  // shape, or a strict-validator rejecting unknown keys) is caught
+  // here. A bare JSON.parse would have tested only the file, not the
+  // contract between schema + parser.
   const fixturePath = resolve(REPO, 'tests/fixtures/schema/v0.369.0-optional-fields.aix.json');
   if (!existsSync(fixturePath)) return ok('fixture not present (post-#160 baseline) — skipped');
+  const { AIXParser } = await loadParser();
+  const parser = new AIXParser();
   const raw = readFileSync(fixturePath, 'utf8');
-  const data = JSON.parse(raw);
+  const agent = await parser.parse(raw, fixturePath);
+  // The parser may surface fields either at the top level of the
+  // AIXAgent instance or under `.data` depending on its internal
+  // shape, so we accept either location and assert on whichever the
+  // parser populated. The contract this case pins is: "after parsing,
+  // the load-bearing v0.369.0 fields are still observable".
+  const data = (agent && agent.data) ? agent.data : agent;
   await check(data.aix_version === '0.369.0', 'aix_version must round-trip exactly');
   await check(
     data.identity_layer && data.identity_layer.zk_proof && data.identity_layer.pi_uid_anchor,
-    'v0.369.0 fixture must carry zk_proof + pi_uid_anchor',
+    'v0.369.0 fixture must carry zk_proof + pi_uid_anchor after parse',
   );
-  return ok('aix_version + zk_proof + pi_uid_anchor present');
+  return ok('aix_version + zk_proof + pi_uid_anchor survived parser round-trip');
 }, 'parsing');
 
 // ---------------------------------------------------------------------------
