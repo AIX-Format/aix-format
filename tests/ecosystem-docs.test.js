@@ -1,597 +1,915 @@
 /**
- * Tests for documentation files added/modified in the Echo369 ecosystem PR.
+ * Ecosystem Documentation Tests
  *
- * Covers: AGENTS.md               — repo operating manual for AI coding agents
- *         AIX_STACK_VERSIONING.md — independent SemVer + Echo369 codename doctrine
- *         AXIOM.md                — §4.5 Extended Ecosystem / satellite-layer additions
- *
- * Strategy: parse markdown as plain text and assert that:
- *  - required sections / headings are present
- *  - canonical constants (protocol version, codename, spec ID) are stated correctly
- *  - cross-references between documents are consistent
- *  - satellite layer definitions are complete and correct
+ * Validates the files added/modified/deleted in the Echo369 satellite-layer PR:
+ *   - AGENTS.md (new)
+ *   - AIX_STACK_VERSIONING.md (new)
+ *   - assets/aix-footer-quote-v2.svg (new)
+ *   - assets/aix-stack-diagram-v2.svg (new)
+ *   - assets/aix-stack-header-v2.svg (new)
+ *   - AXIOM.md §4.5 (modified - satellite-layer doctrine added)
+ *   - README.md (modified - v2 assets, Echo369 badges, L0-L6 nav)
+ *   - scripts/smoke.mjs (deleted)
+ *   - .github/workflows/smoke-gate.yml (deleted)
+ *   - docs/RELEASE-NOTES-baseline-v0.369.0.md (deleted)
  */
 
-import { describe, it } from 'node:test';
-import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import path from 'node:path';
+import { describe, it, expect, beforeAll } from 'vitest';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const REPO = path.resolve(__dirname, '..');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const REPO = resolve(__dirname, '..');
 
-function readDoc(relPath) {
-  return fs.readFileSync(path.join(REPO, relPath), 'utf8');
+// ---------------------------------------------------------------------------
+// Helpers
+
+function repoPath(...parts) {
+  return resolve(REPO, ...parts);
+}
+
+function readText(relPath) {
+  return readFileSync(repoPath(relPath), 'utf8');
+}
+
+function fileExists(relPath) {
+  return existsSync(repoPath(relPath));
 }
 
 // ---------------------------------------------------------------------------
-// AGENTS.md
 
-describe('AGENTS.md', () => {
-  let doc;
+describe('PR Changes: File Existence', () => {
+  describe('New files must exist', () => {
+    it('AGENTS.md is present', () => {
+      expect(fileExists('AGENTS.md')).toBe(true);
+    });
 
-  it('file exists and is non-empty', () => {
-    const p = path.join(REPO, 'AGENTS.md');
-    assert.ok(fs.existsSync(p), 'AGENTS.md must exist at repo root');
-    doc = fs.readFileSync(p, 'utf8');
-    assert.ok(doc.length > 0, 'AGENTS.md must not be empty');
+    it('AIX_STACK_VERSIONING.md is present', () => {
+      expect(fileExists('AIX_STACK_VERSIONING.md')).toBe(true);
+    });
+
+    it('assets/aix-footer-quote-v2.svg is present', () => {
+      expect(fileExists('assets/aix-footer-quote-v2.svg')).toBe(true);
+    });
+
+    it('assets/aix-stack-diagram-v2.svg is present', () => {
+      expect(fileExists('assets/aix-stack-diagram-v2.svg')).toBe(true);
+    });
+
+    it('assets/aix-stack-header-v2.svg is present', () => {
+      expect(fileExists('assets/aix-stack-header-v2.svg')).toBe(true);
+    });
   });
 
-  it('identifies aix-format as the L1 protocol layer', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(
-      doc.includes('L1') && doc.includes('aix-format'),
-      'AGENTS.md must identify aix-format as L1',
-    );
+  describe('Deleted files must not exist', () => {
+    it('scripts/smoke.mjs has been removed', () => {
+      expect(fileExists('scripts/smoke.mjs')).toBe(false);
+    });
+
+    it('.github/workflows/smoke-gate.yml has been removed', () => {
+      expect(fileExists('.github/workflows/smoke-gate.yml')).toBe(false);
+    });
+
+    it('docs/RELEASE-NOTES-baseline-v0.369.0.md has been removed', () => {
+      expect(fileExists('docs/RELEASE-NOTES-baseline-v0.369.0.md')).toBe(false);
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe('AGENTS.md: content validation', () => {
+  let content;
+
+  beforeAll(() => {
+    content = readText('AGENTS.md');
   });
 
-  it('states the current stack codename is Echo369', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(doc.includes('Echo369'), 'AGENTS.md must state the Echo369 codename');
+  it('declares aix-format as L1 of the AIX Sovereign Stack', () => {
+    expect(content).toContain('aix-format');
+    expect(content).toContain('L1');
   });
 
-  it('states the spec ID as AIX/1.0', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(doc.includes('AIX/1.0'), 'AGENTS.md must reference the AIX/1.0 spec ID');
+  it('names the current stack codename as Echo369', () => {
+    expect(content).toContain('Echo369');
   });
 
-  it('states the protocol version constant AIX_PROTOCOL_VERSION as "0.369.0"', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(
-      doc.includes('AIX_PROTOCOL_VERSION') && doc.includes('"0.369.0"'),
-      'AGENTS.md must document AIX_PROTOCOL_VERSION = "0.369.0"',
-    );
+  it('names the current spec ID as AIX/1.0', () => {
+    expect(content).toContain('AIX/1.0');
   });
 
-  it('references AXIOM.md', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(doc.includes('AXIOM.md'), 'AGENTS.md must reference AXIOM.md');
+  it('states AIX_PROTOCOL_VERSION = "0.369.0"', () => {
+    expect(content).toContain('0.369.0');
+    expect(content).toContain('AIX_PROTOCOL_VERSION');
+  });
+
+  it('has a Repository overview section', () => {
+    expect(content).toMatch(/## Repository overview/);
+  });
+
+  it('has a Conventions section', () => {
+    expect(content).toMatch(/## Conventions/);
+  });
+
+  it('has a Sovereign / protected paths section', () => {
+    expect(content).toMatch(/## Sovereign \/ protected paths/);
+  });
+
+  it('has a Commands section', () => {
+    expect(content).toMatch(/## Commands/);
+  });
+
+  it('has a Testing rules section', () => {
+    expect(content).toMatch(/## Testing rules/);
+  });
+
+  it('has a Codegen rules section', () => {
+    expect(content).toMatch(/## Codegen rules/);
+  });
+
+  it('has a Cross-stack awareness section', () => {
+    expect(content).toMatch(/## Cross-stack awareness/);
+  });
+
+  it('references AXIOM.md as the stack-wide constitution', () => {
+    expect(content).toContain('AXIOM.md');
   });
 
   it('references AIX_STACK_VERSIONING.md', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(
-      doc.includes('AIX_STACK_VERSIONING.md'),
-      'AGENTS.md must reference AIX_STACK_VERSIONING.md',
-    );
+    expect(content).toContain('AIX_STACK_VERSIONING.md');
   });
 
-  it('contains a "Repository structure" section', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(
-      doc.includes('Repository structure') || doc.includes('## Repository structure'),
-      'AGENTS.md must contain a Repository structure section',
-    );
+  it('lists all three Sovereign Stack layers (L1, L2, L3)', () => {
+    expect(content).toContain('L2');
+    expect(content).toContain('L3');
+    expect(content).toContain('iqra');
+    expect(content).toContain('aix-agent-skills');
   });
 
-  it('lists assets/ directory in the repo structure', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(
-      doc.includes('assets/'),
-      'AGENTS.md repo structure must include assets/ directory',
-    );
+  it('references §4.5 (Extended Ecosystem · Satellite Layers)', () => {
+    expect(content).toContain('§4.5');
   });
 
-  it('lists tests/ directory in the repo structure', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(
-      doc.includes('tests/'),
-      'AGENTS.md repo structure must include tests/ directory',
-    );
+  it('lists the three satellite repos', () => {
+    expect(content).toContain('AlphaAxiom');
+    expect(content).toContain('PiWorker-OS');
+    expect(content).toContain('GemClaw');
   });
 
-  it('contains a "Sovereign / protected paths" section', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(
-      doc.includes('Sovereign') && doc.includes('protected'),
-      'AGENTS.md must have a Sovereign / protected paths section',
-    );
+  it('lists Apache-2.0 as the required license', () => {
+    expect(content).toContain('Apache-2.0');
   });
 
-  it('marks AXIOM.md as a sovereign protected file', () => {
-    doc = readDoc('AGENTS.md');
-    // The section must list AXIOM.md under protected paths
-    const sovereignIdx = doc.indexOf('Sovereign');
-    const axiomRefIdx = doc.indexOf('AXIOM.md', sovereignIdx);
-    assert.ok(
-      axiomRefIdx !== -1,
-      'Sovereign/protected section must reference AXIOM.md',
-    );
+  it('enforces kebab-case branch convention', () => {
+    expect(content).toContain('kebab-case');
   });
 
-  it('contains a "Commands" section with a pnpm test command', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(doc.includes('## Commands'), 'AGENTS.md must have a Commands section');
-    assert.ok(
-      doc.includes('pnpm') && doc.includes('test'),
-      'Commands section must include a pnpm test command',
-    );
+  it('enforces Conventional Commits', () => {
+    expect(content).toMatch(/Conventional Commits/i);
   });
 
-  it('contains a "Testing rules" section', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(
-      doc.includes('Testing rules') || doc.includes('## Testing'),
-      'AGENTS.md must contain a Testing rules section',
-    );
+  it('mentions the AIX_FORMAT_VERSION constant location', () => {
+    expect(content).toContain('AIX_FORMAT_VERSION');
+    expect(content).toContain('@axiom/schema/version');
   });
 
-  it('mentions no-mock policy for sovereign components', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(
-      doc.includes('No mocks') || doc.includes('no mocks') || doc.includes('sovereign components'),
-      'AGENTS.md must document the no-mock policy for sovereign components',
-    );
+  it('lists protected paths including AXIOM.md and AIX_STACK_VERSIONING.md', () => {
+    // Both must appear in the protected paths section
+    const protectedSection = content.split('## Sovereign / protected paths')[1];
+    expect(protectedSection).toContain('AXIOM.md');
+    expect(protectedSection).toContain('AIX_STACK_VERSIONING.md');
   });
 
-  it('lists satellite repos (AlphaAxiom, PiWorker-OS, GemClaw)', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(doc.includes('AlphaAxiom'), 'AGENTS.md must mention AlphaAxiom satellite');
-    assert.ok(doc.includes('PiWorker-OS'), 'AGENTS.md must mention PiWorker-OS satellite');
-    assert.ok(doc.includes('GemClaw'), 'AGENTS.md must mention GemClaw satellite');
+  it('prohibits running pnpm audit fix --force', () => {
+    expect(content).toContain('pnpm audit fix --force');
+    // Must appear in a prohibition context (do not / never)
+    expect(content).toMatch(/Do not run.*pnpm audit fix --force/i);
   });
 
-  it('states Apache-2.0 license requirement', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(
-      doc.includes('Apache-2.0'),
-      'AGENTS.md must state the Apache-2.0 license requirement',
-    );
+  it('prohibits hand-editing types.gen.ts', () => {
+    expect(content).toContain('types.gen.ts');
+    expect(content).toMatch(/Never hand-edit.*types\.gen\.ts/);
   });
 
-  it('specifies kebab-case for branch names', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(
-      doc.includes('kebab-case'),
-      'AGENTS.md must specify kebab-case for branch names',
-    );
-  });
-
-  it('mentions Conventional Commits requirement', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(
-      doc.includes('Conventional Commits'),
-      'AGENTS.md must require Conventional Commits',
-    );
-  });
-
-  it('contains a "Cross-stack awareness" section', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(
-      doc.includes('Cross-stack'),
-      'AGENTS.md must contain a Cross-stack awareness section',
-    );
-  });
-
-  it('states that L2 iqra consumes from L1', () => {
-    doc = readDoc('AGENTS.md');
-    assert.ok(
-      doc.includes('iqra') && doc.includes('consumes'),
-      'AGENTS.md must state that L2 iqra consumes from L1',
-    );
-  });
-
-  // Boundary / regression: file must NOT claim the old 9-agent count
-  it('does not claim a 9-agent contributor count (reduced to 5 in this PR)', () => {
-    doc = readDoc('AGENTS.md');
-    // The PR reduced agent count from 9 to 5; AGENTS.md should not say "9 AI"
-    assert.ok(
-      !doc.includes('9 AI') && !doc.includes('9 of the 12'),
-      'AGENTS.md must not carry the stale 9-agent contributor count',
-    );
+  it('requires satellite repos to declare aix.stackVersion', () => {
+    expect(content).toContain('aix.stackVersion');
   });
 });
 
 // ---------------------------------------------------------------------------
-// AIX_STACK_VERSIONING.md
 
-describe('AIX_STACK_VERSIONING.md', () => {
-  let doc;
+describe('AIX_STACK_VERSIONING.md: content validation', () => {
+  let content;
 
-  it('file exists and is non-empty', () => {
-    const p = path.join(REPO, 'AIX_STACK_VERSIONING.md');
-    assert.ok(fs.existsSync(p), 'AIX_STACK_VERSIONING.md must exist at repo root');
-    doc = fs.readFileSync(p, 'utf8');
-    assert.ok(doc.length > 0, 'AIX_STACK_VERSIONING.md must not be empty');
+  beforeAll(() => {
+    content = readText('AIX_STACK_VERSIONING.md');
   });
 
-  it('opens with a reference to AXIOM.md', () => {
-    doc = readDoc('AIX_STACK_VERSIONING.md');
-    // File must direct readers to AXIOM.md first
-    assert.ok(
-      doc.includes('AXIOM.md'),
-      'AIX_STACK_VERSIONING.md must reference AXIOM.md',
-    );
+  it('has a title declaring independent SemVer and Echo369 codenames', () => {
+    expect(content).toContain('Independent SemVer');
+    expect(content).toContain('Echo369');
   });
 
-  it('states the one-sentence doctrine in section 1', () => {
-    doc = readDoc('AIX_STACK_VERSIONING.md');
-    assert.ok(
-      doc.includes('## 1.') || doc.includes('## 1 '),
-      'AIX_STACK_VERSIONING.md must have a section 1',
-    );
-    assert.ok(
-      doc.includes('independently') && doc.includes('SemVer'),
-      'section 1 must state that repos version independently using SemVer',
-    );
-  });
-
-  it('states the current codename is Echo369', () => {
-    doc = readDoc('AIX_STACK_VERSIONING.md');
-    assert.ok(doc.includes('Echo369'), 'must state Echo369 as the current codename');
-  });
-
-  it('states the current spec ID as AIX/1.0', () => {
-    doc = readDoc('AIX_STACK_VERSIONING.md');
-    assert.ok(doc.includes('AIX/1.0'), 'must state AIX/1.0 as the current spec');
-  });
-
-  it('defines three version surfaces in section 3', () => {
-    doc = readDoc('AIX_STACK_VERSIONING.md');
-    assert.ok(
-      doc.includes('## 3.') || doc.includes('three version surfaces') || doc.includes('## 3 '),
-      'must have section 3 covering the three version surfaces',
-    );
-    // All three must be described
-    assert.ok(
-      doc.includes('3.1') || doc.includes('App version'),
-      'must describe the app version surface (3.1)',
-    );
-    assert.ok(
-      doc.includes('3.2') || doc.includes('stackVersion'),
-      'must describe the AIX Stack compatibility surface (3.2)',
-    );
-    assert.ok(
-      doc.includes('3.3') || doc.includes('README badges'),
-      'must describe the README badges surface (3.3)',
-    );
-  });
-
-  it('provides a package.json example with the aix metadata block', () => {
-    doc = readDoc('AIX_STACK_VERSIONING.md');
-    assert.ok(
-      doc.includes('"stackVersion"') && doc.includes('"stackCodename"'),
-      'must include a package.json example with stackVersion and stackCodename fields',
-    );
-    assert.ok(
-      doc.includes('"spec"') && doc.includes('"layer"') && doc.includes('"authority"'),
-      'aix metadata block must include spec, layer, and authority fields',
-    );
-  });
-
-  it('contains the codename roadmap table in section 4', () => {
-    doc = readDoc('AIX_STACK_VERSIONING.md');
-    assert.ok(
-      doc.includes('## 4.') || doc.includes('codename roadmap'),
-      'must have section 4 with the codename roadmap',
-    );
-    assert.ok(doc.includes('Echo369'), 'roadmap must list Echo369 as Current window');
-    assert.ok(doc.includes('Resonance'), 'roadmap must list Resonance as the Next window');
-    assert.ok(doc.includes('Sovereignty'), 'roadmap must list Sovereignty as the Then window');
-  });
-
-  it('correctly maps Echo369 to AIX/1.0 in the codename roadmap table', () => {
-    doc = readDoc('AIX_STACK_VERSIONING.md');
-    // The codename table row should read: | Current | **Echo369** | `AIX/1.0` | ...
-    // Find the "Current" row in the table and assert it contains both Echo369 and AIX/1.0.
-    const currentRowMatch = doc.match(/\|\s*Current\s*\|[^|\n]*Echo369[^|\n]*\|\s*`?AIX\/1\.0`?/);
-    assert.ok(
-      currentRowMatch !== null,
-      'The codename roadmap table must map Echo369 (Current window) to spec AIX/1.0 in the same row',
-    );
-  });
-
-  it('describes the 369 motif in section 6', () => {
-    doc = readDoc('AIX_STACK_VERSIONING.md');
-    assert.ok(
-      doc.includes('## 6.') || doc.includes('369 motif'),
-      'must have section 6 describing the 369 motif',
-    );
-    assert.ok(
-      doc.includes('AIX_PROTOCOL_VERSION'),
-      'section 6 must reference AIX_PROTOCOL_VERSION',
-    );
-    assert.ok(
-      doc.includes('0.369.0'),
-      'section 6 must state the protocol version 0.369.0',
-    );
-  });
-
-  it('states the 369 motif is NOT encoded in satellite app versions', () => {
-    doc = readDoc('AIX_STACK_VERSIONING.md');
-    assert.ok(
-      doc.includes('not') && doc.includes("package.json#version"),
-      'must clarify the 369 motif does not bleed into consumer-facing package.json#version',
-    );
-  });
-
-  it('lists all seven ecosystem repositories in the maturity table', () => {
-    doc = readDoc('AIX_STACK_VERSIONING.md');
-    const expected = [
-      'aix-format',
-      'iqra',
-      'aix-agent-skills',
-      'AlphaAxiom',
-      'PiWorker-OS',
-      'GemClaw',
-      'axiomid-project',
-    ];
-    for (const repo of expected) {
-      assert.ok(doc.includes(repo), `maturity table must include repo: ${repo}`);
+  it('has all 8 numbered sections', () => {
+    for (let i = 1; i <= 8; i++) {
+      expect(content).toMatch(new RegExp(`^## ${i}\\.`, 'm'));
     }
   });
 
-  it('contains a migration guide for satellite repos in section 7', () => {
-    doc = readDoc('AIX_STACK_VERSIONING.md');
-    assert.ok(
-      doc.includes('## 7.') || doc.includes('Migration guide'),
-      'must have section 7 with migration instructions for satellite repos',
-    );
-    // The six migration steps should be mentioned
-    assert.ok(
-      doc.includes('aix metadata block') ||
-        (doc.includes('stackVersion') && doc.includes('stackCodename')),
-      'migration guide must mention the aix metadata block fields',
-    );
+  it('states the core doctrine: independent SemVer per repo', () => {
+    expect(content).toMatch(/strict SemVer 2\.0\.0/);
   });
 
-  it('lists the required README badges for satellite repos', () => {
-    doc = readDoc('AIX_STACK_VERSIONING.md');
-    // The badges described use img.shields.io
-    assert.ok(
-      doc.includes('img.shields.io'),
-      'migration guide must reference img.shields.io badge format',
-    );
+  it('names the current codename as Echo369 and spec as AIX/1.0', () => {
+    expect(content).toContain('Echo369');
+    expect(content).toContain('AIX/1.0');
   });
 
-  it('ends with the closing rule (section 8) referencing strict SemVer 2.0.0', () => {
-    doc = readDoc('AIX_STACK_VERSIONING.md');
-    assert.ok(
-      doc.includes('## 8.') || doc.includes('closing rule'),
-      'must have section 8 with the closing rule',
-    );
-    assert.ok(
-      doc.includes('SemVer 2.0.0'),
-      'closing rule must reference strict SemVer 2.0.0',
-    );
+  it('states the AIX_PROTOCOL_VERSION anchor is "0.369.0"', () => {
+    expect(content).toMatch(/AIX_PROTOCOL_VERSION\s*=\s*["']0\.369\.0["']/);
   });
 
-  // Boundary: must not claim fixed lockstep versioning
-  it('explicitly forbids bumping satellite SemVer in lockstep with aix-format', () => {
-    doc = readDoc('AIX_STACK_VERSIONING.md');
-    assert.ok(
-      doc.includes('MUST NOT') || doc.includes('must not'),
-      'must explicitly forbid lockstep SemVer bumping in satellite repos',
-    );
-  });
-});
-
-// ---------------------------------------------------------------------------
-// AXIOM.md §4.5 Extended Ecosystem additions
-
-describe('AXIOM.md §4.5 Extended Ecosystem', () => {
-  let doc;
-
-  it('AXIOM.md exists at repo root', () => {
-    const p = path.join(REPO, 'AXIOM.md');
-    assert.ok(fs.existsSync(p), 'AXIOM.md must exist at repo root');
-    doc = fs.readFileSync(p, 'utf8');
-    assert.ok(doc.length > 0, 'AXIOM.md must not be empty');
+  it('defines the three version surfaces (§3)', () => {
+    expect(content).toMatch(/##\s*3\.\s*The three version surfaces/);
+    expect(content).toContain('3.1');
+    expect(content).toContain('3.2');
+    expect(content).toContain('3.3');
   });
 
-  it('contains the new §4.5 Extended Ecosystem section', () => {
-    doc = readDoc('AXIOM.md');
-    assert.ok(
-      doc.includes('4.5') && (doc.includes('Extended Ecosystem') || doc.includes('Satellite Layers')),
-      'AXIOM.md must contain the §4.5 Extended Ecosystem section',
-    );
+  it('defines the aix metadata block with all required fields', () => {
+    expect(content).toContain('stackVersion');
+    expect(content).toContain('stackCodename');
+    expect(content).toContain('"spec"');
+    expect(content).toContain('"layer"');
+    expect(content).toContain('"authority"');
   });
 
-  it('defines L0 as the axiomid-project root authority', () => {
-    doc = readDoc('AXIOM.md');
-    assert.ok(
-      doc.includes('axiomid-project') && doc.includes('L0'),
-      'AXIOM.md must define axiomid-project as L0 root authority',
-    );
+  it('shows axiomid.app as the authority in the example metadata block', () => {
+    expect(content).toContain('"authority": "axiomid.app"');
   });
 
-  it('defines L4 AlphaAxiom as a satellite trading layer', () => {
-    doc = readDoc('AXIOM.md');
-    assert.ok(
-      doc.includes('AlphaAxiom') && doc.includes('L4'),
-      'AXIOM.md must define AlphaAxiom as L4 satellite',
-    );
+  it('defines the codename roadmap table (§4)', () => {
+    expect(content).toMatch(/##\s*4\.\s*The codename roadmap/);
+    expect(content).toContain('Echo369');
+    expect(content).toContain('Resonance');
+    expect(content).toContain('Sovereignty');
   });
 
-  it('defines L5 PiWorker-OS as a satellite Pi layer', () => {
-    doc = readDoc('AXIOM.md');
-    assert.ok(
-      doc.includes('PiWorker-OS') || doc.includes('PiWorker'),
-      'AXIOM.md must define PiWorker-OS as L5 satellite',
-    );
+  it('maps Echo369 to AIX/1.0 in the codename roadmap', () => {
+    // Should have a table row linking Echo369 to AIX/1.0
+    const roadmapSection = content.split('## 4.')[1].split('## 5.')[0];
+    expect(roadmapSection).toContain('Echo369');
+    expect(roadmapSection).toContain('AIX/1.0');
   });
 
-  it('defines L6 GemClaw as a satellite voice layer', () => {
-    doc = readDoc('AXIOM.md');
-    assert.ok(
-      doc.includes('GemClaw') && doc.includes('L6'),
-      'AXIOM.md must define GemClaw as L6 satellite',
-    );
+  it('maps Resonance to AIX/2.0 in the codename roadmap', () => {
+    const roadmapSection = content.split('## 4.')[1].split('## 5.')[0];
+    expect(roadmapSection).toContain('Resonance');
+    expect(roadmapSection).toContain('AIX/2.0');
   });
 
-  it('states the four invariants for satellite topology', () => {
-    doc = readDoc('AXIOM.md');
-    assert.ok(
-      doc.includes('Invariants') || doc.includes('invariants') || doc.includes('4.5.1'),
-      'AXIOM.md §4.5 must state the invariants for satellite topology',
-    );
-    // Invariant 1: dependency direction
-    assert.ok(
-      doc.includes('Dependency direction') || doc.includes('dependency direction'),
-      'invariant 1 (dependency direction) must be stated',
-    );
-    // Invariant 2: money flows upward
-    assert.ok(
-      doc.includes('Money flows') || doc.includes('money flows'),
-      'invariant 2 (money flows upward) must be stated',
-    );
-    // Invariant 3: identity flows downward
-    assert.ok(
-      doc.includes('Identity flows') || doc.includes('identity flows'),
-      'invariant 3 (identity flows downward) must be stated',
-    );
-    // Invariant 4: trust flows centrally
-    assert.ok(
-      doc.includes('Trust flows') || doc.includes('trust flows'),
-      'invariant 4 (trust flows centrally) must be stated',
-    );
+  it('maps Sovereignty to AIX/3.0 in the codename roadmap', () => {
+    const roadmapSection = content.split('## 4.')[1].split('## 5.')[0];
+    expect(roadmapSection).toContain('Sovereignty');
+    expect(roadmapSection).toContain('AIX/3.0');
   });
 
-  it('clarifies that satellites are NOT members of the Sovereign Stack (§4.5.2)', () => {
-    doc = readDoc('AXIOM.md');
-    assert.ok(
-      doc.includes('4.5.2') || (doc.includes('satellite') && doc.includes('NOT')),
-      'AXIOM.md must clarify satellites are not members of the Sovereign Stack',
-    );
+  it('lists all seven sacred constants in §6', () => {
+    const section6 = content.split('## 6.')[1];
+    expect(section6).toContain('THREE=3');
+    expect(section6).toContain('SABEEN=7');
+    expect(section6).toContain('NINE=9');
+    expect(section6).toContain('NINETEEN=19');
+    expect(section6).toContain('ARBAUN=40');
+    expect(section6).toContain('FORTY_NINE=49');
+    expect(section6).toContain('THREE_SIXTY_NINE=369');
   });
 
-  it('requires coordinated PRs for cross-tier changes (§4.5.3)', () => {
-    doc = readDoc('AXIOM.md');
-    assert.ok(
-      doc.includes('coordinated PRs') || doc.includes('4.5.3'),
-      'AXIOM.md must require coordinated PRs for cross-tier changes',
-    );
+  it('states the 369 motif is NOT encoded in per-repo package.json version (§6)', () => {
+    const section6 = content.split('## 6.')[1];
+    expect(section6).toMatch(/not.*encoded.*every repo.*package\.json|not.*bleed.*version/is);
   });
 
-  it('updates the Versions convention row to reference AIX_STACK_VERSIONING.md', () => {
-    doc = readDoc('AXIOM.md');
-    assert.ok(
-      doc.includes('AIX_STACK_VERSIONING.md'),
-      'AXIOM.md §6 Versions row must reference the versioning doctrine file',
-    );
+  it('provides a migration guide for satellite repos (§7)', () => {
+    expect(content).toMatch(/##\s*7\.\s*Migration guide for satellite repos/);
+    const section7 = content.split('## 7.')[1];
+    // Must list all three satellite repos as examples
+    expect(section7).toContain('AlphaAxiom');
+    expect(section7).toContain('PiWorker-OS');
+    expect(section7).toContain('GemClaw');
   });
 
-  it('adds the Stack codename convention row with Echo369', () => {
-    doc = readDoc('AXIOM.md');
-    assert.ok(
-      doc.includes('Stack codename') && doc.includes('Echo369'),
-      'AXIOM.md conventions table must have a Stack codename row with Echo369',
-    );
+  it('migration guide requires adding the aix metadata block (§7)', () => {
+    const section7 = content.split('## 7.')[1];
+    expect(section7).toContain('stackVersion');
+    expect(section7).toContain('stackCodename');
   });
 
-  it('adds the Stack compatibility convention row', () => {
-    doc = readDoc('AXIOM.md');
-    assert.ok(
-      doc.includes('Stack compatibility') || doc.includes('aix.stackVersion'),
-      'AXIOM.md conventions table must have a Stack compatibility row',
-    );
+  it('closing rule falls back to strict SemVer 2.0.0 (§8)', () => {
+    expect(content).toMatch(/##\s*8\.\s*The closing rule/);
+    const section8 = content.split('## 8.')[1];
+    expect(section8).toMatch(/strict SemVer 2\.0\.0/);
   });
 
-  it('clarifies that THREE_SIXTY_NINE is the anchor for the Echo369 codename (§8)', () => {
-    doc = readDoc('AXIOM.md');
-    assert.ok(
-      doc.includes('THREE_SIXTY_NINE') && doc.includes('Echo369'),
-      'AXIOM.md §8 must link the THREE_SIXTY_NINE constant to the Echo369 codename',
-    );
+  it('closing footer cites axiomid.app as L1 protocol in Echo369 window', () => {
+    expect(content).toContain('axiomid.app');
+    expect(content).toContain('L1 protocol');
+    expect(content).toContain('Echo369 release window');
   });
 
-  it('states the 369 motif must not bleed into consumer app versions', () => {
-    doc = readDoc('AXIOM.md');
-    assert.ok(
-      doc.includes('AIX_STACK_VERSIONING.md') &&
-        (doc.includes('§6') || doc.includes('motif')),
-      'AXIOM.md §8 must refer readers to the versioning doctrine for the 369 motif boundary',
-    );
-  });
-
-  // Boundary / regression: the old adjacent product repos paragraph was removed
-  it('no longer lists repos as "Adjacent product repos" in the old flat format', () => {
-    doc = readDoc('AXIOM.md');
-    // The old phrasing was "Adjacent product repos live under the same authority but are not in the strict Sovereign Stack"
-    assert.ok(
-      !doc.includes('Adjacent product repos'),
-      'AXIOM.md must not use the removed "Adjacent product repos" phrasing',
-    );
+  it('rejects lockstep SemVer bumps for cosmetic reasons (§5)', () => {
+    const section5 = content.split('## 5.')[1].split('## 6.')[0];
+    expect(section5).toMatch(/MUST NOT.*bump.*lockstep|cosmetic/i);
   });
 });
 
 // ---------------------------------------------------------------------------
-// Cross-document consistency
 
-describe('Cross-document consistency', () => {
-  it('AGENTS.md and AIX_STACK_VERSIONING.md agree on the current codename (Echo369)', () => {
-    const agents = readDoc('AGENTS.md');
-    const versioning = readDoc('AIX_STACK_VERSIONING.md');
-    assert.ok(agents.includes('Echo369'), 'AGENTS.md must name Echo369 as current codename');
-    assert.ok(versioning.includes('Echo369'), 'AIX_STACK_VERSIONING.md must name Echo369 as current codename');
+describe('AXIOM.md §4.5: Extended Ecosystem · Satellite Layers (new section)', () => {
+  let content;
+
+  beforeAll(() => {
+    content = readText('AXIOM.md');
   });
 
-  it('AGENTS.md and AXIOM.md agree on the current spec (AIX/1.0)', () => {
-    const agents = readDoc('AGENTS.md');
-    const axiom = readDoc('AXIOM.md');
-    assert.ok(agents.includes('AIX/1.0'), 'AGENTS.md must reference AIX/1.0 spec');
-    assert.ok(axiom.includes('AIX/1.0'), 'AXIOM.md must reference AIX/1.0 spec');
+  it('contains the new §4.5 section heading', () => {
+    expect(content).toContain('## 4.5 Extended Ecosystem · Satellite Layers');
   });
 
-  it('all three docs agree on the protocol version anchor (0.369.0)', () => {
-    const agents = readDoc('AGENTS.md');
-    const versioning = readDoc('AIX_STACK_VERSIONING.md');
-    const axiom = readDoc('AXIOM.md');
-    assert.ok(agents.includes('0.369.0'), 'AGENTS.md must state protocol version 0.369.0');
-    assert.ok(versioning.includes('0.369.0'), 'AIX_STACK_VERSIONING.md must state protocol version 0.369.0');
-    assert.ok(axiom.includes('0.369.0'), 'AXIOM.md must state protocol version 0.369.0');
+  it('defines L0 as axiomid-project Root Authority', () => {
+    const section45 = content.split('## 4.5')[1];
+    expect(section45).toContain('L0');
+    expect(section45).toContain('axiomid-project');
+    expect(section45).toMatch(/Root [Aa]uthority/);
   });
 
-  it('all three docs agree on the satellite repos (AlphaAxiom, PiWorker-OS, GemClaw)', () => {
-    const docs = ['AGENTS.md', 'AIX_STACK_VERSIONING.md', 'AXIOM.md'].map(readDoc);
-    for (const [name, doc] of [['AGENTS.md', docs[0]], ['AIX_STACK_VERSIONING.md', docs[1]], ['AXIOM.md', docs[2]]]) {
-      assert.ok(doc.includes('AlphaAxiom'), `${name} must mention AlphaAxiom`);
-      assert.ok(
-        doc.includes('PiWorker'),
-        `${name} must mention PiWorker-OS`,
-      );
-      assert.ok(doc.includes('GemClaw'), `${name} must mention GemClaw`);
+  it('defines L4 as AlphaAxiom (trading satellite)', () => {
+    const section45 = content.split('## 4.5')[1].split('## 5.')[0];
+    expect(section45).toContain('L4');
+    expect(section45).toContain('AlphaAxiom');
+  });
+
+  it('defines L5 as PiWorker-OS (Pi-Network satellite)', () => {
+    const section45 = content.split('## 4.5')[1].split('## 5.')[0];
+    expect(section45).toContain('L5');
+    expect(section45).toContain('PiWorker-OS');
+  });
+
+  it('defines L6 as GemClaw (voice satellite)', () => {
+    const section45 = content.split('## 4.5')[1].split('## 5.')[0];
+    expect(section45).toContain('L6');
+    expect(section45).toContain('GemClaw');
+  });
+
+  it('has a §4.5.1 Invariants sub-section with exactly 4 invariants', () => {
+    expect(content).toContain('### 4.5.1 Invariants');
+    const invariantsSection = content
+      .split('### 4.5.1 Invariants')[1]
+      .split('### 4.5.2')[0];
+    // Four numbered invariants
+    expect(invariantsSection).toContain('1. **Dependency direction**');
+    expect(invariantsSection).toContain('2. **Money flows upward**');
+    expect(invariantsSection).toContain('3. **Identity flows downward**');
+    expect(invariantsSection).toContain('4. **Trust flows centrally**');
+  });
+
+  it('invariant 1 prohibits reverse imports (stack → satellite)', () => {
+    const inv = content.split('### 4.5.1 Invariants')[1].split('### 4.5.2')[0];
+    expect(inv).toContain('Reverse imports are forbidden');
+  });
+
+  it('invariant 2 specifies money flows from L4/L5/L6 upward into L3', () => {
+    const inv = content.split('### 4.5.1 Invariants')[1].split('### 4.5.2')[0];
+    expect(inv).toContain('L4/L5/L6');
+    expect(inv).toContain('L3');
+  });
+
+  it('invariant 3 specifies identity flows downward from L0', () => {
+    const inv = content.split('### 4.5.1 Invariants')[1].split('### 4.5.2')[0];
+    expect(inv).toContain('L0');
+    expect(inv).toContain('did:axiom:axiomid.app:*');
+  });
+
+  it('invariant 4 specifies trust mirrors into L2 TrustChain', () => {
+    const inv = content.split('### 4.5.1 Invariants')[1].split('### 4.5.2')[0];
+    expect(inv).toContain('TrustChain');
+    expect(inv).toContain('L2');
+  });
+
+  it('has a §4.5.2 What a satellite is not sub-section', () => {
+    expect(content).toContain('### 4.5.2 What a satellite is not');
+  });
+
+  it('§4.5.2 prohibits satellites from defining new payment rails unilaterally', () => {
+    const section = content.split('### 4.5.2')[1].split('### 4.5.3')[0];
+    expect(section).toContain('payment rails');
+    expect(section).toContain('coordinated PR upstream into L1');
+  });
+
+  it('has a §4.5.3 Cross-tier coordination sub-section', () => {
+    expect(content).toContain('### 4.5.3 Cross-tier coordination');
+  });
+
+  it('§4.5.3 requires coordinated PRs for cross-tier changes', () => {
+    const section = content.split('### 4.5.3')[1].split('---')[0];
+    expect(section).toContain('coordinated PRs');
+  });
+
+  it('§8 THREE_SIXTY_NINE entry now references Echo369 codename', () => {
+    // The updated row should mention both "0.369.0" and "Echo369"
+    const sacredSection = content.split('## 8.')[1];
+    const threeRow = sacredSection
+      .split('\n')
+      .find(line => line.includes('THREE_SIXTY_NINE'));
+    expect(threeRow).toBeTruthy();
+    expect(threeRow).toContain('Echo369');
+    expect(threeRow).toContain('0.369.0');
+  });
+
+  it('§8 closing paragraph notes 369 motif does NOT bleed into consumer-facing versions', () => {
+    const sacredSection = content.split('## 8.')[1].split('## 9.')[0];
+    expect(sacredSection).toMatch(/does NOT bleed into consumer-facing app versions/i);
+    expect(sacredSection).toContain('AIX_STACK_VERSIONING.md');
+  });
+
+  it('§6 versioning table now has an Echo369 stack codename row', () => {
+    const section6 = content.split('## 6.')[1].split('## 7.')[0];
+    expect(section6).toContain('Stack codename');
+    expect(section6).toContain('Echo369');
+  });
+
+  it('§6 versioning table now has a Stack compatibility row', () => {
+    const section6 = content.split('## 6.')[1].split('## 7.')[0];
+    expect(section6).toContain('Stack compatibility');
+    expect(section6).toContain('aix.stackVersion');
+    expect(section6).toContain('aix.stackCodename');
+  });
+
+  it('§4 states three Sovereign Stack repos share one codename window (Echo369)', () => {
+    const section4 = content.split('## 4. The Stack Layers')[1].split('## 4.5')[0];
+    expect(section4).toContain('Echo369');
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe('README.md: content validation', () => {
+  let content;
+
+  beforeAll(() => {
+    content = readText('README.md');
+  });
+
+  it('references the v2 header SVG (not v1)', () => {
+    expect(content).toContain('aix-stack-header-v2.svg');
+    expect(content).not.toContain('aix-stack-header.svg"');
+  });
+
+  it('references the v2 stack diagram SVG (not v1)', () => {
+    expect(content).toContain('aix-stack-diagram-v2.svg');
+    expect(content).not.toContain('aix-stack-diagram.svg"');
+  });
+
+  it('references the v2 footer quote SVG (not v1)', () => {
+    expect(content).toContain('aix-footer-quote-v2.svg');
+    expect(content).not.toContain('aix-footer-quote.svg"');
+  });
+
+  it('has an AIX Stack badge for Echo369', () => {
+    expect(content).toContain('Echo369');
+    // Badge should appear in the shield badge format
+    expect(content).toMatch(/img\.shields\.io\/badge.*Echo369/);
+  });
+
+  it('has a Spec badge for AIX/1.0', () => {
+    expect(content).toMatch(/img\.shields\.io\/badge.*AIX/);
+    expect(content).toContain('AIX%2F1.0');
+  });
+
+  it('has a Version badge for v0.369.0', () => {
+    expect(content).toContain('v0.369.0');
+    expect(content).toMatch(/img\.shields\.io\/badge.*version.*v0\.369\.0/);
+  });
+
+  it('has a L0 root authority navigation link to axiomid-project', () => {
+    expect(content).toContain('axiomid-project');
+    expect(content).toContain('L0');
+  });
+
+  it('has L4 satellite navigation link to AlphaAxiom', () => {
+    expect(content).toContain('AlphaAxiom');
+    expect(content).toContain('L4');
+  });
+
+  it('has L5 satellite navigation link to PiWorker-OS', () => {
+    expect(content).toContain('PiWorker-OS');
+    expect(content).toContain('L5');
+  });
+
+  it('has L6 satellite navigation link to GemClaw', () => {
+    expect(content).toContain('GemClaw');
+    expect(content).toContain('L6');
+  });
+
+  it('credits section states 5 AI agents (not 9)', () => {
+    // Updated from "9 AI Agents" to "5 AI Agents"
+    expect(content).toMatch(/5 AI Agents/);
+    expect(content).not.toMatch(/9 AI Agents/);
+  });
+
+  it('has the cross-stack YOU ARE HERE nav row for L1', () => {
+    expect(content).toContain('YOU ARE HERE');
+    expect(content).toContain('L1');
+  });
+
+  it('describes extended ecosystem with root authority and satellite layers', () => {
+    expect(content).toContain('root authority');
+    expect(content).toContain('satellite layers');
+  });
+
+  it('references AIX_STACK_VERSIONING.md for the versioning doctrine', () => {
+    expect(content).toContain('AIX_STACK_VERSIONING.md');
+  });
+
+  it('references AXIOM.md §4.5 for satellite layer doctrine', () => {
+    expect(content).toContain('AXIOM.md');
+    expect(content).toContain('§4.5');
+  });
+
+  it('topology section mentions genus 0 tree invariant', () => {
+    expect(content).toContain('Genus 0');
+  });
+
+  it('versioning at a glance section names current window as Echo369', () => {
+    const versionSection = content.split('Versioning at a glance')[1]?.split('---')[0];
+    expect(versionSection).toContain('Echo369');
+    expect(versionSection).toContain('AIX/1.0');
+  });
+
+  it('Extended Ecosystem table includes all four tiers (L0, L4, L5, L6)', () => {
+    const ecoSection = content.split('Extended Ecosystem')[1]?.split('---')[0];
+    expect(ecoSection).toContain('L0');
+    expect(ecoSection).toContain('L4');
+    expect(ecoSection).toContain('L5');
+    expect(ecoSection).toContain('L6');
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe('SVG Assets: structural validation', () => {
+  describe('aix-footer-quote-v2.svg', () => {
+    let content;
+
+    beforeAll(() => {
+      content = readText('assets/aix-footer-quote-v2.svg');
+    });
+
+    it('is a well-formed SVG element with correct dimensions (900×240)', () => {
+      expect(content).toMatch(/<svg\s[^>]*width="900"/);
+      expect(content).toMatch(/<svg\s[^>]*height="240"/);
+    });
+
+    it('declares the SVG namespace', () => {
+      expect(content).toContain('xmlns="http://www.w3.org/2000/svg"');
+    });
+
+    it('has a pattern element with id cfFooterV2', () => {
+      expect(content).toContain('id="cfFooterV2"');
+    });
+
+    it('has a linearGradient element with id footerAccentV2', () => {
+      expect(content).toContain('id="footerAccentV2"');
+    });
+
+    it('references the ECHO369 codename in visible text', () => {
+      expect(content).toContain('ECHO369');
+    });
+
+    it('references the AIX/1.0 spec', () => {
+      expect(content).toContain('AIX/1.0');
+    });
+
+    it('lists all four stack tiers in the layer legend (L0-L3)', () => {
+      expect(content).toContain('L0 axiomid');
+      expect(content).toContain('L1 aix-format');
+      expect(content).toContain('L2 iqra');
+      expect(content).toContain('L3 aix-agent-skills');
+    });
+
+    it('mentions satellite repos in the footer legend', () => {
+      expect(content).toContain('alphaaxiom');
+      expect(content).toContain('piworker-os');
+      expect(content).toContain('gemclaw');
+    });
+
+    it('uses neon green (#39FF14) as the brand accent colour', () => {
+      expect(content).toContain('#39FF14');
+    });
+
+    it('has an animated pulse circle', () => {
+      expect(content).toContain('<animate');
+      expect(content).toContain('attributeName="opacity"');
+    });
+
+    it('has a <defs> block containing the pattern and gradient', () => {
+      expect(content).toContain('<defs>');
+    });
+
+    it('closes the SVG element', () => {
+      expect(content.trimEnd()).toMatch(/<\/svg>$/);
+    });
+  });
+
+  describe('aix-stack-header-v2.svg', () => {
+    let content;
+
+    beforeAll(() => {
+      content = readText('assets/aix-stack-header-v2.svg');
+    });
+
+    it('is a well-formed SVG element with correct dimensions (1100×340)', () => {
+      expect(content).toMatch(/<svg\s[^>]*width="1100"/);
+      expect(content).toMatch(/<svg\s[^>]*height="340"/);
+    });
+
+    it('declares the SVG namespace', () => {
+      expect(content).toContain('xmlns="http://www.w3.org/2000/svg"');
+    });
+
+    it('has a pattern element with id cfHeaderV2', () => {
+      expect(content).toContain('id="cfHeaderV2"');
+    });
+
+    it('has a linearGradient element with id topAccentV2', () => {
+      expect(content).toContain('id="topAccentV2"');
+    });
+
+    it('references the ECHO369 codename in visible text', () => {
+      expect(content).toContain('ECHO369');
+    });
+
+    it('references the AIX/1.0 spec', () => {
+      expect(content).toContain('AIX/1.0');
+    });
+
+    it('shows the L0 Root Authority (AXIOMID-PROJECT)', () => {
+      expect(content).toContain('ROOT AUTHORITY');
+      expect(content).toContain('L0');
+      expect(content).toContain('AXIOMID-PROJECT');
+    });
+
+    it('shows all three Sovereign Core layers (L1, L2, L3)', () => {
+      expect(content).toContain('L1');
+      expect(content).toContain('AIX-FORMAT');
+      expect(content).toContain('L2');
+      expect(content).toContain('IQRA');
+      expect(content).toContain('L3');
+      expect(content).toContain('AGENT-SKILLS');
+    });
+
+    it('shows all three Satellite layers (L4, L5, L6)', () => {
+      expect(content).toContain('L4');
+      expect(content).toContain('ALPHAAXIOM');
+      expect(content).toContain('L5');
+      expect(content).toContain('PIWORKER-OS');
+      expect(content).toContain('L6');
+      expect(content).toContain('GEMCLAW');
+    });
+
+    it('uses neon green (#39FF14) as brand accent', () => {
+      expect(content).toContain('#39FF14');
+    });
+
+    it('uses gold (#FFD700) for the root authority highlight', () => {
+      expect(content).toContain('#FFD700');
+    });
+
+    it('has a live pulse animation', () => {
+      expect(content).toContain('<animate');
+      expect(content).toContain('LIVE');
+    });
+
+    it('closes the SVG element', () => {
+      expect(content.trimEnd()).toMatch(/<\/svg>$/);
+    });
+  });
+
+  describe('aix-stack-diagram-v2.svg', () => {
+    let content;
+
+    beforeAll(() => {
+      content = readText('assets/aix-stack-diagram-v2.svg');
+    });
+
+    it('is a well-formed SVG element with correct dimensions (1100×560)', () => {
+      expect(content).toMatch(/<svg\s[^>]*width="1100"/);
+      expect(content).toMatch(/<svg\s[^>]*height="560"/);
+    });
+
+    it('declares the SVG namespace', () => {
+      expect(content).toContain('xmlns="http://www.w3.org/2000/svg"');
+    });
+
+    it('has a pattern element with id cfDiagV2', () => {
+      expect(content).toContain('id="cfDiagV2"');
+    });
+
+    it('references the ECHO369 codename in visible text', () => {
+      expect(content).toContain('ECHO369');
+    });
+
+    it('references the AIX/1.0 spec', () => {
+      expect(content).toContain('AIX/1.0');
+    });
+
+    it('names the authority as axiomid.app', () => {
+      expect(content).toContain('axiomid.app');
+    });
+
+    it('shows the L0 Root Authority (AXIOMID-PROJECT)', () => {
+      expect(content).toContain('ROOT AUTHORITY');
+      expect(content).toContain('L0');
+      expect(content).toContain('AXIOMID-PROJECT');
+    });
+
+    it('shows all three Sovereign Core layers (L1, L2, L3)', () => {
+      expect(content).toContain('L1 · PROTOCOL');
+      expect(content).toContain('AIX-FORMAT');
+      expect(content).toContain('L2 · RUNTIME');
+      expect(content).toContain('IQRA');
+      expect(content).toContain('L3 · MARKETPLACE');
+      expect(content).toContain('AGENT-SKILLS');
+    });
+
+    it('shows all three Satellite layers (L4, L5, L6)', () => {
+      expect(content).toContain('L4 · SATELLITE');
+      expect(content).toContain('ALPHAAXIOM');
+      expect(content).toContain('L5 · SATELLITE');
+      expect(content).toContain('PIWORKER-OS');
+      expect(content).toContain('L6 · SATELLITE');
+      expect(content).toContain('GEMCLAW');
+    });
+
+    it('has identity flow arrows from L0 downward', () => {
+      expect(content).toContain('identity flows down');
+    });
+
+    it('has money flow arrows from satellites upward', () => {
+      expect(content).toContain('buys skills');
+    });
+
+    it('includes the topology invariants legend', () => {
+      expect(content).toContain('TOPOLOGICAL INVARIANTS');
+      expect(content).toContain('money');
+      expect(content).toContain('identity');
+      expect(content).toContain('trust');
+    });
+
+    it('states the tree topology constraint (genus 0, χ = +1)', () => {
+      expect(content).toContain('genus 0');
+      expect(content).toContain('tree-shaped');
+      expect(content).toContain('χ = +1');
+    });
+
+    it('uses gold (#FFD700) for the root authority', () => {
+      expect(content).toContain('#FFD700');
+    });
+
+    it('uses neon green (#39FF14) for the sovereign core layers', () => {
+      expect(content).toContain('#39FF14');
+    });
+
+    it('closes the SVG element', () => {
+      expect(content.trimEnd()).toMatch(/<\/svg>$/);
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe('Cross-file consistency: Echo369 and AIX/1.0 doctrine', () => {
+  let agents, versioning, axiom, readme, footerSvg, headerSvg, diagramSvg;
+
+  beforeAll(() => {
+    agents = readText('AGENTS.md');
+    versioning = readText('AIX_STACK_VERSIONING.md');
+    axiom = readText('AXIOM.md');
+    readme = readText('README.md');
+    footerSvg = readText('assets/aix-footer-quote-v2.svg');
+    headerSvg = readText('assets/aix-stack-header-v2.svg');
+    diagramSvg = readText('assets/aix-stack-diagram-v2.svg');
+  });
+
+  it('Echo369 codename appears in all new/modified documentation files', () => {
+    expect(agents).toContain('Echo369');
+    expect(versioning).toContain('Echo369');
+    expect(axiom).toContain('Echo369');
+    expect(readme).toContain('Echo369');
+  });
+
+  it('Echo369 codename appears in all three new SVG assets', () => {
+    // SVGs use uppercase ECHO369 in their text elements
+    expect(footerSvg).toContain('ECHO369');
+    expect(headerSvg).toContain('ECHO369');
+    expect(diagramSvg).toContain('ECHO369');
+  });
+
+  it('AIX/1.0 spec ID appears in all new/modified documentation files', () => {
+    expect(agents).toContain('AIX/1.0');
+    expect(versioning).toContain('AIX/1.0');
+    expect(axiom).toContain('AIX/1.0');
+  });
+
+  it('AIX/1.0 spec ID appears in all three new SVG assets', () => {
+    expect(footerSvg).toContain('AIX/1.0');
+    expect(headerSvg).toContain('AIX/1.0');
+    expect(diagramSvg).toContain('AIX/1.0');
+  });
+
+  it('protocol version 0.369.0 is consistent across AGENTS.md and AIX_STACK_VERSIONING.md', () => {
+    expect(agents).toContain('0.369.0');
+    expect(versioning).toContain('0.369.0');
+  });
+
+  it('axiomid.app authority is consistent across AGENTS.md, AIX_STACK_VERSIONING.md, AXIOM.md, and the diagram SVG', () => {
+    expect(agents).toContain('axiomid.app');
+    expect(versioning).toContain('axiomid.app');
+    expect(axiom).toContain('axiomid.app');
+    expect(diagramSvg).toContain('axiomid.app');
+  });
+
+  it('all four satellite/root-tier repos (axiomid-project, AlphaAxiom, PiWorker-OS, GemClaw) appear in AXIOM.md §4.5', () => {
+    const section45 = axiom.split('## 4.5')[1].split('## 5.')[0];
+    expect(section45).toContain('axiomid-project');
+    expect(section45).toContain('AlphaAxiom');
+    expect(section45).toContain('PiWorker-OS');
+    expect(section45).toContain('GemClaw');
+  });
+
+  it('all satellite repos appear in the README Extended Ecosystem table', () => {
+    expect(readme).toContain('axiomid-project');
+    expect(readme).toContain('AlphaAxiom');
+    expect(readme).toContain('PiWorker-OS');
+    expect(readme).toContain('GemClaw');
+  });
+
+  it('the layer numbering (L0-L6) is consistent across AXIOM.md, README.md, and SVGs', () => {
+    // L0 through L6 must appear in each document that talks about the extended ecosystem
+    for (const doc of [axiom, readme]) {
+      expect(doc).toContain('L0');
+      expect(doc).toContain('L4');
+      expect(doc).toContain('L5');
+      expect(doc).toContain('L6');
+    }
+    for (const svg of [headerSvg, diagramSvg]) {
+      expect(svg).toContain('L0');
+      expect(svg).toContain('L4');
+      expect(svg).toContain('L5');
+      expect(svg).toContain('L6');
     }
   });
 
-  it('AGENTS.md cross-references AIX_STACK_VERSIONING.md and AXIOM.md correctly', () => {
-    const doc = readDoc('AGENTS.md');
-    assert.ok(doc.includes('AIX_STACK_VERSIONING.md'), 'AGENTS.md must link to AIX_STACK_VERSIONING.md');
-    assert.ok(doc.includes('AXIOM.md'), 'AGENTS.md must link to AXIOM.md');
+  it('the neon green brand colour #39FF14 is used consistently across all three SVGs', () => {
+    expect(footerSvg).toContain('#39FF14');
+    expect(headerSvg).toContain('#39FF14');
+    expect(diagramSvg).toContain('#39FF14');
   });
 
-  it('AIX_STACK_VERSIONING.md cross-references AXIOM.md', () => {
-    const doc = readDoc('AIX_STACK_VERSIONING.md');
-    assert.ok(doc.includes('AXIOM.md'), 'AIX_STACK_VERSIONING.md must reference AXIOM.md');
+  it('AGENTS.md references AIX_STACK_VERSIONING.md and AIX_STACK_VERSIONING.md references AXIOM.md (bidirectional cross-refs intact)', () => {
+    expect(agents).toContain('AIX_STACK_VERSIONING.md');
+    expect(versioning).toContain('AXIOM.md');
   });
 
-  it('AXIOM.md cross-references AIX_STACK_VERSIONING.md for the versioning doctrine', () => {
-    const doc = readDoc('AXIOM.md');
-    assert.ok(
-      doc.includes('AIX_STACK_VERSIONING.md'),
-      'AXIOM.md must cross-reference AIX_STACK_VERSIONING.md',
-    );
+  it('Apache-2.0 license requirement is stated in AGENTS.md and AXIOM.md', () => {
+    expect(agents).toContain('Apache-2.0');
+    expect(axiom).toContain('Apache-2.0');
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe('Deleted smoke infrastructure: regression guard', () => {
+  it('scripts/smoke.mjs was intentionally removed and must not be recreated without review', () => {
+    // This test documents the intentional removal.
+    // If smoke.mjs is accidentally re-added, this test will fail,
+    // alerting the team to revisit the decision.
+    expect(fileExists('scripts/smoke.mjs')).toBe(false);
+  });
+
+  it('.github/workflows/smoke-gate.yml was intentionally removed and must not be recreated without review', () => {
+    expect(fileExists('.github/workflows/smoke-gate.yml')).toBe(false);
+  });
+
+  it('docs/RELEASE-NOTES-baseline-v0.369.0.md was intentionally archived and must not be recreated without review', () => {
+    expect(fileExists('docs/RELEASE-NOTES-baseline-v0.369.0.md')).toBe(false);
+  });
+
+  it('smoke-gate.yml is not present in the .github/workflows directory', () => {
+    const workflowsDir = repoPath('.github/workflows');
+    if (!existsSync(workflowsDir)) return; // no workflows dir at all is also fine
+    const workflows = readdirSync(workflowsDir);
+    expect(workflows).not.toContain('smoke-gate.yml');
   });
 });
