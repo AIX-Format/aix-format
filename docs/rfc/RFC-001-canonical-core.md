@@ -96,7 +96,7 @@ Sequential, one PR per phase:
 
 | Phase | Scope | Estimate |
 |---|---|---|
-| 1.0 | Cleanup: drop 18 superseded files in L1 (see §6) | 1 day |
+| 1.0 | Cleanup: drop 14 superseded files in L1 (see §6) | 1 day |
 | 1.1 | `@aix/schema` + codegen ratchet | 3-5 days |
 | 1.2 | `@aix/identity` (consumes 1.1) | 3 days |
 | 1.3 | `@aix/trustchain` (consumes 1.2 for Ed25519 entry signatures) | 3 days |
@@ -133,17 +133,16 @@ Order matters: trustchain depends on identity for the signature field; runtime-a
 
 ## 6. Phase 1.0 cleanup PR (DROP list)
 
-Single L1 PR. 14 files removed, zero new behaviour. L3 dupes (`legacy-trust-chain.ts`, `iqra-purity-filter.ts`) are removed in a separate L3 PR sequenced with L3 migration in Phase 1.3 / 1.4. `apps/studio/src/lib/security-core.ts TrustChainManager` is a rewrite, not a delete, and lands as a consumer-side change in Phase 1.3 (tracked in §5.1 Migration, not here).
+Single L1 PR. 14 files removed, zero new behaviour. L3 dupes (`legacy-trust-chain.ts`, `iqra-purity-filter.ts`) are removed in a separate L3 PR sequenced with L3 migration in Phase 1.3 / 1.4. `apps/studio/src/lib/security-core.ts TrustChainManager` is a rewrite, not a delete, and lands as a consumer-side change in Phase 1.3 (tracked in §5.1 Migration, not here). `schemas/core/aix.schema.json` is intentionally not on this list because `tests/schema_validation.test.js` still reads it; that deletion + test retarget land together in Phase 1.1 alongside the `@aix/schema` package.
 
 | # | Path | Reason |
 |---|---|---|
 | 1 | `aix-format/schemas/aix-enhanced.schema.json` | Superseded by unified `aix.schema.json` |
-| 2 | `aix-format/schemas/core/aix.schema.json` | Superseded |
-| 3 | `aix-format/schemas/core/aix-enhanced.schema.json` | Superseded |
-| 4-11 | `aix-format/types/{aix, aix.schema, aix-v1.schema, aix-enhanced.schema, axiom-aix.schema, manifest.schema, parser, pi_kyc_adapter}.d.ts` | Stale generated artifacts (8 files). Will be re-emitted from `@aix/schema` in Phase 1.1 |
-| 12 | `aix-format/packages/aix-types/` (whole dir) | Trivial `index.d.ts` wrapper; subsumed by `@aix/schema` |
-| 13 | `aix-format/packages/aix-core/src/security/trust-chain.ts` | HMAC + shared secret, in-memory static. Security antipattern. Hard delete, no shim |
-| 14-15 | `aix-format/tests/integration/{signature-verification, gateway-expectation-integration}.test.ts MockTrustChain` | Mock classes replaced by real `@aix/trustchain` |
+| 2 | `aix-format/schemas/core/aix-enhanced.schema.json` | Superseded |
+| 3-10 | `aix-format/types/{aix, aix.schema, aix-v1.schema, aix-enhanced.schema, axiom-aix.schema, manifest.schema, parser, pi_kyc_adapter}.d.ts` | Stale generated artifacts (8 files). Will be re-emitted from `@aix/schema` in Phase 1.1 |
+| 11 | `aix-format/packages/aix-types/` (whole dir) | Trivial `index.d.ts` wrapper; subsumed by `@aix/schema` |
+| 12 | `aix-format/packages/aix-core/src/security/trust-chain.ts` | HMAC + shared secret, in-memory static. Security antipattern. Hard delete, no shim |
+| 13-14 | `aix-format/tests/integration/{signature-verification, gateway-expectation-integration}.test.ts MockTrustChain` | Mock classes replaced by real `@aix/trustchain` |
 
 L3 cleanup (separate PR, Phase 1.3 / 1.4):
 
