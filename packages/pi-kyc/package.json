@@ -1,0 +1,29 @@
+{
+  "name": "@axiom/pi",
+  "version": "1.0.0",
+  "description": "Pi Network KYC and Identity Adapter for AIX Sovereign Stack",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": [
+    "pi-network",
+    "kyc",
+    "aix",
+    "identity",
+    "sovereign"
+  ],
+  "author": "Antigravity & Moe Abdelaziz",
+  "license": "Sovereign-1.0",
+  "dependencies": {
+    "zod": "^3.22.0",
+    "tweetnacl": "^1.0.3",
+    "tweetnacl-util": "^0.15.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}

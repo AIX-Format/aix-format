@@ -1,0 +1,19 @@
+.
+./agent_payment_router.js
+./AXIOM.md
+./AIX_RULES.md
+./openmemory.md
+./AIX_STACK_VERSIONING.md
+./CHANGELOG.md
+./validation-engine.js
+./AGENT_GOVERNANCE.md
+./pi_kyc_adapter.ts
+./abom-scanner.js
+./aix.schema.json
+./AIX_CONSTITUTION.md
+./MANIFEST.md
+./package.json
+./AGENTS.md
+./canonicalize.js
+./parser.js
+160K	.
