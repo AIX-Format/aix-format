@@ -1,4 +1,5 @@
 import { QuantumMemoryCache } from '../memory/QuantumMemoryCache.js';
+import * as crypto from 'node:crypto';
 
 /**
  * 📊 QUANTUM MEMORY BENCHMARK
@@ -10,7 +11,7 @@ async function runBenchmark() {
 
   // Simulate 1536-dimensional vector (standard OpenAI embedding size)
   const vectorLength = 1536;
-  const originalVector = Array.from({ length: vectorLength }, () => Math.random());
+  const originalVector = Array.from({ length: vectorLength }, () => crypto.randomBytes(4).readUInt32BE() / 0xFFFFFFFF);
 
   // Measure Original Size (approximate JSON)
   const originalSize = JSON.stringify(originalVector).length;

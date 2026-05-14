@@ -1,7 +1,8 @@
 import { kv, KEYS } from './memory/storage.js';
 import { getRustBridge } from '@aix/rust-core/src/bridge.js';
 import { BusEventSchema } from './domain.js';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
+import { TrustChain } from './security/trust-chain.js';
 
 /**
  * 🆔 IDENTITY_SERVICE
@@ -64,6 +65,9 @@ export class IdentityService {
 
     await kv.set(`user:${userId}:kyc`, status);
     
+    // Record in TrustChain (Rule 3)
+    await TrustChain.append(3, `KYC_LEVEL_UP: ${level} for ${userId}`, 'IDENTITY_SERVICE');
+
     // Reward user in TrustChain for completing KYC
     try {
       await this.rust.trustChain.reward(`user:${userId}`, 100, 'KYC_COMPLETED', 'identity');

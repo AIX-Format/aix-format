@@ -27,7 +27,7 @@ export const AIX_FORMAT_VERSION = '1.3';
  * The full AIX Sovereign Protocol release this package is published
  * alongside. Surfaces the Tesla 369 motif in the patch segment.
  */
-export const AIX_PROTOCOL_VERSION = '0.369.0';
+export const AIX_PROTOCOL_VERSION = '1.4.0';
 
 /**
  * Axiom A2A protocol pin. The Axiom agent-to-agent transport layer

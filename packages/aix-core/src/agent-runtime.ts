@@ -154,7 +154,7 @@ export class AgentRuntimeEngine extends SovereignEntity {
       const prompt = this.buildPrompt(task);
       const response = await this.llm.complete(prompt, ['Observation:']);
       // HARDENED: Robust Final Answer detection (handles markdown, extra colons, varying case)
-      const finalAnswerRegex = /(?:final answer|answer)[:\s*]+([\s\S]+)/i;
+      const finalAnswerRegex = /(?:final answer|answer)\s*:\s*([\s\S]+)/i;
       const match = response.match(finalAnswerRegex);
 
       if (match) {

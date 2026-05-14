@@ -1,5 +1,7 @@
 import { kv, KEYS } from './memory/storage.js';
 import { z } from 'zod';
+import * as crypto from 'node:crypto';
+import { TrustChain } from './security/trust-chain.js';
 
 /**
  * Sovereign AIX Economics & FoldTrace Protocol
@@ -25,7 +27,7 @@ export class SovereignEconomics {
    * NO MOCKS. Real Redis persistence.
    */
   async settleTask(agentId: string, userId: string, amount: number): Promise<FoldTraceEntry> {
-    const id = `tx_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const id = `tx_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
     const timestamp = Date.now();
     
     // 1. Calculate Split
@@ -64,6 +66,9 @@ export class SovereignEconomics {
     // 4. Update Global Protocol Metrics
     await kv.incrbyfloat('protocol:total_revenue', amount);
     await kv.incrby('protocol:total_operations', 1);
+
+    // 5. Append to TrustChain (Rule 3)
+    await TrustChain.append(3, `Economic Settlement: ${amount} ${entry.currency} for ${agentId}`, userId);
 
     console.log(`💸 [FoldTrace] Settled ${amount} PI for ${agentId}. Author: ${authorShare.toFixed(4)}`);
     

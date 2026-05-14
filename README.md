@@ -36,15 +36,13 @@
 
 <!-- ════════════════ /AIX SOVEREIGN STACK ════════════════ -->
 
-# 🧬 AIX Format: Universal Agent Passport v0.369
+# 🧬 AIX Format: Universal Agent Passport v1.4.0
 
  Vision
-“If your laptop dies or your cloud vendor disappears, your agents should not.
-AIX is the USB stick for agentic work: a portable, signed manifest that lets any compliant runtime rehydrate the same agent with the same identity, economics, and evolution history.”
+“AIX is the Universal Agent Passport: a portable, sovereign identity that carries an agent's DNA, multi-chain economics, and immutable evolution history across any platform.”
 
  الرؤية
-“لو جهازك وقع، أو الـ platform اختفت، وكيلك ماينتهيش معاها.
-AIX هو فلاشـة الوكلاء: ملف واحد موقَّع يشيل هوية الوكيل، اقتصاده، وتاريخه التطوري، وتقدر تشغّله على أي نظام يدعم معيار AIX.”
+“AIX هو جواز سفر الوكيل العالمي: هوية سيادية محمولة تشيل الحمض النووي للوكيل، واقتصاده المعتمد على سلاسل الكتل المتعددة، وتاريخه التطوري غير القابل للتلاعب عبر أي منصة.”
 
 
 
@@ -78,6 +76,12 @@ This **L1 Protocol** carries the fingerprints of **9 of the 12 stack-wide AI age
 
 > AIX is the only standard combining **Identity + Execution + Economics** in one signed manifest.
 > Compare: Google A2A ✅ execution only · IBM ACP ✅ execution only · AIX ✅ all three.
+
+---
+
+### 💳 Universal Agent Passport | جواز الوكيل العالمي v1.4.0
+
+AIX v1.4.0 transforms the protocol into a sovereign economic engine. Agents can now own their multi-chain wallets, settle tasks using Pi, Base, or Solana, and navigate through enterprise gates with ZK-KYC.
 
 ---
 

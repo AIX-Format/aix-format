@@ -223,16 +223,19 @@ describe('CircuitBreaker', () => {
     expect(state.state).toBe('HALF_OPEN');
   });
 
-  it('closes from HALF_OPEN after success threshold', () => {
+  it('closes from HALF_OPEN after success threshold', async () => {
     const breaker = new CircuitBreaker({
       failureThreshold: 1,
       successThreshold: 2,
-      timeoutSeconds: 0,
+      timeoutSeconds: 1,
     });
     
     breaker.recordFailure();
     expect(breaker.isOpen()).toBe(true);
     
+    // Wait for timeout
+    await new Promise(resolve => setTimeout(resolve, 1100));
+
     // Force HALF_OPEN
     breaker.isOpen(); // This will transition to HALF_OPEN if timeout elapsed
     

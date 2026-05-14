@@ -7,6 +7,7 @@
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert';
 import { EventEmitter } from 'node:events';
+import * as crypto from 'node:crypto';
 
 // Mock Metrics Collector
 class MetricsCollector {
@@ -130,7 +131,7 @@ class Gateway {
 
     return {
       success: true,
-      txHash: `0x${Math.random().toString(16).substr(2, 64)}`
+      txHash: `0x${crypto.randomBytes(32).toString('hex')}`
     };
   }
 }
