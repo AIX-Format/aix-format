@@ -116,7 +116,7 @@
   "dependencies": {
     "@ai-sdk/google": "^3.0.73",
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "@octokit/rest": "^20.0.0",
+    "@octokit/rest": "^22.0.1",
     "@upstash/redis": "^1.38.0",
     "ai": "^6.0.182",
     "framer-motion": "^11.11.0",
