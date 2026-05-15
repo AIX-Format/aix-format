@@ -1,7 +1,7 @@
 {
   "name": "@aix/pi-kyc",
   "version": "0.369.0",
-  "description": "Pi Network KYC integration for AIX format (Legacy wrapper for @axiom/pi)",
+  "description": "Pi Network KYC integration for AIX format",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -12,14 +12,13 @@
   },
   "dependencies": {
     "@aix/core": "workspace:*",
-    "@axiom/pi": "workspace:*",
     "axios": "^1.16.1",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
     "typescript": "^6.0.3",
-    "vitest": "^3.0.4"
+    "vitest": "^2.1.8"
   },
   "keywords": [
     "pi-network",
