@@ -115,12 +115,12 @@
     "packages/pi-kyc"
   ],
   "dependencies": {
-    "@ai-sdk/google": "^3.0.75",
+    "@ai-sdk/google": "^3.0.79",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@octokit/rest": "^20.0.0",
     "@upstash/redis": "^1.38.0",
-    "ai": "^6.0.184",
-    "framer-motion": "^12.38.0",
+    "ai": "^6.0.191",
+    "framer-motion": "^12.40.0",
     "js-yaml": "^4.1.1",
     "lucide-react": "^1.16.0",
     "nanoid": "^5.0.0",
